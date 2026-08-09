@@ -23,6 +23,10 @@
       color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px;
     }
     
+    /* Views */
+    .view-section { display: none; }
+    .view-section.active { display: block; }
+
     /* Balance Card */
     .card {
       background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px);
@@ -34,7 +38,7 @@
     .eye-toggle { background: none; border: none; cursor: pointer; font-size: 16px; color: #94a3b8; }
     .balance-amount { font-size: 32px; font-weight: 700; color: #ffffff; margin: 12px 0 0 0; }
 
-    /* Action Buttons (Deposit & Plans) */
+    /* Action Buttons */
     .actions-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;
     }
@@ -43,6 +47,36 @@
     }
     .btn-deposit { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
     .btn-plan { background: rgba(30, 41, 59, 0.9); border: 1px solid #334155; color: #f8fafc; }
+
+    /* Deposit Options List */
+    .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; margin-top: 20px; }
+    .back-btn { background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+    .section-title { font-size: 18px; font-weight: 600; color: #ffffff; }
+
+    .method-card {
+      background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center;
+      justify-content: space-between; cursor: pointer; transition: border-color 0.2s;
+    }
+    .method-card:hover { border-color: #2563eb; }
+    .method-info { display: flex; align-items: center; gap: 14px; }
+    .method-icon { font-size: 24px; background: rgba(15, 23, 42, 0.5); padding: 10px; border-radius: 10px; }
+    .method-name { font-size: 15px; font-weight: 600; color: #ffffff; }
+    .method-desc { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+
+    /* Sub-forms for payment methods */
+    .sub-form { display: none; }
+    .sub-form.active { display: block; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; }
+    input, textarea {
+      width: 100%; padding: 12px 14px; background: rgba(15, 23, 42, 0.6);
+      border: 1px solid #334155; border-radius: 8px; color: #ffffff; font-size: 14px; outline: none;
+    }
+    .submit-payment-btn {
+      width: 100%; padding: 14px; background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px;
+    }
 
     /* Slide-out Menu Drawer */
     .drawer-overlay {
@@ -71,16 +105,151 @@
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
   </div>
 
-  <div class="card">
-    <div class="balance-header">
-      <div class="balance-title">Total Account Balance</div>
-      <button class="eye-toggle" id="eye-icon" onclick="toggleBalance()">👁️</button>
-    </div>
-    <div class="balance-amount" id="balance-display">$0.00</div>
+  <!-- MAIN DASHBOARD VIEW -->
+  <div id="main-view" class="view-section active">
+    <div class="card">
+      <div class="balance-header">
+        <div class="balance-title">Total Account Balance</div>
+        <button class="eye-toggle" id="eye-icon" onclick="toggleBalance()">👁️</button>
+      </div>
+      <div class="balance-amount" id="balance-display">$0.00</div>
 
-    <div class="actions-grid">
-      <button class="action-btn btn-deposit" onclick="openDeposit()">Deposit</button>
-      <button class="action-btn btn-plan" onclick="openPlans()">Investment Plan</button>
+      <div class="actions-grid">
+        <button class="action-btn btn-deposit" onclick="switchView('deposit-methods-view')">Deposit</button>
+        <button class="action-btn btn-plan" onclick="openPlans()">Investment Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEPOSIT METHODS SELECTION VIEW -->
+  <div id="deposit-methods-view" class="view-section">
+    <div class="section-header">
+      <button class="back-btn" onclick="switchView('main-view')">← Back</button>
+      <div class="section-title">Select Payment Method</div>
+    </div>
+
+    <div class="method-card" onclick="switchView('btc-view')">
+      <div class="method-info">
+        <div class="method-icon">₿</div>
+        <div>
+          <div class="method-name">Pay through Bitcoin</div>
+          <div class="method-desc">Instant crypto network deposit</div>
+        </div>
+      </div>
+      <div>→</div>
+    </div>
+
+    <div class="method-card" onclick="switchView('giftcard-view')">
+      <div class="method-info">
+        <div class="method-icon">🎁</div>
+        <div>
+          <div class="method-name">Upload Gift Card</div>
+          <div class="method-desc">Submit card details & receipt</div>
+        </div>
+      </div>
+      <div>→</div>
+    </div>
+
+    <div class="method-card" onclick="switchView('bank-view')">
+      <div class="method-info">
+        <div class="method-icon">🏦</div>
+        <div>
+          <div class="method-name">Bank Transfer</div>
+          <div class="method-desc">Direct wire or local bank deposit</div>
+        </div>
+      </div>
+      <div>→</div>
+    </div>
+
+    <div class="method-card" onclick="switchView('custom-view')">
+      <div class="method-info">
+        <div class="method-icon">⚙️</div>
+        <div>
+          <div class="method-name">Request Custom Payment</div>
+          <div class="method-desc">Alternate payment arrangements</div>
+        </div>
+      </div>
+      <div>→</div>
+    </div>
+  </div>
+
+  <!-- 1. BITCOIN DEPOSIT VIEW -->
+  <div id="btc-view" class="view-section">
+    <div class="section-header">
+      <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
+      <div class="section-title">Bitcoin Deposit</div>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label>Send Bitcoin to Address</label>
+        <input type="text" value="bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh" readonly>
+      </div>
+      <div class="form-group">
+        <label>Amount Sent (USD Equivalent)</label>
+        <input type="number" placeholder="Enter amount">
+      </div>
+      <button class="submit-payment-btn" onclick="alert('Bitcoin deposit notification submitted!')">I Have Paid</button>
+    </div>
+  </div>
+
+  <!-- 2. UPLOAD GIFT CARD VIEW -->
+  <div id="giftcard-view" class="view-section">
+    <div class="section-header">
+      <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
+      <div class="section-title">Upload Gift Card</div>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label>Gift Card Type</label>
+        <input type="text" placeholder="e.g. Apple, Steam, Amazon">
+      </div>
+      <div class="form-group">
+        <label>Card Value ($)</label>
+        <input type="number" placeholder="Enter card value">
+      </div>
+      <div class="form-group">
+        <label>Upload Card Image / Receipt</label>
+        <input type="file" style="padding: 9px;">
+      </div>
+      <button class="submit-payment-btn" onclick="alert('Gift card uploaded successfully for review!')">Submit Gift Card</button>
+    </div>
+  </div>
+
+  <!-- 3. BANK TRANSFER VIEW -->
+  <div id="bank-view" class="view-section">
+    <div class="section-header">
+      <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
+      <div class="section-title">Bank Transfer Details</div>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label>Bank Name</label>
+        <input type="text" value="Global Institutional Trust Bank" readonly>
+      </div>
+      <div class="form-group">
+        <label>Account Number</label>
+        <input type="text" value="4829103948" readonly>
+      </div>
+      <div class="form-group">
+        <label>Routing / SWIFT Code</label>
+        <input type="text" value="GITBUS33XXX" readonly>
+      </div>
+      <button class="submit-payment-btn" onclick="alert('Transfer notification sent!')">I Have Made Transfer</button>
+    </div>
+  </div>
+
+  <!-- 4. CUSTOM PAYMENT VIEW -->
+  <div id="custom-view" class="view-section">
+    <div class="section-header">
+      <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
+      <div class="section-title">Request Custom Payment</div>
+    </div>
+    <div class="card">
+      <div class="form-group">
+        <label>Preferred Payment Description / Instructions</label>
+        <textarea rows="4" placeholder="Describe your preferred payment method..."></textarea>
+      </div>
+      <button class="submit-payment-btn" onclick="alert('Custom request submitted! Support will contact you.')">Send Request</button>
     </div>
   </div>
 
@@ -92,8 +261,8 @@
       <button class="drawer-close" onclick="toggleMenu()">✕</button>
     </div>
     <div class="drawer-links">
-      <a onclick="toggleMenu()">Dashboard</a>
-      <a onclick="openDeposit(); toggleMenu();">Deposit Funds</a>
+      <a onclick="switchView('main-view'); toggleMenu();">Dashboard</a>
+      <a onclick="switchView('deposit-methods-view'); toggleMenu();">Deposit Funds</a>
       <a onclick="openPlans(); toggleMenu();">Investment Plans</a>
       <a onclick="alert('Transaction history coming soon!')">Transactions</a>
       <a onclick="alert('Settings panel coming soon!')">Settings</a>
@@ -111,6 +280,12 @@
       if (!user) {
         window.location.href = 'index.html';
       }
+    }
+
+    function switchView(viewId) {
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+      document.getElementById(viewId).classList.add('active');
+      window.scrollTo(0, 0);
     }
 
     function toggleMenu() {
@@ -131,10 +306,6 @@
       }
     }
 
-    function openDeposit() {
-      alert('Deposit portal selected. Add your funding gateway link here.');
-    }
-
     function openPlans() {
       alert('Investment plans view selected.');
     }
@@ -146,6 +317,5 @@
 
     checkUser();
   </script>
-</
-  body>
-  </html>
+</body>
+</html>
