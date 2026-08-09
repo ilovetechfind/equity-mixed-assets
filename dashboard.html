@@ -11,7 +11,7 @@
     body {
       margin: 0; min-height: 100vh;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #f8fafc; padding: 20px; padding-bottom: 50px;
+      color: #f8fafc; padding: 20px; padding-bottom: 90px;
     }
     .header {
       display: flex; justify-content: space-between; align-items: center;
@@ -23,11 +23,9 @@
       color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 16px;
     }
     
-    /* Views */
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* Cards */
     .card {
       background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
@@ -38,7 +36,6 @@
     .eye-toggle { background: none; border: none; cursor: pointer; font-size: 16px; color: #94a3b8; }
     .balance-amount { font-size: 32px; font-weight: 700; color: #ffffff; margin: 12px 0 0 0; }
 
-    /* Action Buttons */
     .actions-grid {
       display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px;
     }
@@ -48,7 +45,6 @@
     .btn-deposit { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
     .btn-plan { background: rgba(30, 41, 59, 0.9); border: 1px solid #334155; color: #f8fafc; }
 
-    /* Volume Progress Card styles */
     .volume-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .volume-title { color: #94a3b8; font-size: 12px; text-transform: uppercase; font-weight: 500; }
     .volume-stats { font-size: 14px; font-weight: 600; color: #38bdf8; }
@@ -68,8 +64,7 @@
     }
     .volume-note { font-size: 11px; color: #f59e0b; margin-top: 8px; font-style: italic; }
 
-    /* Promo code box */
-    .promo-box { display: flex; gap: 8px; margin-top: 18px; }
+    .promo-box { display: flex; gap: 8px; margin-top: 14px; }
     .promo-input {
       flex: 1; padding: 10px 14px; background: rgba(15, 23, 42, 0.6);
       border: 1px solid #334155; border-radius: 8px; color: #ffffff; font-size: 13px; outline: none;
@@ -78,9 +73,33 @@
       padding: 10px 16px; background: #334155; color: white; border: none;
       border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
     }
-    .promo-btn:hover { background: #475569; }
 
-    /* Section Headers & Forms */
+    .live-feed-box {
+      margin-top: 16px; background: rgba(15, 23, 42, 0.5); border: 1px solid #334155;
+      border-radius: 10px; padding: 10px 12px; height: 75px; overflow: hidden; position: relative;
+    }
+    .live-feed-item {
+      font-size: 12px; color: #cbd5e1; padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.03);
+      animation: fadeInOut 0.5s ease-in-out;
+    }
+    @keyframes fadeInOut {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);
+      border-top: 1px solid #334155; display: flex; justify-content: space-around;
+      padding: 10px 0; z-index: 99;
+    }
+    .nav-item {
+      background: none; border: none; color: #94a3b8; font-size: 12px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+    }
+    .nav-item.active { color: #38bdf8; }
+    .nav-icon { font-size: 18px; }
+
     .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; margin-top: 20px; }
     .back-btn { background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
     .section-title { font-size: 18px; font-weight: 600; color: #ffffff; }
@@ -118,7 +137,6 @@
       color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px;
     }
 
-    /* Drawer */
     .drawer-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
@@ -145,9 +163,7 @@
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
   </div>
 
-  <!-- MAIN DASHBOARD VIEW -->
   <div id="main-view" class="view-section active">
-    <!-- Account Balance Card -->
     <div class="card">
       <div class="balance-header">
         <div class="balance-title">Total Account Balance</div>
@@ -161,7 +177,6 @@
       </div>
     </div>
 
-    <!-- Volume Position Card -->
     <div class="card">
       <div class="volume-header">
         <div class="volume-title">Volume Position</div>
@@ -173,6 +188,11 @@
       </div>
       <div class="volume-note">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
 
+      <div class="live-feed-box" id="live-feed-container">
+        <div class="live-feed-item">⚡ Alex M. deposited $1,200 via Bitcoin</div>
+        <div class="live-feed-item">🚀 Sarah K. upgraded to Gold Tier</div>
+      </div>
+
       <div class="promo-box">
         <input type="text" class="promo-input" id="promo-input-field" placeholder="Enter Promo Code">
         <button class="promo-btn" onclick="applyPromoCode()">Enter</button>
@@ -180,7 +200,6 @@
     </div>
   </div>
 
-  <!-- INVESTMENT PLANS 7 TIERS VIEW -->
   <div id="investment-plans-view" class="view-section">
     <div class="section-header">
       <button class="back-btn" onclick="switchView('main-view')">← Back</button>
@@ -189,7 +208,7 @@
 
     <div class="card" style="margin-top: 0; margin-bottom: 20px; background: rgba(37, 99, 235, 0.1); border-color: rgba(37, 99, 235, 0.3);">
       <div style="font-size: 12px; color: #93c5fd; text-transform: uppercase; font-weight: 600;">Current Active Tier</div>
-      <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 4px;" id="current-tier-display">Brass Tier</div>
+      <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 4px;">Brass Tier</div>
     </div>
 
     <div class="tier-card active-tier">
@@ -249,7 +268,6 @@
     </div>
   </div>
 
-  <!-- DEPOSIT METHODS SELECTION VIEW -->
   <div id="deposit-methods-view" class="view-section">
     <div class="section-header">
       <button class="back-btn" onclick="switchView('main-view')">← Back</button>
@@ -301,7 +319,6 @@
     </div>
   </div>
 
-  <!-- BITCOIN DEPOSIT VIEW -->
   <div id="btc-view" class="view-section">
     <div class="section-header">
       <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
@@ -320,7 +337,6 @@
     </div>
   </div>
 
-  <!-- GIFT CARD VIEW -->
   <div id="giftcard-view" class="view-section">
     <div class="section-header">
       <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
@@ -343,7 +359,6 @@
     </div>
   </div>
 
-  <!-- BANK TRANSFER VIEW -->
   <div id="bank-view" class="view-section">
     <div class="section-header">
       <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
@@ -366,7 +381,6 @@
     </div>
   </div>
 
-  <!-- CUSTOM PAYMENT VIEW -->
   <div id="custom-view" class="view-section">
     <div class="section-header">
       <button class="back-btn" onclick="switchView('deposit-methods-view')">← Back</button>
@@ -381,7 +395,24 @@
     </div>
   </div>
 
-  <!-- Side Navigation Drawer -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="switchView('main-view'); setActiveNav(this)">
+      <span class="nav-icon">🏠</span> Home
+    </button>
+    <button class="nav-item" onclick="switchView('investment-plans-view'); setActiveNav(this)">
+      <span class="nav-icon">📈</span> Plans
+    </button>
+    <button class="nav-item" onclick="switchView('deposit-methods-view'); setActiveNav(this)">
+      <span class="nav-icon">💳</span> Deposit
+    </button>
+    <button class="nav-item" onclick="alert('Transactions history coming soon!');">
+      <span class="nav-icon">📜</span> History
+    </button>
+    <button class="nav-item" onclick="toggleMenu();">
+      <span class="nav-icon">⚙️</span> Menu
+    </button>
+  </div>
+
   <div class="drawer-overlay" id="drawer-overlay" onclick="toggleMenu()"></div>
   <div class="drawer" id="drawer">
     <div class="drawer-header">
@@ -399,6 +430,7 @@
   </div>
 
   <script src="config.js"></script>
+  <script src="notifications.js"></script>
   <script>
     let isBalanceHidden = false;
     let currentBalance = "$0.00";
@@ -416,6 +448,11 @@
       window.scrollTo(0, 0);
     }
 
+    function setActiveNav(btn) {
+      document.querySelectorAll('.bottom-nav .nav-item').forEach(el => el.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
     function toggleMenu() {
       document.getElementById('drawer').classList.toggle('active');
       document.getElementById('drawer-overlay').classList.toggle('active');
@@ -429,30 +466,4 @@
         display.innerText = "$***";
         eye.innerText = "🙈";
       } else {
-        display.innerText = currentBalance;
-        eye.innerText = "👁️";
-      }
-    }
-
-    function selectTier(tierName) {
-      alert(`Upgrade request submitted for ${tierName}. Please complete the required deposit to activate.`);
-    }
-
-    function applyPromoCode() {
-      const code = document.getElementById('promo-input-field').value.trim();
-      if (!code) {
-        alert('Please enter a valid promo code.');
-      } else {
-        alert(`Promo code "${code}" submitted for verification.`);
-      }
-    }
-
-    async function logout() {
-      await supabaseClient.auth.signOut();
-      window.location.href = 'index.html';
-    }
-
-    checkUser();
-  </script>
-</body>
-</html>
+    
