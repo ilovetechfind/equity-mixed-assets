@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Equity Mixed Assets</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; background: #f8fafc; margin: 0; padding: 20px; }
+    .header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #e2e8f0; }
+    .card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); max-width: 400px; margin: 30px auto; text-align: center; }
+    .balance-title { color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .balance-amount { font-size: 36px; font-weight: bold; color: #0f172a; margin: 10px 0; }
+    .logout-btn { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h3>Equity Mixed Assets</h3>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+
+  <div class="card">
+    <div class="balance-title">Total Account Balance</div>
+    <div class="balance-amount" id="balance">$0.00</div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    async function checkUser() {
+      const { data: { user } } = await supabaseClient.auth.getUser();
+      if (!user) {
+        window.location.href = 'index.html';
+      }
+    }
+
+    async function logout() {
+      await supabaseClient.auth.signOut();
+      window.location.href = 'index.html';
+    }
+
+    checkUser();
+  </script>
+</body>
+</html>
