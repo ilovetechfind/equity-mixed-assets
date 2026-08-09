@@ -66,6 +66,27 @@
     }
     .switch { text-align: center; margin-top: 20px; font-size: 13px; color: #94a3b8; }
     .switch a { color: #38bdf8; font-weight: 600; cursor: pointer; margin-left: 4px; }
+
+    /* --- CUSTOM POPUP MODAL --- */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 100;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+      padding: 24px; max-width: 340px; width: 90%; text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .modal-icon { font-size: 32px; margin-bottom: 12px; }
+    .modal-title { font-size: 18px; font-weight: 600; color: #ffffff; margin-bottom: 8px; }
+    .modal-text { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; }
+    .modal-btn {
+      width: 100%; padding: 10px; background: #2563eb; color: #ffffff;
+      border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -107,14 +128,34 @@
     </div>
   </div>
 
+  <!-- Custom Professional Popup -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-box">
+      <div class="modal-icon" id="modal-icon">📩</div>
+      <div class="modal-title" id="modal-title">Check Your Email</div>
+      <div class="modal-text" id="modal-text">A confirmation email has been sent to your email address. Kindly check your email or spam folder to verify.</div>
+      <button class="modal-btn" onclick="closeModal()">Got it</button>
+    </div>
+  </div>
+
   <script>
-    // FIXED URL WITH 3 'd's AND NEW PUBLISHABLE KEY
     const SUPABASE_URL = 'https://rrdddtmqojyheshznrwl.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_0fS5eYtsQL8tZz67eSWDvQ_G4flOw5M';
 
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let isSignUp = false;
+
+    function showModal(title, text, icon = '📩') {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-text').innerText = text;
+      document.getElementById('modal-icon').innerText = icon;
+      document.getElementById('custom-modal').classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('custom-modal').classList.remove('active');
+    }
 
     function togglePasswordVisibility() {
       const pwdInput = document.getElementById('password');
@@ -142,8 +183,8 @@
       const password = document.getElementById('password').value.trim();
       const fullName = document.getElementById('fullname').value.trim();
 
-      if (!email || !password) return alert('Please enter both email and password.');
-      if (password.length < 6) return alert('Password must be at least 6 characters.');
+      if (!email || !password) return showModal('Action Required', 'Please enter both your email address and password.', '⚠️');
+      if (password.length < 6) return showModal('Weak Password', 'Password must be at least 6 characters long.', '⚠️');
 
       const btn = document.getElementById('btn-submit');
       btn.innerText = 'Processing...';
@@ -152,7 +193,7 @@
         if (isSignUp) {
           if (!fullName) {
             btn.innerText = 'Create Account';
-            return alert('Please enter your full name.');
+            return showModal('Name Required', 'Please enter your full name.', '⚠️');
           }
           
           const { data, error } = await supabaseClient.auth.signUp({ 
@@ -162,21 +203,24 @@
           });
 
           if (error) {
-            alert('Supabase Error: ' + error.message);
+            showModal('Registration Failed', error.message, '❌');
           } else {
-            alert('Account created successfully!');
-            window.location.href = 'dashboard.html';
+            showModal(
+              'Verification Email Sent', 
+              'A confirmation email has been sent to your email address. Kindly check your email or spam folder to verify.', 
+              '📩'
+            );
           }
         } else {
           const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
           if (error) {
-            alert('Supabase Error: ' + error.message);
+            showModal('Sign In Failed', error.message, '❌');
           } else {
             window.location.href = 'dashboard.html';
           }
         }
       } catch (err) {
-        alert('Network Connection Error: Check internet connection or ad-blockers.');
+        showModal('Connection Error', 'Unable to reach the servers. Please check your internet connection.', '⚠️');
       } finally {
         btn.innerText = isSignUp ? 'Create Account' : 'Sign In';
       }
