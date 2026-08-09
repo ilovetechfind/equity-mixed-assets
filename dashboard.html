@@ -15,6 +15,7 @@
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
   </div>
 
+  <!-- Main View -->
   <div id="main-view" class="view-section active">
     <div class="card">
       <div class="balance-header">
@@ -40,7 +41,6 @@
       </div>
       <div class="volume-note">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
 
-      <!-- Notification Feed Slot -->
       <div class="live-feed-box" id="live-feed-container">
         <div class="live-feed-item" id="notification-text">⚡ Alex M. deposited $1,200 via Bitcoin</div>
       </div>
@@ -132,7 +132,7 @@
     </div>
   </div>
 
-  <!-- Customer Support Floating Chat Bubble & Widget -->
+  <!-- Customer Support Floating Chat Widget -->
   <button class="chat-bubble-btn" onclick="toggleChatModal()">💬</button>
 
   <div class="chat-modal" id="chat-modal">
@@ -182,7 +182,7 @@
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
 
-  <!-- Scripts -->
+  <!-- External JavaScript Files -->
   <script src="config.js"></script>
   <script src="data/notifications.js"></script>
   <script src="app.js"></script>
