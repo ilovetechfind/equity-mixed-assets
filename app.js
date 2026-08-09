@@ -202,4 +202,4 @@ body {
 .drawer-links { display: flex; flex-direction: column; gap: 16px; flex-grow: 1; }
 .drawer-links a { color: #f8fafc; text-decoration: none; font-size: 15px; font-weight: 500; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
 .logout-btn { background: #ef4444; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
-  
+    
