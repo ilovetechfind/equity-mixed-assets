@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Equity Mixed Assets | Client Portal</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -97,7 +97,6 @@
 
     .form-group {
       margin-bottom: 16px;
-      position: relative;
     }
     .form-group.hidden {
       display: none;
@@ -132,6 +131,19 @@
     .password-wrapper {
       position: relative;
     }
+    
+    /* Password Blur / Eye Icon styling */
+    .password-wrapper input {
+      padding-right: 42px;
+      transition: filter 0.2s ease;
+    }
+    
+    /* When hidden, password text gets blurred */
+    .password-wrapper input.blurred {
+      -webkit-text-security: disc;
+      filter: blur(2px);
+    }
+
     .toggle-eye {
       position: absolute;
       right: 12px;
@@ -141,11 +153,16 @@
       border: none;
       color: #94a3b8;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 18px;
       padding: 0;
       margin: 0;
       width: auto;
       box-shadow: none;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+    }
+    .toggle-eye:hover {
+      opacity: 1;
     }
 
     button.btn-submit {
@@ -206,8 +223,8 @@
       <div class="form-group">
         <label>Password</label>
         <div class="password-wrapper">
-          <input type="password" id="password" placeholder="••••••••" required>
-          <button type="button" class="toggle-eye" onclick="togglePasswordVisibility()">👁️</button>
+          <input type="password" id="password" class="blurred" placeholder="••••••••" required>
+          <button type="button" class="toggle-eye" id="eye-btn" onclick="togglePasswordVisibility()">👁️</button>
         </div>
       </div>
 
@@ -220,16 +237,27 @@
     </div>
   </div>
 
-  <script src="config.js"></script>
   <script>
+    const SUPABASE_URL = 'https://rrddtmqojyheshznrwl.supabase.co';
+    const SUPABASE_ANON_KEY = 'Sb_publishable_0fS5eYtsQL8tZz67eSWDvQ_G4flOw5M';
+
+    // Initialize Supabase client
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
     let isSignUp = false;
 
     function togglePasswordVisibility() {
       const pwdInput = document.getElementById('password');
+      const eyeBtn = document.getElementById('eye-btn');
+      
       if (pwdInput.type === 'password') {
         pwdInput.type = 'text';
+        pwdInput.classList.remove('blurred');
+        eyeBtn.style.opacity = '1';
       } else {
         pwdInput.type = 'password';
+        pwdInput.classList.add('blurred');
+        eyeBtn.style.opacity = '0.6';
       }
     }
 
@@ -265,18 +293,22 @@
             options: { data: { full_name: fullName } }
           });
 
-          if (error) alert(error.message);
-          else {
+          if (error) {
+            alert('Error: ' + error.message);
+          } else {
             alert('Account created successfully!');
             window.location.href = 'dashboard.html';
           }
         } else {
           const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-          if (error) alert(error.message);
-          else window.location.href = 'dashboard.html';
+          if (error) {
+            alert('Error: ' + error.message);
+          } else {
+            window.location.href = 'dashboard.html';
+          }
         }
       } catch (err) {
-        alert(err.message || 'An error occurred during authentication.');
+        alert('Network/Configuration error: ' + (err.message || 'Failed to communicate with Supabase.'));
       }
     }
   </script>
