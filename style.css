@@ -127,9 +127,53 @@ body {
 .section-title { font-size: 18px; font-weight: 600; color: #ffffff; }
 
 .method-card {
-  background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+  background: rgba(30, 41, 59, 0.7); 
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px; 
+  padding: 16px; 
+  margin-bottom: 12px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  cursor: pointer;
 }
+.method-content-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.method-icon-box {
+  width: 44px;
+  height: 44px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+.active-tier-banner {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid #334155;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.active-tier-label {
+  font-size: 11px;
+  color: #38bdf8;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+.active-tier-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 4px;
+}
+
 .tier-card {
   background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
@@ -158,4 +202,3 @@ body {
 .drawer-links { display: flex; flex-direction: column; gap: 16px; flex-grow: 1; }
 .drawer-links a { color: #f8fafc; text-decoration: none; font-size: 15px; font-weight: 500; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
 .logout-btn { background: #ef4444; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; width: 100%; }
-              
