@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Portal</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: sans-serif; background: #f4f6f8; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 360px; }
+    h2 { margin-top: 0; color: #1a202c; }
+    input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+    button { width: 100%; padding: 10px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; font-weight: bold; }
+    button:hover { background: #0051a2; }
+    .switch { text-align: center; margin-top: 15px; font-size: 14px; }
+    .switch a { color: #0070f3; text-decoration: none; cursor: pointer; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2 id="title">Sign In</h2>
+    <input type="email" id="email" placeholder="Email address" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="btn-submit" onclick="handleSubmit()">Sign In</button>
+    
+    <div class="switch">
+      <span id="toggle-text">Don't have an account?</span> 
+      <a onclick="toggleMode()" id="toggle-link">Sign Up</a>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    let isSignUp = false;
+
+    function toggleMode() {
+      isSignUp = !isSignUp;
+      document.getElementById('title').innerText = isSignUp ? 'Create Account' : 'Sign In';
+      document.getElementById('btn-submit').innerText = isSignUp ? 'Sign Up' : 'Sign In';
+      document.getElementById('toggle-text').innerText = isSignUp ? 'Already have an account?' : "Don't have an account?";
+      document.getElementById('toggle-link').innerText = isSignUp ? 'Sign In' : 'Sign Up';
+    }
+
+    async function handleSubmit() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) return alert('Please enter both email and password.');
+
+      if (isSignUp) {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password });
+        if (error) alert(error.message);
+        else {
+          alert('Registration successful! Logging you in...');
+          window.location.href = 'dashboard.html';
+        }
+      } else {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+        else window.location.href = 'dashboard.html';
+      }
+    }
+  </script>
+</body>
+</html>
