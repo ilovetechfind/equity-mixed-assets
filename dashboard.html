@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deposit - Equity Mixed Assets</title>
+  <title>Dashboard - Equity Mixed Assets</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -15,64 +15,190 @@
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
   </div>
 
-  <div class="section-header">
-    <a href="dashboard.html" class="back-btn" style="text-decoration: none; display: inline-block;">← Back</a>
-    <div class="section-title">Select Payment Method</div>
-  </div>
+  <!-- Main View -->
+  <div id="main-view" class="view-section active">
+    <div class="card">
+      <div class="balance-header">
+        <div class="balance-title">Total Account Balance</div>
+        <button class="eye-toggle" id="eye-icon" onclick="toggleBalance()">👁️</button>
+      </div>
+      <div class="balance-amount" id="balance-display">$0.00</div>
 
-  <div class="method-card" onclick="alert('Bitcoin deposit instructions will load here.')">
-    <div class="method-content-left">
-      <div class="method-icon-box">₿</div>
-      <div>
-        <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through Bitcoin</div>
-        <div style="font-size: 12px; color: #94a3b8;">Instant crypto network deposit</div>
+      <div class="actions-grid">
+        <button class="action-btn btn-deposit" onclick="switchView('deposit-methods-view')">Deposit</button>
+        <button class="action-btn btn-plan" onclick="switchView('investment-plans-view')">Investment Plan</button>
       </div>
     </div>
-    <div style="color: #94a3b8;">→</div>
-  </div>
 
-  <div class="method-card" onclick="alert('Gift card deposit instructions will load here.')">
-    <div class="method-content-left">
-      <div class="method-icon-box">🎁</div>
-      <div>
-        <div style="font-size: 15px; font-weight: 600; color: #fff;">Upload Gift Card</div>
-        <div style="font-size: 12px; color: #94a3b8;">Submit card details & receipt</div>
+    <div class="card">
+      <div class="volume-header">
+        <div class="volume-title">Volume Position</div>
+        <div class="volume-stats">15% Full</div>
+      </div>
+      
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill"></div>
+      </div>
+      <div class="volume-note">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
+
+      <div class="live-feed-box" id="live-feed-container">
+        <div class="live-feed-item" id="notification-text">⚡ Alex M. deposited $1,200 via Bitcoin</div>
+      </div>
+
+      <div class="promo-box">
+        <input type="text" class="promo-input" id="promo-input-field" placeholder="Enter Promo Code">
+        <button class="promo-btn" onclick="applyPromoCode()">Enter</button>
       </div>
     </div>
-    <div style="color: #94a3b8;">→</div>
   </div>
 
-  <div class="method-card" onclick="alert('Bank transfer details will load here.')">
-    <div class="method-content-left">
-      <div class="method-icon-box">🏦</div>
-      <div>
-        <div style="font-size: 15px; font-weight: 600; color: #fff;">Bank Transfer</div>
-        <div style="font-size: 12px; color: #94a3b8;">Direct wire or local bank deposit</div>
-      </div>
+  <!-- Investment Plans View -->
+  <div id="investment-plans-view" class="view-section">
+    <div class="section-header">
+      <button class="back-btn" onclick="switchView('main-view')">← Back</button>
+      <div class="section-title">Investment Plans</div>
     </div>
-    <div style="color: #94a3b8;">→</div>
+
+    <div class="active-tier-banner">
+      <div class="active-tier-label">Current Active Tier</div>
+      <div class="active-tier-title">Brass Tier</div>
+    </div>
+    
+    <div class="tier-card active-tier">
+      <div>
+        <div class="tier-name">1. Brass Tier</div>
+        <div class="tier-details">Min: $100 | ROI: 5% Daily</div>
+      </div>
+      <span class="tier-badge badge-current">Active</span>
+    </div>
+
+    <div class="tier-card">
+      <div>
+        <div class="tier-name">2. Bronze Tier</div>
+        <div class="tier-details">Min: $500 | ROI: 8% Daily</div>
+      </div>
+      <button class="tier-badge badge-select" onclick="alert('Select deposit to fund this tier.')">Select</button>
+    </div>
+
+    <div class="tier-card">
+      <div>
+        <div class="tier-name">3. Silver Tier</div>
+        <div class="tier-details">Min: $1,500 | ROI: 12% Daily</div>
+      </div>
+      <button class="tier-badge badge-select" onclick="alert('Select deposit to fund this tier.')">Select</button>
+    </div>
+
+    <div class="tier-card">
+      <div>
+        <div class="tier-name">4. Gold Tier</div>
+        <div class="tier-details">Min: $5,000 | ROI: 18% Daily</div>
+      </div>
+      <button class="tier-badge badge-select" onclick="alert('Select deposit to fund this tier.')">Select</button>
+    </div>
+
+    <div class="tier-card">
+      <div>
+        <div class="tier-name">5. Platinum Tier</div>
+        <div class="tier-details">Min: $10,000 | ROI: 25% Daily</div>
+      </div>
+      <button class="tier-badge badge-select" onclick="alert('Select deposit to fund this tier.')">Select</button>
+    </div>
+
+    <div class="tier-card">
+      <div>
+        <div class="tier-name">6. Super Platinum Tier</div>
+        <div class="tier-details">Min: $25,000 | ROI: 35% Daily</div>
+      </div>
+      <button class="tier-badge badge-select" onclick="alert('Select deposit to fund this tier.')">Select</button>
+    </div>
+
+    <div class="tier-card">
+      <div>
+        <div class="tier-name">7. Super Platinum God Tier</div>
+        <div class="tier-details">Min: $50,000+ | ROI: 50% Daily</div>
+      </div>
+      <button class="tier-badge badge-select" onclick="alert('Select deposit to fund this tier.')">Select</button>
+    </div>
   </div>
 
-  <div class="method-card" onclick="alert('Custom payment details will load here.')">
-    <div class="method-content-left">
-      <div class="method-icon-box">⚙️</div>
-      <div>
-        <div style="font-size: 15px; font-weight: 600; color: #fff;">Request Custom Payment</div>
-        <div style="font-size: 12px; color: #94a3b8;">Alternate payment arrangements</div>
-      </div>
+  <!-- Deposit Methods View -->
+  <div id="deposit-methods-view" class="view-section">
+    <div class="section-header">
+      <button class="back-btn" onclick="switchView('main-view')">← Back</button>
+      <div class="section-title">Select Payment Method</div>
     </div>
-    <div style="color: #94a3b8;">→</div>
+
+    <div class="method-card" onclick="alert('Bitcoin deposit instructions will load here.')">
+      <div class="method-content-left">
+        <div class="method-icon-box">₿</div>
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through Bitcoin</div>
+          <div style="font-size: 12px; color: #94a3b8;">Instant crypto network deposit</div>
+        </div>
+      </div>
+      <div style="color: #94a3b8;">→</div>
+    </div>
+
+    <div class="method-card" onclick="alert('USDT deposit instructions will load here.')">
+      <div class="method-content-left">
+        <div class="method-icon-box">₮</div>
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through USDT (TRC20)</div>
+          <div style="font-size: 12px; color: #94a3b8;">Low fee stablecoin transfer</div>
+        </div>
+      </div>
+      <div style="color: #94a3b8;">→</div>
+    </div>
+
+    <div class="method-card" onclick="alert('Ethereum deposit instructions will load here.')">
+      <div class="method-content-left">
+        <div class="method-icon-box">Ξ</div>
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through Ethereum</div>
+          <div style="font-size: 12px; color: #94a3b8;">ERC-20 network transfer</div>
+        </div>
+      </div>
+      <div style="color: #94a3b8;">→</div>
+    </div>
+
+    <div class="method-card" onclick="alert('Bank wire transfer details will load here.')">
+      <div class="method-content-left">
+        <div class="method-icon-box">🏦</div>
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #fff;">Bank Wire Transfer</div>
+          <div style="font-size: 12px; color: #94a3b8;">Direct institutional wire</div>
+        </div>
+      </div>
+      <div style="color: #94a3b8;">→</div>
+    </div>
+  </div>
+
+  <!-- Customer Support Floating Chat Widget -->
+  <button class="chat-bubble-btn" onclick="toggleChatModal()">💬</button>
+
+  <div class="chat-modal" id="chat-modal">
+    <div class="chat-header">
+      <div class="chat-title"><span class="online-dot"></span> Customer Support</div>
+      <button class="chat-close" onclick="toggleChatModal()">✕</button>
+    </div>
+    <div class="chat-body" id="chat-body">
+      <div class="chat-msg support">Hello! Welcome to Equity Mixed Assets support. How can we assist you today?</div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="chat-input-field" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
+      <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+    </div>
   </div>
 
   <!-- Bottom Navigation -->
   <div class="bottom-nav">
-    <button class="nav-item" onclick="window.location.href='dashboard.html'">
+    <button class="nav-item active" onclick="switchView('main-view'); setActiveNav(this)">
       <span class="nav-icon">🏠</span> Home
     </button>
-    <button class="nav-item" onclick="window.location.href='plans.html'">
+    <button class="nav-item" onclick="switchView('investment-plans-view'); setActiveNav(this)">
       <span class="nav-icon">📈</span> Plans
     </button>
-    <button class="nav-item active" onclick="window.location.href='deposit.html'">
+    <button class="nav-item" onclick="switchView('deposit-methods-view'); setActiveNav(this)">
       <span class="nav-icon">💳</span> Deposit
     </button>
     <button class="nav-item" onclick="alert('Transactions history coming soon!');">
@@ -90,15 +216,17 @@
       <button class="drawer-close" onclick="toggleMenu()">✕</button>
     </div>
     <div class="drawer-links">
-      <a href="dashboard.html">Dashboard</a>
-      <a href="deposit.html">Deposit Funds</a>
-      <a href="plans.html">Investment Plans</a>
+      <a onclick="switchView('main-view'); toggleMenu();">Dashboard</a>
+      <a onclick="switchView('deposit-methods-view'); toggleMenu();">Deposit Funds</a>
+      <a onclick="switchView('investment-plans-view'); toggleMenu();">Investment Plans</a>
     </div>
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
 
+  <!-- External JavaScript Files -->
   <script src="config.js"></script>
+  <script src="data/notifications.js"></script>
   <script src="app.js"></script>
-</body
-  >
-</html>
+</body>
+    </html>
+  
