@@ -11,7 +11,7 @@
     body {
       margin: 0; min-height: 100vh;
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      color: #f8fafc; padding: 20px;
+      color: #f8fafc; padding: 20px; padding-bottom: 50px;
     }
     .header {
       display: flex; justify-content: space-between; align-items: center;
@@ -27,7 +27,7 @@
     .view-section { display: none; }
     .view-section.active { display: block; }
 
-    /* Balance Card */
+    /* Cards */
     .card {
       background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
@@ -48,12 +48,43 @@
     .btn-deposit { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
     .btn-plan { background: rgba(30, 41, 59, 0.9); border: 1px solid #334155; color: #f8fafc; }
 
-    /* Section Headers */
+    /* Volume Progress Card styles */
+    .volume-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .volume-title { color: #94a3b8; font-size: 12px; text-transform: uppercase; font-weight: 500; }
+    .volume-stats { font-size: 14px; font-weight: 600; color: #38bdf8; }
+    
+    .progress-bar-container {
+      width: 100%; height: 14px; background: rgba(15, 23, 42, 0.8);
+      border-radius: 7px; overflow: hidden; position: relative; border: 1px solid #334155;
+    }
+    .progress-bar-fill {
+      width: 15%; height: 100%; background: linear-gradient(90deg, #2563eb, #38bdf8, #2563eb);
+      background-size: 200% 100%; border-radius: 7px;
+      animation: bubbleMove 2s infinite linear;
+    }
+    @keyframes bubbleMove {
+      0% { background-position: 200% 0; }
+      100% { background-position: 0 0; }
+    }
+    .volume-note { font-size: 11px; color: #f59e0b; margin-top: 8px; font-style: italic; }
+
+    /* Promo code box */
+    .promo-box { display: flex; gap: 8px; margin-top: 18px; }
+    .promo-input {
+      flex: 1; padding: 10px 14px; background: rgba(15, 23, 42, 0.6);
+      border: 1px solid #334155; border-radius: 8px; color: #ffffff; font-size: 13px; outline: none;
+    }
+    .promo-btn {
+      padding: 10px 16px; background: #334155; color: white; border: none;
+      border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
+    }
+    .promo-btn:hover { background: #475569; }
+
+    /* Section Headers & Forms */
     .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; margin-top: 20px; }
     .back-btn { background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
     .section-title { font-size: 18px; font-weight: 600; color: #ffffff; }
 
-    /* Deposit Cards & Methods */
     .method-card {
       background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center;
@@ -65,7 +96,6 @@
     .method-name { font-size: 15px; font-weight: 600; color: #ffffff; }
     .method-desc { font-size: 12px; color: #94a3b8; margin-top: 2px; }
 
-    /* Tier Cards */
     .tier-card {
       background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px; padding: 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
@@ -77,7 +107,6 @@
     .badge-current { background: #10b981; color: white; }
     .badge-select { background: #2563eb; color: white; border: none; cursor: pointer; }
 
-    /* Forms */
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 12px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; text-transform: uppercase; }
     input, textarea {
@@ -118,6 +147,7 @@
 
   <!-- MAIN DASHBOARD VIEW -->
   <div id="main-view" class="view-section active">
+    <!-- Account Balance Card -->
     <div class="card">
       <div class="balance-header">
         <div class="balance-title">Total Account Balance</div>
@@ -128,6 +158,24 @@
       <div class="actions-grid">
         <button class="action-btn btn-deposit" onclick="switchView('deposit-methods-view')">Deposit</button>
         <button class="action-btn btn-plan" onclick="switchView('investment-plans-view')">Investment Plan</button>
+      </div>
+    </div>
+
+    <!-- Volume Position Card -->
+    <div class="card">
+      <div class="volume-header">
+        <div class="volume-title">Volume Position</div>
+        <div class="volume-stats">15% Full / Employed</div>
+      </div>
+      
+      <div class="progress-bar-container">
+        <div class="progress-bar-fill"></div>
+      </div>
+      <div class="volume-note">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
+
+      <div class="promo-box">
+        <input type="text" class="promo-input" id="promo-input-field" placeholder="Enter Promo Code">
+        <button class="promo-btn" onclick="applyPromoCode()">Enter</button>
       </div>
     </div>
   </div>
@@ -144,7 +192,6 @@
       <div style="font-size: 20px; font-weight: 700; color: #ffffff; margin-top: 4px;" id="current-tier-display">Brass Tier</div>
     </div>
 
-    <!-- Tier 1: Brass -->
     <div class="tier-card active-tier">
       <div>
         <div class="tier-name">1. Brass Tier</div>
@@ -153,7 +200,6 @@
       <span class="tier-badge badge-current">Active</span>
     </div>
 
-    <!-- Tier 2: Bronze -->
     <div class="tier-card">
       <div>
         <div class="tier-name">2. Bronze Tier</div>
@@ -162,7 +208,6 @@
       <button class="tier-badge badge-select" onclick="selectTier('Bronze Tier')">Select</button>
     </div>
 
-    <!-- Tier 3: Silver -->
     <div class="tier-card">
       <div>
         <div class="tier-name">3. Silver Tier</div>
@@ -171,7 +216,6 @@
       <button class="tier-badge badge-select" onclick="selectTier('Silver Tier')">Select</button>
     </div>
 
-    <!-- Tier 4: Gold -->
     <div class="tier-card">
       <div>
         <div class="tier-name">4. Gold Tier</div>
@@ -180,7 +224,6 @@
       <button class="tier-badge badge-select" onclick="selectTier('Gold Tier')">Select</button>
     </div>
 
-    <!-- Tier 5: Platinum -->
     <div class="tier-card">
       <div>
         <div class="tier-name">5. Platinum Tier</div>
@@ -189,7 +232,6 @@
       <button class="tier-badge badge-select" onclick="selectTier('Platinum Tier')">Select</button>
     </div>
 
-    <!-- Tier 6: Super Platinum -->
     <div class="tier-card">
       <div>
         <div class="tier-name">6. Super Platinum Tier</div>
@@ -198,7 +240,6 @@
       <button class="tier-badge badge-select" onclick="selectTier('Super Platinum Tier')">Select</button>
     </div>
 
-    <!-- Tier 7: Super Platinum God -->
     <div class="tier-card">
       <div>
         <div class="tier-name">7. Super Platinum God Tier</div>
@@ -397,6 +438,15 @@
       alert(`Upgrade request submitted for ${tierName}. Please complete the required deposit to activate.`);
     }
 
+    function applyPromoCode() {
+      const code = document.getElementById('promo-input-field').value.trim();
+      if (!code) {
+        alert('Please enter a valid promo code.');
+      } else {
+        alert(`Promo code "${code}" submitted for verification.`);
+      }
+    }
+
     async function logout() {
       await supabaseClient.auth.signOut();
       window.location.href = 'index.html';
@@ -405,5 +455,5 @@
     checkUser();
   </script>
 </body>
-  </html>
-  
+      </html>
+      
