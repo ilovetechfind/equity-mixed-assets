@@ -20,7 +20,6 @@
       overflow: hidden;
     }
     
-    /* Background investment vibe accents */
     body::before {
       content: '';
       position: absolute;
@@ -98,6 +97,7 @@
 
     .form-group {
       margin-bottom: 16px;
+      position: relative;
     }
     .form-group.hidden {
       display: none;
@@ -129,7 +129,26 @@
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
 
-    button {
+    .password-wrapper {
+      position: relative;
+    }
+    .toggle-eye {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      color: #94a3b8;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0;
+      margin: 0;
+      width: auto;
+      box-shadow: none;
+    }
+
+    button.btn-submit {
       width: 100%;
       padding: 12px;
       background: linear-gradient(135deg, #2563eb, #1d4ed8);
@@ -143,7 +162,7 @@
       transition: transform 0.1s ease, box-shadow 0.2s ease;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
-    button:active {
+    button.btn-submit:active {
       transform: scale(0.98);
     }
 
@@ -159,9 +178,6 @@
       font-weight: 600;
       cursor: pointer;
       margin-left: 4px;
-    }
-    .switch a:hover {
-      text-decoration: underline;
     }
   </style>
 </head>
@@ -189,10 +205,13 @@
 
       <div class="form-group">
         <label>Password</label>
-        <input type="password" id="password" placeholder="••••••••" required>
+        <div class="password-wrapper">
+          <input type="password" id="password" placeholder="••••••••" required>
+          <button type="button" class="toggle-eye" onclick="togglePasswordVisibility()">👁️</button>
+        </div>
       </div>
 
-      <button id="btn-submit" onclick="handleSubmit()">Sign In</button>
+      <button class="btn-submit" id="btn-submit" onclick="handleSubmit()">Sign In</button>
       
       <div class="switch">
         <span id="toggle-text">Don't have an account?</span> 
@@ -204,6 +223,15 @@
   <script src="config.js"></script>
   <script>
     let isSignUp = false;
+
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById('password');
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+      } else {
+        pwdInput.type = 'password';
+      }
+    }
 
     function toggleMode() {
       isSignUp = !isSignUp;
@@ -227,30 +255,30 @@
 
       if (!email || !password) return alert('Please enter both email and password.');
 
-      if (isSignUp) {
-        if (!fullName) return alert('Please enter your full name.');
-        
-        const { data, error } = await supabaseClient.auth.signUp({ 
-          email, 
-          password,
-          options: {
-            data: { full_name: fullName }
-          }
-        });
+      try {
+        if (isSignUp) {
+          if (!fullName) return alert('Please enter your full name.');
+          
+          const { data, error } = await supabaseClient.auth.signUp({ 
+            email, 
+            password,
+            options: { data: { full_name: fullName } }
+          });
 
-        if (error) {
-          alert(error.message);
+          if (error) alert(error.message);
+          else {
+            alert('Account created successfully!');
+            window.location.href = 'dashboard.html';
+          }
         } else {
-          alert('Account created successfully!');
-          window.location.href = 'dashboard.html';
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+          if (error) alert(error.message);
+          else window.location.href = 'dashboard.html';
         }
-      } else {
-        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-        if (error) alert(error.message);
-        else window.location.href = 'dashboard.html';
+      } catch (err) {
+        alert(err.message || 'An error occurred during authentication.');
       }
     }
   </script>
 </body>
-    </html>
-    
+</html>
