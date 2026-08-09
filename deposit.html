@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deposit - Equity Mixed Assets</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="header">
+    <div class="brand-title">Equity Mixed Assets</div>
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  </div>
+
+  <div class="section-header">
+    <a href="dashboard.html" class="back-btn" style="text-decoration: none; display: inline-block;">← Back</a>
+    <div class="section-title">Select Payment Method</div>
+  </div>
+
+  <div class="method-card" onclick="alert('Bitcoin deposit instructions will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">₿</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through Bitcoin</div>
+        <div style="font-size: 12px; color: #94a3b8;">Instant crypto network deposit</div>
+      </div>
+    </div>
+    <div style="color: #94a3b8;">→</div>
+  </div>
+
+  <div class="method-card" onclick="alert('USDT deposit instructions will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">₮</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through USDT (TRC20)</div>
+        <div style="font-size: 12px; color: #94a3b8;">Low fee stablecoin transfer</div>
+      </div>
+    </div>
+    <div style="color: #94a3b8;">→</div>
+  </div>
+
+  <div class="method-card" onclick="alert('Ethereum deposit instructions will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">Ξ</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through Ethereum</div>
+        <div style="font-size: 12px; color: #94a3b8;">ERC-20 network transfer</div>
+      </div>
+    </div>
+    <div style="color: #94a3b8;">→</div>
+  </div>
+
+  <div class="method-card" onclick="alert('Bank wire transfer details will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">🏦</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Bank Wire Transfer</div>
+        <div style="font-size: 12px; color: #94a3b8;">Direct institutional wire</div>
+      </div>
+    </div>
+    <div style="color: #94a3b8;">→</div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav">
+    <button class="nav-item" onclick="window.location.href='dashboard.html'">
+      <span class="nav-icon">🏠</span> Home
+    </button>
+    <button class="nav-item" onclick="window.location.href='plans.html'">
+      <span class="nav-icon">📈</span> Plans
+    </button>
+    <button class="nav-item active" onclick="window.location.href='deposit.html'">
+      <span class="nav-icon">💳</span> Deposit
+    </button>
+    <button class="nav-item" onclick="alert('Transactions history coming soon!');">
+      <span class="nav-icon">📜</span> History
+    </button>
+    <button class="nav-item" onclick="toggleMenu();">
+      <span class="nav-icon">⚙️</span> Menu
+    </button>
+  </div>
+
+  <div class="drawer-overlay" id="drawer-overlay" onclick="toggleMenu()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div style="font-weight: 700;">Menu</div>
+      <button class="drawer-close" onclick="toggleMenu()">✕</button>
+    </div>
+    <div class="drawer-links">
+      <a href="dashboard.html">Dashboard</a>
+      <a href="deposit.html">Deposit Funds</a>
+      <a href="plans.html">Investment Plans</a>
+    </div>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
