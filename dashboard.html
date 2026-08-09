@@ -84,6 +84,42 @@
       border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;
     }
 
+    /* Floating Support Chat Bubble */
+    .chat-bubble-btn {
+      position: fixed; bottom: 85px; right: 20px; width: 56px; height: 56px;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; cursor: pointer;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5); z-index: 98; border: none; font-size: 24px; color: white;
+      transition: transform 0.2s ease;
+    }
+    .chat-bubble-btn:hover { transform: scale(1.05); }
+
+    /* Chat Modal Window */
+    .chat-modal {
+      position: fixed; bottom: 150px; right: 20px; width: 320px; max-width: calc(100vw - 40px);
+      height: 400px; background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+      display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+      z-index: 102; transform: scale(0); opacity: 0; transform-origin: bottom right; transition: all 0.3s ease;
+    }
+    .chat-modal.active { transform: scale(1); opacity: 1; }
+    .chat-header {
+      background: #0f172a; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid #334155;
+    }
+    .chat-title { font-size: 14px; font-weight: 600; color: white; display: flex; align-items: center; gap: 8px; }
+    .online-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; }
+    .chat-close { background: none; border: none; color: #94a3b8; font-size: 18px; cursor: pointer; }
+    .chat-body { flex: 1; padding: 14px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .chat-msg { background: rgba(30, 41, 59, 0.9); padding: 10px 12px; border-radius: 10px; font-size: 13px; color: #cbd5e1; max-width: 80%; }
+    .chat-msg.support { align-self: flex-start; border: 1px solid #334155; }
+    .chat-msg.user { align-self: flex-end; background: #2563eb; color: white; }
+    .chat-footer { padding: 10px; background: #0f172a; border-top: 1px solid #334155; display: flex; gap: 8px; }
+    .chat-input {
+      flex: 1; background: rgba(30, 41, 59, 0.8); border: 1px solid #334155; padding: 8px 12px;
+      border-radius: 8px; color: white; font-size: 13px; outline: none;
+    }
+    .chat-send-btn { background: #2563eb; color: white; border: none; padding: 8px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; width: 100%;
       background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(10px);
@@ -103,8 +139,7 @@
 
     .method-card {
       background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center;
-      justify-content: space-between; cursor: pointer;
+      border-radius: 14px; padding: 18px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
     }
     .tier-card {
       background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
@@ -221,6 +256,23 @@
     </div>
   </div>
 
+  <!-- Customer Support Floating Chat Bubble & Widget -->
+  <button class="chat-bubble-btn" onclick="toggleChatModal()">💬</button>
+
+  <div class="chat-modal" id="chat-modal">
+    <div class="chat-header">
+      <div class="chat-title"><span class="online-dot"></span> Customer Support</div>
+      <button class="chat-close" onclick="toggleChatModal()">✕</button>
+    </div>
+    <div class="chat-body" id="chat-body">
+      <div class="chat-msg support">Hello! Welcome to Equity Mixed Assets support. How can we assist you with your deposit or investment plan today?</div>
+    </div>
+    <div class="chat-footer">
+      <input type="text" class="chat-input" id="chat-input-field" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
+      <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+    </div>
+  </div>
+
   <div class="bottom-nav">
     <button class="nav-item active" onclick="switchView('main-view'); setActiveNav(this)">
       <span class="nav-icon">🏠</span> Home
@@ -282,6 +334,42 @@
       document.getElementById('drawer-overlay').classList.toggle('active');
     }
 
+    function toggleChatModal() {
+      document.getElementById('chat-modal').classList.toggle('active');
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-input-field');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBody = document.getElementById('chat-body');
+      
+      // Append user message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.innerText = text;
+      chatBody.appendChild(userMsg);
+
+      input.value = '';
+      chatBody.scrollTop = chatBody.scrollHeight;
+
+      // Simulate support response after 1 second
+      setTimeout(() => {
+        const supportMsg = document.createElement('div');
+        supportMsg.className = 'chat-msg support';
+        supportMsg.innerText = "Thank you for reaching out. A customer care representative will review your message and respond shortly.";
+        chatBody.appendChild(supportMsg);
+        chatBody.scrollTop = chatBody.scrollHeight;
+      }, 1000);
+    }
+
+    function handleChatKeyPress(event) {
+      if (event.key === 'Enter') {
+        sendChatMessage();
+      }
+    }
+
     function toggleBalance() {
       isBalanceHidden = !isBalanceHidden;
       const display = document.getElementById('balance-display');
@@ -299,7 +387,6 @@
       }
     }
 
-    // Fallback data array if data/notifications.js is empty or missing
     const fallbackNotifications = [
       "⚡ Alex M. deposited $1,200 via Bitcoin",
       "🚀 Sarah K. upgraded to Gold Tier",
@@ -315,7 +402,6 @@
       const noticeElement = document.getElementById('notification-text');
       if (!noticeElement) return;
 
-      // Use window.liveNotificationData if available, otherwise use fallback array
       const dataSource = (window.liveNotificationData && window.liveNotificationData.length > 0) 
         ? window.liveNotificationData 
         : fallbackNotifications;
@@ -323,16 +409,13 @@
       function showRandomNotice() {
         const randomMsg = dataSource[Math.floor(Math.random() * dataSource.length)];
         
-        // Fade out
         noticeElement.style.opacity = '0';
 
         setTimeout(() => {
           noticeElement.innerText = randomMsg;
-          // Fade in
           noticeElement.style.opacity = '1';
         }, 500);
 
-        // Random timing interval (roughly every 5 seconds)
         const randomDelay = Math.random() * 2000 + 4000;
         setTimeout(showRandomNotice, randomDelay);
       }
