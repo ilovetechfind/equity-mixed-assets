@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard - Equity Mixed Assets</title>
+  <title>Deposit - Equity Mixed Assets</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
@@ -15,69 +15,64 @@
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
   </div>
 
-  <!-- Main View -->
-  <div id="main-view" class="view-section active">
-    <div class="card">
-      <div class="balance-header">
-        <div class="balance-title">Total Account Balance</div>
-        <button class="eye-toggle" id="eye-icon" onclick="toggleBalance()">👁️</button>
-      </div>
-      <div class="balance-amount" id="balance-display">$0.00</div>
-
-      <div class="actions-grid">
-        <button class="action-btn btn-deposit" onclick="window.location.href='deposit.html'">Deposit</button>
-        <button class="action-btn btn-plan" onclick="window.location.href='plans.html'">Investment Plan</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="volume-header">
-        <div class="volume-title">Volume Position</div>
-        <div class="volume-stats">15% Full</div>
-      </div>
-      
-      <div class="progress-bar-container">
-        <div class="progress-bar-fill"></div>
-      </div>
-      <div class="volume-note">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
-
-      <div class="live-feed-box" id="live-feed-container">
-        <div class="live-feed-item" id="notification-text">⚡ Alex M. deposited $1,200 via Bitcoin</div>
-      </div>
-
-      <div class="promo-box">
-        <input type="text" class="promo-input" id="promo-input-field" placeholder="Enter Promo Code">
-        <button class="promo-btn" onclick="applyPromoCode()">Enter</button>
-      </div>
-    </div>
+  <div class="section-header">
+    <a href="dashboard.html" class="back-btn" style="text-decoration: none; display: inline-block;">← Back</a>
+    <div class="section-title">Select Payment Method</div>
   </div>
 
-  <!-- Customer Support Floating Chat Widget -->
-  <button class="chat-bubble-btn" onclick="toggleChatModal()">💬</button>
+  <div class="method-card" onclick="alert('Bitcoin deposit instructions will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">₿</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Pay through Bitcoin</div>
+        <div style="font-size: 12px; color: #94a3b8;">Instant crypto network deposit</div>
+      </div>
+    </div>
+    <div style="color: #94a3b8;">→</div>
+  </div>
 
-  <div class="chat-modal" id="chat-modal">
-    <div class="chat-header">
-      <div class="chat-title"><span class="online-dot"></span> Customer Support</div>
-      <button class="chat-close" onclick="toggleChatModal()">✕</button>
+  <div class="method-card" onclick="alert('Gift card deposit instructions will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">🎁</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Upload Gift Card</div>
+        <div style="font-size: 12px; color: #94a3b8;">Submit card details & receipt</div>
+      </div>
     </div>
-    <div class="chat-body" id="chat-body">
-      <div class="chat-msg support">Hello! Welcome to Equity Mixed Assets support. How can we assist you today?</div>
+    <div style="color: #94a3b8;">→</div>
+  </div>
+
+  <div class="method-card" onclick="alert('Bank transfer details will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">🏦</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Bank Transfer</div>
+        <div style="font-size: 12px; color: #94a3b8;">Direct wire or local bank deposit</div>
+      </div>
     </div>
-    <div class="chat-footer">
-      <input type="text" class="chat-input" id="chat-input-field" placeholder="Type a message..." onkeypress="handleChatKeyPress(event)">
-      <button class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+    <div style="color: #94a3b8;">→</div>
+  </div>
+
+  <div class="method-card" onclick="alert('Custom payment details will load here.')">
+    <div class="method-content-left">
+      <div class="method-icon-box">⚙️</div>
+      <div>
+        <div style="font-size: 15px; font-weight: 600; color: #fff;">Request Custom Payment</div>
+        <div style="font-size: 12px; color: #94a3b8;">Alternate payment arrangements</div>
+      </div>
     </div>
+    <div style="color: #94a3b8;">→</div>
   </div>
 
   <!-- Bottom Navigation -->
   <div class="bottom-nav">
-    <button class="nav-item active" onclick="window.location.href='dashboard.html'">
+    <button class="nav-item" onclick="window.location.href='dashboard.html'">
       <span class="nav-icon">🏠</span> Home
     </button>
     <button class="nav-item" onclick="window.location.href='plans.html'">
       <span class="nav-icon">📈</span> Plans
     </button>
-    <button class="nav-item" onclick="window.location.href='deposit.html'">
+    <button class="nav-item active" onclick="window.location.href='deposit.html'">
       <span class="nav-icon">💳</span> Deposit
     </button>
     <button class="nav-item" onclick="alert('Transactions history coming soon!');">
@@ -102,10 +97,8 @@
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
 
-  <!-- External JavaScript Files -->
   <script src="config.js"></script>
-  <script src="data/notifications.js"></script>
   <script src="app.js"></script>
-</bod
-  y>
-          </html>
+</body
+  >
+</html>
