@@ -68,13 +68,78 @@
     <button class="nav-item active" onclick="window.location.href='settings.html'" style="background: none; border: none; color: #3b82f6; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-weight: bold;">
       <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">⚙️</span> Settings
     </button>
-    <button class="nav-item" onclick="alert('Menu function connected to dashboard slide-out');" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+    <button class="nav-item" onclick="toggleMenu()" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
       <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">☰</span> Menu
     </button>
   </div>
 
+  <!-- Slide-out Menu Drawer -->
+  <div class="drawer-overlay" id="drawer-overlay" onclick="toggleMenu()"></div>
+  <div class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div style="font-weight: 700;">Menu</div>
+      <button class="drawer-close" onclick="toggleMenu()">✕</button>
+    </div>
+    <div class="drawer-links">
+      <a onclick="window.location.href='dashboard.html';">Dashboard</a>
+      <a onclick="window.location.href='dashboard.html';">Deposit Funds</a>
+      <a onclick="window.location.href='plans.html';">Investment Plans</a>
+      <a onclick="window.location.href='settings.html';">Settings</a>
+    </div>
+    <button class="logout-btn" onclick="confirmLogout()">Log Out</button>
+  </div>
+
+  <!-- Custom Modal UI -->
+  <div id="custom-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 9999; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+    <div style="background: #1e293b; padding: 25px; border-radius: 12px; width: 80%; max-width: 320px; text-align: center; border: 1px solid #334155; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+      <div id="modal-message" style="color: #fff; font-size: 16px; font-weight: 500; margin-bottom: 20px; line-height: 1.5;"></div>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button id="modal-cancel-btn" style="flex: 1; padding: 12px; border: 1px solid #334155; background: #0f172a; color: #94a3b8; border-radius: 8px; font-weight: 600; cursor: pointer; display: none;">Cancel</button>
+        <button id="modal-ok-btn" style="flex: 1; padding: 12px; border: none; background: #3b82f6; color: #fff; border-radius: 8px; font-weight: 600; cursor: pointer;">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
   <script src="config.js"></script>
+  <script src="app.js"></script>
   <script>
+    // Custom Modal Logic
+    let confirmCallback = null;
+
+    function showModal(message, isConfirm = false, callback = null) {
+      document.getElementById('modal-message').innerText = message;
+      document.getElementById('custom-modal').style.display = 'flex';
+      confirmCallback = callback;
+
+      if (isConfirm) {
+        document.getElementById('modal-cancel-btn').style.display = 'block';
+        document.getElementById('modal-ok-btn').style.background = '#ef4444';
+      } else {
+        document.getElementById('modal-cancel-btn').style.display = 'none';
+        document.getElementById('modal-ok-btn').style.background = '#3b82f6';
+      }
+    }
+
+    document.getElementById('modal-cancel-btn').onclick = function() {
+      document.getElementById('custom-modal').style.display = 'none';
+      confirmCallback = null;
+    };
+
+    document.getElementById('modal-ok-btn').onclick = function() {
+      document.getElementById('custom-modal').style.display = 'none';
+      if (confirmCallback) confirmCallback();
+    };
+
+    // Logout Functionality from Menu
+    function confirmLogout() {
+      showModal("Are you sure you want to log out?", true, function() {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = 'index.html'; 
+      });
+    }
+
     // Preview selected image file on screen
     function previewImage(event) {
       const reader = new FileReader();
@@ -86,19 +151,33 @@
       }
     }
 
-    // Handle save button click
+    // Handle save button click using Custom Modal
     function saveProfileData() {
       const name = document.getElementById('profile-name').value;
-      const code = document.getElementById('admin-code').value;
       
       if(!name) {
-        alert("Please enter a name.");
+        showModal("Please enter a name.");
         return;
       }
       
-      // Future logic to save to database goes here
-      alert("Profile updated successfully!");
-      window.location.href = 'settings.html';
+      showModal("Profile updated successfully!", false, function() {
+        window.location.href = 'settings.html';
+      });
+    }
+
+    // Fallback menu toggle if app.js is missing
+    if(typeof toggleMenu !== "function") {
+      window.toggleMenu = function() {
+        const drawer = document.getElementById('drawer');
+        const overlay = document.getElementById('drawer-overlay');
+        if (drawer.classList.contains('open')) {
+          drawer.classList.remove('open');
+          overlay.classList.remove('open');
+        } else {
+          drawer.classList.add('open');
+          overlay.classList.add('open');
+        }
+      }
     }
   </script>
 </body>
