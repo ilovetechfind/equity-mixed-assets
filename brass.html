@@ -15,7 +15,7 @@
     <button class="back-btn" onclick="window.location.href='plans.html'">← Back</button>
   </div>
 
-  <div class="view-section active" style="padding: 15px; max-width: 600px; margin: 0 auto;">
+  <div class="view-section active" style="padding: 15px; max-width: 600px; margin: 0 auto; display: block !important;">
     
     <!-- Tier Overview & Payment Breakdown -->
     <div class="card" style="margin-bottom: 15px;">
@@ -36,12 +36,12 @@
 
     <!-- Volume Flow Status Card -->
     <div class="card" style="margin-bottom: 15px;">
-      <div class="volume-header">
-        <div class="volume-title">Volume Position Flow</div>
-        <div class="volume-stats">35% Active</div>
+      <div class="volume-header" style="display: flex; justify-content: space-between;">
+        <div class="volume-title" style="color: #fff; font-weight: bold;">Volume Position Flow</div>
+        <div class="volume-stats" style="color: #10b981;">35% Active</div>
       </div>
-      <div class="progress-bar-container" style="margin-top: 10px;">
-        <div class="progress-bar-fill" style="width: 35%;"></div>
+      <div class="progress-bar-container" style="margin-top: 10px; background: #0f172a; height: 8px; border-radius: 4px; overflow: hidden;">
+        <div class="progress-bar-fill" style="width: 35%; background: #3b82f6; height: 100%;"></div>
       </div>
       <div class="volume-note" style="margin-top: 8px; font-size: 12px; color: #f59e0b;">⚠️ Volume motion syncing with market liquidity. Complete daily payments to maximize yield flow.</div>
     </div>
@@ -62,7 +62,7 @@
     </div>
 
     <!-- Daily Profit Tracker Card -->
-    <div class="card">
+    <div class="card" style="background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; margin-bottom: 20px;">
       <div style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 10px;">35-Day Payment & Profit Tracker</div>
       <div style="font-size: 12px; color: #94a3b8; margin-bottom: 12px;">Track your daily contributions and corresponding daily profits.</div>
       
@@ -99,7 +99,6 @@
   </div>
 
   <script src="config.js"></script>
-  <script src="app.js"></script>
 </body>
-  
+
 </html>
