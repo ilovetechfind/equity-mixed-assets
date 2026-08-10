@@ -34,7 +34,7 @@
         </div>
         <label style="font-size: 13px; color: #3b82f6; cursor: pointer; font-weight: 600; padding: 5px 10px; background: rgba(59, 130, 246, 0.1); border-radius: 6px;">
           Change Picture
-          <input type="file" accept="image/*" style="display: none;" onchange="previewImage(event)">
+          <input type="file" id="profile-file-input" accept="image/*" style="display: none;" onchange="previewImage(event)">
         </label>
       </div>
 
@@ -104,7 +104,6 @@
   <script src="config.js"></script>
   <script src="app.js"></script>
   <script>
-    // Custom Modal Logic
     let confirmCallback = null;
 
     function showModal(message, isConfirm = false, callback = null) {
@@ -131,7 +130,6 @@
       if (confirmCallback) confirmCallback();
     };
 
-    // Logout Functionality from Menu
     function confirmLogout() {
       showModal("Are you sure you want to log out?", true, function() {
         localStorage.clear();
@@ -140,7 +138,16 @@
       });
     }
 
-    // Preview selected image file on screen
+    // Load data from Supabase on startup
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data, error } = await supabase.from('profiles').select('*').limit(1).single();
+      if (data) {
+        if(data.full_name) document.getElementById('profile-name').value = data.full_name;
+        if(data.admin_code) document.getElementById('admin-code').value = data.admin_code;
+        if(data.avatar_url) document.getElementById('profile-preview').src = data.avatar_url;
+      }
+    });
+
     function previewImage(event) {
       const reader = new FileReader();
       reader.onload = function() {
@@ -151,21 +158,53 @@
       }
     }
 
-    // Handle save button click using Custom Modal
-    function saveProfileData() {
+    // Save profile data & image to Supabase
+    async function saveProfileData() {
       const name = document.getElementById('profile-name').value;
+      const code = document.getElementById('admin-code').value;
+      const fileInput = document.getElementById('profile-file-input');
       
       if(!name) {
         showModal("Please enter a name.");
         return;
       }
-      
-      showModal("Profile updated successfully!", false, function() {
-        window.location.href = 'settings.html';
+
+      showModal("Saving profile...");
+
+      let avatarUrl = document.getElementById('profile-preview').src;
+
+      // If a new image file was selected, upload it to Supabase Storage
+      if (fileInput.files && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const filePath = `${fileName}`;
+
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file);
+        
+        if (!uploadError) {
+          const { data: publicURLData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+          avatarUrl = publicURLData.publicUrl;
+        }
+      }
+
+      // Upsert profile data into database
+      const { error: dbError } = await supabase.from('profiles').upsert({
+        id: 1, 
+        full_name: name,
+        admin_code: code,
+        avatar_url: avatarUrl
       });
+
+      if (dbError) {
+        showModal("Error saving: " + dbError.message);
+      } else {
+        showModal("Profile updated successfully!", false, function() {
+          window.location.href = 'dashboard.html';
+        });
+      }
     }
 
-    // Fallback menu toggle if app.js is missing
     if(typeof toggleMenu !== "function") {
       window.toggleMenu = function() {
         const drawer = document.getElementById('drawer');
