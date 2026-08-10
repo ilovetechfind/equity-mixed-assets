@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Equity Mixed Assets</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body style="background-color: #0b0f19; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 90px;">
+
+  <!-- Header -->
+  <div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #1e293b; border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 100;">
+    <div class="brand-title" style="font-weight: 700; font-size: 16px;">Settings</div>
+    <button class="back-btn" onclick="window.location.href='dashboard.html'" style="background: #334155; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div style="padding: 16px; max-width: 600px; margin: 0 auto;">
+    
+    <!-- Settings Options Group -->
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; overflow: hidden; margin-bottom: 20px;">
+      
+      <!-- Profile Option -->
+      <div onclick="alert('Opening profile information...');" style="padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(51, 65, 85, 0.5); cursor: pointer;">
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #fff;">Profile</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">View and update your account details</div>
+        </div>
+        <span style="color: #64748b; font-size: 16px;">→</span>
+      </div>
+
+      <!-- Log Out Option -->
+      <div onclick="if(confirm('Are you sure you want to log out?')) { window.location.href='index.html'; }" style="padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(51, 65, 85, 0.5); cursor: pointer;">
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #3b82f6;">Log Out</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Sign out of your active session</div>
+        </div>
+        <span style="color: #3b82f6; font-size: 16px;">→</span>
+      </div>
+
+      <!-- Delete Account Option -->
+      <div onclick="if(confirm('WARNING: Deleting your account is permanent. Are you sure you want to proceed?')) { alert('Account deletion request submitted.'); }" style="padding: 18px 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;">
+        <div>
+          <div style="font-size: 15px; font-weight: 600; color: #ef4444;">Delete Account</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">Permanently remove your account and data</div>
+        </div>
+        <span style="color: #ef4444; font-size: 16px;">→</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav" style="position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000;">
+    <button class="nav-item" onclick="window.location.href='dashboard.html'" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">🏠</span> Home
+    </button>
+    <button class="nav-item" onclick="window.location.href='plans.html'" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">📈</span> Plans
+    </button>
+    <button class="nav-item" onclick="window.location.href='dashboard.html'" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">💳</span> Deposit
+    </button>
+    <button class="nav-item" onclick="alert('Transactions history coming soon!');" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">📜</span> History
+    </button>
+    <button class="nav-item active" onclick="window.location.href='settings.html'" style="background: none; border: none; color: #3b82f6; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-weight: bold;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">⚙️</span> Menu
+    </button>
+  </div>
+
+  <script src="config.js"></script>
+</body>
+
+</html>
