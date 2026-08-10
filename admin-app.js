@@ -1,10 +1,6 @@
 // Ensure Supabase client is initialized via config.js
-// Example: const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Check which page we are on
-    const isLoginPage = document.getElementById('admin-email') !== null;
-    const isSignupPage = document.getElementById('admin-signup-email') !== null;
     const isDashboard = document.getElementById('admin-greeting') !== null;
 
     if (isDashboard) {
@@ -32,6 +28,14 @@ async function adminLogin() {
     if (error) {
         errorMsg.innerText = error.message;
         errorMsg.style.display = 'block';
+        return;
+    }
+    
+    // Check if email is verified
+    if (!data.user.email_confirmed_at) {
+        errorMsg.innerText = 'Please verify your email address before logging in. Check your inbox.';
+        errorMsg.style.display = 'block';
+        await supabase.auth.signOut();
         return;
     }
     
@@ -66,10 +70,13 @@ async function registerAdmin() {
         return;
     }
     
-    // 1. Create user in Supabase Auth
+    // 1. Create user in Supabase Auth with email redirect verification
     const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
+        options: {
+            emailRedirectTo: window.location.origin + '/admin-login.html'
+        }
     });
     
     if (error) {
@@ -93,10 +100,35 @@ async function registerAdmin() {
             return;
         }
         
+        successMsg.innerText = "Registration successful! Please check your email to verify your account before logging in.";
         successMsg.style.display = 'block';
-        setTimeout(() => {
-            window.location.href = 'admin-dashboard.html';
-        }, 1500);
+    }
+}
+
+async function forgotPassword() {
+    const email = document.getElementById('admin-signup-email').value;
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
+    
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+    
+    if (!email) {
+        errorMsg.innerText = "Please enter your email address above first.";
+        errorMsg.style.display = 'block';
+        return;
+    }
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/admin-login.html',
+    });
+    
+    if (error) {
+        errorMsg.innerText = error.message;
+        errorMsg.style.display = 'block';
+    } else {
+        successMsg.innerText = "Password reset link sent to your email!";
+        successMsg.style.display = 'block';
     }
 }
 
@@ -186,7 +218,6 @@ async function loadUsers() {
     const container = document.getElementById('user-list-container');
     const { data: { session } } = await supabase.auth.getSession();
     
-    // Fetch users assigned to this admin
     const { data: users, error } = await supabase
         .from('profiles')
         .select('id, email, balance, used_code')
@@ -240,34 +271,6 @@ async function updateBalance(userId) {
     } else {
         alert("Balance updated successfully!");
         input.value = '';
-        loadUsers(); // Refresh the list
+        loadUsers();
     }
-                  }
-                                             
-
-async function forgotPassword() {
-    const email = document.getElementById('admin-signup-email').value;
-    const errorMsg = document.getElementById('error-msg');
-    const successMsg = document.getElementById('success-msg');
-    
-    errorMsg.style.display = 'none';
-    successMsg.style.display = 'none';
-    
-    if (!email) {
-        errorMsg.innerText = "Please enter your email address above first.";
-        errorMsg.style.display = 'block';
-        return;
-    }
-    
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: window.location.origin + '/admin-login.html',
-    });
-    
-    if (error) {
-        errorMsg.innerText = error.message;
-        errorMsg.style.display = 'block';
-    } else {
-        successMsg.innerText = "Password reset link sent to your email!";
-        successMsg.style.display = 'block';
-    }
-}
+                                               }
