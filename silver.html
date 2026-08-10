@@ -1,1 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Silver Tier - Mixed Assets</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    @keyframes pulseLine {
+      0% { transform: translateY(0px) scaleY(1); opacity: 0.8; }
+      50% { transform: translateY(-4px) scaleY(1.15); opacity: 1; }
+      100% { transform: translateY(0px) scaleY(1); opacity: 0.8; }
+    }
+    .animated-wave-bar {
+      animation: pulseLine 2s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body style="background-color: #0b0f19; color: #fff; font-family: 'Inter', sans-serif; margin: 0; padding-bottom: 90px;">
 
+  <div class="header" style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #1e293b; border-bottom: 1px solid #334155; position: sticky; top: 0; z-index: 100;">
+    <div class="brand-title" style="font-weight: 700; font-size: 16px;">Silver Tier Portfolio</div>
+    <button class="back-btn" onclick="window.location.href='plans.html'" style="background: #334155; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer;">← Back</button>
+  </div>
+
+  <div style="padding: 16px; max-width: 600px; margin: 0 auto;">
+    
+    <!-- Tier Overview & Payment Breakdown -->
+    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+      <h3 style="color: #fff; margin-top: 0; font-size: 18px; margin-bottom: 15px; border-bottom: 1px solid #334155; padding-bottom: 10px;">Silver Tier Investment</h3>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px;">
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Total Goal</div>
+          <div style="font-size: 16px; font-weight: bold; color: #fff; margin-top: 4px;">$3,500</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Expected Return</div>
+          <div style="font-size: 16px; font-weight: bold; color: #10b981; margin-top: 4px;">$16,000</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">First Payment</div>
+          <div style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-top: 4px;">$700</div>
+        </div>
+        <div style="background: rgba(15, 23, 42, 0.6); padding: 10px; border-radius: 8px; border: 1px solid #334155;">
+          <div style="font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 600;">Daily Payout</div>
+          <div style="font-size: 16px; font-weight: bold; color: #3b82f6; margin-top: 4px;">$120 / day</div>
+        </div>
+      </div>
+      
+      <button onclick="alert('Redirecting to deposit for Silver Tier first payment...'); window.location.href='dashboard.html';" style="width: 100%; background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);">
+        Make First Payment ($700) & Activate
+      </button>
+    </div>
+
+    <!-- Volume Flow Status Card -->
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div style="font-size: 13px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px;">Volume Position Flow</div>
+        <div style="font-size: 13px; font-weight: 700; color: #10b981; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 4px;">35% Active</div>
+      </div>
+      <div style="background: #0f172a; height: 8px; border-radius: 4px; overflow: hidden; border: 1px solid #334155;">
+        <div style="width: 35%; background: linear-gradient(90deg, #3b82f6 0%, #10b981 100%); height: 100%; border-radius: 4px;"></div>
+      </div>
+      <div style="margin-top: 10px; font-size: 12px; color: #f59e0b; background: rgba(245, 158, 11, 0.08); padding: 8px 12px; border-radius: 6px; border-left: 3px solid #f59e0b;">
+        ⚠️ Volume motion syncing with market liquidity. Complete daily payments to maximize yield flow.
+      </div>
+    </div>
+
+    <!-- Live Forex Graph & Market Simulation Card -->
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+        <div style="font-size: 14px; font-weight: 700; color: #fff;">Live Market Asset Stream</div>
+        <div style="font-size: 11px; color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 3px 8px; border-radius: 4px; font-weight: 600;">● Live Feed</div>
+      </div>
+      <p style="font-size: 12px; color: #94a3b8; margin: 0 0 14px 0;">Real-time asset pairing performance for Silver Tier investments.</p>
+      
+      <div style="background: #0f172a; height: 170px; border-radius: 8px; border: 1px solid #334155; display: flex; flex-direction: column; justify-content: space-between; padding: 12px 15px; position: relative; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between; align-items: center; z-index: 2;">
+          <span style="font-size: 11px; color: #64748b; font-weight: 500;">GBP/USD & Tech Equities Index</span>
+          <span style="font-size: 14px; font-weight: 800; color: #10b981;">+6.14%</span>
+        </div>
+
+        <div style="display: flex; align-items: flex-end; justify-content: space-between; height: 75px; padding: 0 5px; z-index: 2;">
+          <div class="animated-wave-bar" style="width: 8px; height: 40%; background: #3b82f6; border-radius: 4px; animation-delay: 0.2s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 65%; background: #3b82f6; border-radius: 4px; animation-delay: 0.5s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 85%; background: #10b981; border-radius: 4px; animation-delay: 0.1s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 50%; background: #3b82f6; border-radius: 4px; animation-delay: 0.4s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 95%; background: #10b981; border-radius: 4px; animation-delay: 0.3s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 70%; background: #10b981; border-radius: 4px; animation-delay: 0.6s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 85%; background: #10b981; border-radius: 4px; animation-delay: 0.2s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 55%; background: #3b82f6; border-radius: 4px; animation-delay: 0.7s;"></div>
+          <div class="animated-wave-bar" style="width: 8px; height: 90%; background: #10b981; border-radius: 4px; animation-delay: 0.1s;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; z-index: 2; font-size: 11px; color: #64748b;">
+          <span>Upward Flow</span>
+          <span>Speed: 0.03s</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Daily Profit Tracker Card -->
+    <div style="background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; margin-bottom: 20px;">
+      <div style="font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 4px;">35-Day Payment & Profit Tracker</div>
+      <div style="font-size: 12px; color: #94a3b8; margin-bottom: 15px;">Track your daily contributions and corresponding daily profits.</div>
+      
+      <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;">
+        <div style="background: rgba(16, 185, 129, 0.1); padding: 10px 2px; text-align: center; border-radius: 8px; font-size: 11px; border: 1px solid #10b981; color: #10b981;">Day 1<br><strong style="font-size: 10px;">Paid</strong></div>
+        <div style="background: rgba(245, 158, 11, 0.1); padding: 10px 2px; text-align: center; border-radius: 8px; font-size: 11px; border: 1px solid #f59e0b; color: #f59e0b;">Day 2<br><strong style="font-size: 9px;">Pending</strong></div>
+        <div style="background: #0f172a; padding: 10px 2px; text-align: center; border-radius: 8px; font-size: 11px; border: 1px solid #334155; color: #64748b;">Day 3<br><strong>-</strong></div>
+        <div style="background: #0f172a; padding: 10px 2px; text-align: center; border-radius: 8px; font-size: 11px; border: 1px solid #334155; color: #64748b;">Day 4<br><strong>-</strong></div>
+        <div style="background: #0f172a; padding: 10px 2px; text-align: center; border-radius: 8px; font-size: 11px; border: 1px solid #334155; color: #64748b;">Day 5<br><strong>-</strong></div>
+        <div style="background: rgba(100, 116, 139, 0.1); padding: 10px 2px; text-align: center; border-radius: 8px; font-size: 11px; border: 1px solid #334155; color: #64748b;">Day 6<br><strong style="font-size: 10px;">Off</strong></div>
+        <div style="background: rgba(100, 116, 139, 0.1); padding: 10px 2px; text-align: center; border-radius: 8px; font-size: 11px; border: 1px solid #334155; color: #64748b;">Day 7<br><strong style="font-size: 10px;">Off</strong></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <div class="bottom-nav" style="position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000;">
+    <button class="nav-item" onclick="window.location.href='dashboard.html'" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">🏠</span> Home
+    </button>
+    <button class="nav-item active" onclick="window.location.href='plans.html'" style="background: none; border: none; color: #3b82f6; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center; font-weight: bold;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">📈</span> Plans
+    </button>
+    <button class="nav-item" onclick="window.location.href='dashboard.html'" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">💳</span> Deposit
+    </button>
+    <button class="nav-item" onclick="alert('Transactions history coming soon!');" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">📜</span> History
+    </button>
+    <button class="nav-item" onclick="window.location.href='dashboard.html'" style="background: none; border: none; color: #94a3b8; font-size: 11px; cursor: pointer; display: flex; flex-direction: column; align-items: center;">
+      <span class="nav-icon" style="font-size: 18px; margin-bottom: 2px;">⚙️</span> Menu
+    </button>
+  </div>
+
+  <script src="config.js"></script>
+</bod
+  y>
+            </html>
