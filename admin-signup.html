@@ -65,6 +65,20 @@
     .btn:hover { 
       background-color: #1d4ed8; 
     }
+    .links {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .links a {
+      color: #3b82f6;
+      text-decoration: none;
+      display: block;
+      margin-top: 8px;
+    }
+    .links a:hover {
+      text-decoration: underline;
+    }
     .error { 
       color: #ef4444; 
       font-size: 14px; 
@@ -98,12 +112,17 @@
     </div>
     
     <button class="btn" onclick="registerAdmin()">Register Admin</button>
+    
+    <div class="links">
+      <a href="admin-login.html">Already have an account? Login here</a>
+      <a href="#" onclick="forgotPassword()">Forgot Password?</a>
+    </div>
+
     <div id="error-msg" class="error"></div>
-    <div id="success-msg" class="success">Admin account created successfully! Redirecting...</div>
+    <div id="success-msg" class="success"></div>
   </div>
 
   <script src="config.js"></script>
   <script src="admin-app.js"></script>
 </body>
-</html
-  >
+</html>
