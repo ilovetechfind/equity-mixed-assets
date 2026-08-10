@@ -56,6 +56,7 @@ async function adminLogin() {
 }
 
 async function registerAdmin() {
+    const fullName = document.getElementById('admin-signup-name').value;
     const email = document.getElementById('admin-signup-email').value;
     const password = document.getElementById('admin-signup-password').value;
     const errorMsg = document.getElementById('error-msg');
@@ -64,8 +65,8 @@ async function registerAdmin() {
     errorMsg.style.display = 'none';
     successMsg.style.display = 'none';
     
-    if (!email || !password) {
-        errorMsg.innerText = "Please fill in all fields.";
+    if (!fullName || !email || !password) {
+        errorMsg.innerText = "Please fill in all fields including your full name.";
         errorMsg.style.display = 'block';
         return;
     }
@@ -86,11 +87,11 @@ async function registerAdmin() {
     }
     
     if (data.user) {
-        // 2. Automatically assign 'admin' role in the profiles table
+        // 2. Automatically assign 'admin' role and full name in the profiles table
         const { error: profileError } = await supabase
             .from('profiles')
             .insert([
-                { id: data.user.id, email: email, role: 'admin' }
+                { id: data.user.id, email: email, full_name: fullName, role: 'admin' }
             ]);
             
         if (profileError) {
@@ -100,7 +101,7 @@ async function registerAdmin() {
             return;
         }
         
-        successMsg.innerText = "Registration successful! Please check your email to verify your account before logging in.";
+        successMsg.innerText = "An email has been sent to your email address (" + email + "). Please check your inbox and verify your account before logging in.";
         successMsg.style.display = 'block';
     }
 }
@@ -273,4 +274,4 @@ async function updateBalance(userId) {
         input.value = '';
         loadUsers();
     }
-                                               }
+        }
