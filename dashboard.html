@@ -155,11 +155,11 @@
     <button class="nav-item" onclick="switchView('deposit-methods-view'); setActiveNav(this)">
       <span class="nav-icon">💳</span> Deposit
     </button>
-    <button class="nav-item" onclick="alert('Transactions history coming soon!');">
-      <span class="nav-icon">📜</span> History
+    <button class="nav-item" onclick="window.location.href='settings.html'">
+      <span class="nav-icon">⚙️</span> Settings
     </button>
     <button class="nav-item" onclick="toggleMenu();">
-      <span class="nav-icon">⚙️</span> Menu
+      <span class="nav-icon">☰</span> Menu
     </button>
   </div>
 
@@ -173,6 +173,7 @@
       <a onclick="switchView('main-view'); toggleMenu();">Dashboard</a>
       <a onclick="switchView('deposit-methods-view'); toggleMenu();">Deposit Funds</a>
       <a onclick="window.location.href='plans.html'; toggleMenu();">Investment Plans</a>
+      <a onclick="window.location.href='settings.html'; toggleMenu();">Settings</a>
     </div>
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
@@ -182,5 +183,4 @@
   <script src="data/notifications.js"></script>
   <script src="app.js"></script>
 </body>
-          </html>
-          
+</html>
