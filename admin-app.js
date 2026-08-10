@@ -4,6 +4,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // Check which page we are on
     const isLoginPage = document.getElementById('admin-email') !== null;
+    const isSignupPage = document.getElementById('admin-signup-email') !== null;
     const isDashboard = document.getElementById('admin-greeting') !== null;
 
     if (isDashboard) {
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// --- 1. AUTHENTICATION ---
+// --- 1. AUTHENTICATION & REGISTRATION ---
 
 async function adminLogin() {
     const email = document.getElementById('admin-email').value;
@@ -47,6 +48,55 @@ async function adminLogin() {
         errorMsg.innerText = 'Unauthorized: Admin access required.';
         errorMsg.style.display = 'block';
         await supabase.auth.signOut();
+    }
+}
+
+async function registerAdmin() {
+    const email = document.getElementById('admin-signup-email').value;
+    const password = document.getElementById('admin-signup-password').value;
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
+    
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+    
+    if (!email || !password) {
+        errorMsg.innerText = "Please fill in all fields.";
+        errorMsg.style.display = 'block';
+        return;
+    }
+    
+    // 1. Create user in Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+    });
+    
+    if (error) {
+        errorMsg.innerText = error.message;
+        errorMsg.style.display = 'block';
+        return;
+    }
+    
+    if (data.user) {
+        // 2. Automatically assign 'admin' role in the profiles table
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([
+                { id: data.user.id, email: email, role: 'admin' }
+            ]);
+            
+        if (profileError) {
+            errorMsg.innerText = "Failed to setup admin profile.";
+            errorMsg.style.display = 'block';
+            console.error(profileError);
+            return;
+        }
+        
+        successMsg.style.display = 'block';
+        setTimeout(() => {
+            window.location.href = 'admin-dashboard.html';
+        }, 1500);
     }
 }
 
@@ -192,4 +242,5 @@ async function updateBalance(userId) {
         input.value = '';
         loadUsers(); // Refresh the list
     }
-  }
+                  }
+                                             
