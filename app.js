@@ -5,12 +5,85 @@ async function checkUser() {
   const { data: { user } } = await supabaseClient.auth.getUser();
   if (!user) {
     window.location.href = 'index.html';
+  } else {
+    // Load profile data if user is logged in
+    loadUserProfile();
   }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
   switchView('main-view');
 });
+
+async function loadUserProfile() {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) return;
+
+  const { data: profile, error } = await supabaseClient
+    .from('profiles')
+    .select('balance, avatar_url')
+    .eq('id', session.user.id)
+    .single();
+
+  if (profile) {
+    // Format the balance properly
+    currentBalance = '$' + (profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    // Update display if it is not currently hidden
+    if (!isBalanceHidden) {
+      document.getElementById('balance-display').innerText = currentBalance;
+    }
+    
+    // Update avatar if the user has one
+    if (profile.avatar_url) {
+      document.getElementById('user-profile-pic').src = profile.avatar_url;
+    }
+  }
+}
+
+async function requestWithdrawal() {
+  const amountInput = document.getElementById('withdraw-amount-input');
+  const amount = parseFloat(amountInput.value);
+
+  if (isNaN(amount) || amount <= 0) {
+    alert("Please enter a valid withdrawal amount.");
+    return;
+  }
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session) {
+    alert("You must be logged in to withdraw.");
+    return;
+  }
+
+  // Fetch current balance to verify they have enough funds
+  const { data: profile } = await supabaseClient
+    .from('profiles')
+    .select('balance')
+    .eq('id', session.user.id)
+    .single();
+
+  if (!profile || (profile.balance || 0) < amount) {
+    alert("Insufficient balance for this withdrawal.");
+    return;
+  }
+
+  // Deduct the requested amount from the balance
+  const { error } = await supabaseClient
+    .from('profiles')
+    .update({ balance: profile.balance - amount })
+    .eq('id', session.user.id);
+
+  if (error) {
+    alert("Withdrawal failed. Please try again.");
+    console.error(error);
+  } else {
+    alert("Withdrawal request submitted successfully!");
+    amountInput.value = '';
+    // Refresh the profile to show the new lower balance
+    loadUserProfile();
+  }
+}
 
 function switchView(viewId) {
   document.querySelectorAll('.view-section').forEach(el => {
@@ -128,5 +201,4 @@ async function logout() {
 }
 
 checkUser();
-start
-  NotificationStream();
+startNotificationStream();
