@@ -244,3 +244,30 @@ async function updateBalance(userId) {
     }
                   }
                                              
+
+async function forgotPassword() {
+    const email = document.getElementById('admin-signup-email').value;
+    const errorMsg = document.getElementById('error-msg');
+    const successMsg = document.getElementById('success-msg');
+    
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+    
+    if (!email) {
+        errorMsg.innerText = "Please enter your email address above first.";
+        errorMsg.style.display = 'block';
+        return;
+    }
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/admin-login.html',
+    });
+    
+    if (error) {
+        errorMsg.innerText = error.message;
+        errorMsg.style.display = 'block';
+    } else {
+        successMsg.innerText = "Password reset link sent to your email!";
+        successMsg.style.display = 'block';
+    }
+}
