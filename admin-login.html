@@ -65,6 +65,20 @@
     .btn:hover { 
       background-color: #1d4ed8; 
     }
+    .links {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .links a {
+      color: #3b82f6;
+      text-decoration: none;
+      display: block;
+      margin-top: 8px;
+    }
+    .links a:hover {
+      text-decoration: underline;
+    }
     .error { 
       color: #ef4444; 
       font-size: 14px; 
@@ -91,11 +105,16 @@
     </div>
     
     <button class="btn" onclick="adminLogin()">Secure Login</button>
-    <div id="error-msg" class="error">Invalid credentials or unauthorized access.</div>
+    
+    <div class="links">
+      <a href="admin-signup.html">Don't have an account? Create one here</a>
+    </div>
+
+    <div id="error-msg" class="error"></div>
   </div>
 
-  <!-- We will create admin-app.js next -->
   <script src="config.js"></script>
   <script src="admin-app.js"></script>
 </body>
-</html>
+</htm
+  l>
