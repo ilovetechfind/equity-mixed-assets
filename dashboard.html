@@ -17,12 +17,24 @@
 
   <!-- Main View -->
   <div id="main-view" class="view-section active">
+    
+    <!-- Balance Card -->
     <div class="card">
-      <div class="balance-header">
-        <div class="balance-title">Total Account Balance</div>
-        <button class="eye-toggle" id="eye-icon" onclick="toggleBalance()">👁️</button>
+      <div class="balance-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <div class="balance-title" style="font-size: 12px; color: #94a3b8; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase;">Total Account Balance</div>
+        <button class="eye-toggle" id="eye-icon" onclick="toggleBalance()" style="background: none; border: none; cursor: pointer; font-size: 16px;">👁️</button>
       </div>
-      <div class="balance-amount" id="balance-display">$0.00</div>
+      
+      <!-- Profile Pic and Balance Row -->
+      <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <!-- Circular Profile Picture -->
+        <div style="width: 45px; height: 45px; border-radius: 50%; overflow: hidden; background: #334155; flex-shrink: 0; border: 2px solid #3b82f6;">
+          <img id="user-profile-pic" src="https://via.placeholder.com/150" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        
+        <!-- Balance Display -->
+        <div class="balance-amount" id="balance-display" style="font-size: 32px; font-weight: bold; margin: 0; color: #ffffff;">$0.00</div>
+      </div>
 
       <div class="actions-grid">
         <button class="action-btn btn-deposit" onclick="switchView('deposit-methods-view')">Deposit</button>
@@ -30,6 +42,7 @@
       </div>
     </div>
 
+    <!-- Volume, Promo, and Withdraw Card -->
     <div class="card">
       <div class="volume-header">
         <div class="volume-title">Volume Position</div>
@@ -49,6 +62,16 @@
         <input type="text" class="promo-input" id="promo-input-field" placeholder="Enter Promo Code">
         <button class="promo-btn" onclick="applyPromoCode()">Enter</button>
       </div>
+
+      <!-- New Withdraw Section -->
+      <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #334155;">
+        <div style="font-size: 14px; font-weight: bold; color: #ffffff; margin-bottom: 10px;">Withdraw Funds</div>
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="withdraw-amount-input" placeholder="Enter amount" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #334155; background-color: #0f172a; color: white;">
+          <button onclick="requestWithdrawal()" style="background-color: #10b981; color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; cursor: pointer;">Withdraw</button>
+        </div>
+      </div>
+      
     </div>
   </div>
 
