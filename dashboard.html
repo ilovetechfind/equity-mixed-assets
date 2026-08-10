@@ -25,15 +25,18 @@
         <button class="eye-toggle" id="eye-icon" onclick="toggleBalance()" style="background: none; border: none; cursor: pointer; font-size: 16px;">👁️</button>
       </div>
       
-      <!-- Profile Pic and Balance Row -->
+      <!-- Profile Pic, Name, and Balance Row -->
       <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
         <!-- Circular Profile Picture -->
         <div style="width: 45px; height: 45px; border-radius: 50%; overflow: hidden; background: #334155; flex-shrink: 0; border: 2px solid #3b82f6; display: flex; justify-content: center; align-items: center;">
           <img id="user-profile-pic" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2394a3b8'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
         
-        <!-- Balance Display -->
-        <div class="balance-amount" id="balance-display" style="font-size: 32px; font-weight: bold; margin: 0; color: #ffffff;">$0.00</div>
+        <!-- Name and Balance Display -->
+        <div style="display: flex; flex-direction: column;">
+          <div id="dashboard-user-name" style="font-size: 14px; color: #94a3b8; margin-bottom: 2px; font-weight: 600;">Welcome</div>
+          <div class="balance-amount" id="balance-display" style="font-size: 32px; font-weight: bold; margin: 0; color: #ffffff;">$0.00</div>
+        </div>
       </div>
 
       <div class="actions-grid">
@@ -63,7 +66,7 @@
         <button class="promo-btn" onclick="applyPromoCode()">Enter</button>
       </div>
 
-      <!-- New Withdraw Section -->
+      <!-- Withdraw Section -->
       <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #334155;">
         <div style="font-size: 14px; font-weight: bold; color: #ffffff; margin-bottom: 10px;">Withdraw Funds</div>
         <div style="display: flex; gap: 10px; width: 100%; align-items: center;">
@@ -182,5 +185,21 @@
   <script src="config.js"></script>
   <script src="data/notifications.js"></script>
   <script src="app.js"></script>
+  
+  <!-- Load profile details from Supabase database -->
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      const { data, error } = await supabase.from('profiles').select('*').limit(1).single();
+      if (data) {
+        if(data.avatar_url) {
+          document.getElementById('user-profile-pic').src = data.avatar_url;
+        }
+        if(data.full_name) {
+          document.getElementById('dashboard-user-name').innerText = data.full_name;
+        }
+      }
+    });
+  </script>
 </body>
 </html>
+
