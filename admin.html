@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Control Panel</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      margin: 0; 
+      font-family: 'Inter', sans-serif; 
+      background: #0f172a; 
+      color: #fff; 
+      display: flex; 
+      height: 100vh; 
+    }
+    
+    /* Sidebar styling for user list */
+    .sidebar { 
+      width: 320px; 
+      background: #1e293b; 
+      border-right: 1px solid #334155; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .sidebar-header { 
+      padding: 20px; 
+      font-size: 18px; 
+      font-weight: 700; 
+      border-bottom: 1px solid #334155; 
+    }
+    .user-list { 
+      flex: 1; 
+      overflow-y: auto; 
+    }
+    .user-item { 
+      padding: 15px 20px; 
+      border-bottom: 1px solid #334155; 
+      cursor: pointer; 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+    }
+    .user-item:hover { 
+      background: #334155; 
+    }
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .user-code {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+    
+    /* Main chat area styling */
+    .chat-area { 
+      flex: 1; 
+      display: flex; 
+      flex-direction: column; 
+    }
+    .chat-header { 
+      padding: 20px; 
+      background: #1e293b; 
+      border-bottom: 1px solid #334155; 
+      font-weight: 600; 
+    }
+    .chat-messages { 
+      flex: 1; 
+      padding: 20px; 
+      overflow-y: auto; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px; 
+    }
+    .message { 
+      max-width: 70%; 
+      padding: 12px 16px; 
+      border-radius: 8px; 
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .msg-user { 
+      background: #334155; 
+      align-self: flex-start; 
+      border-bottom-left-radius: 2px;
+    }
+    .msg-admin { 
+      background: #2563eb; 
+      align-self: flex-end; 
+      border-bottom-right-radius: 2px;
+    }
+    
+    /* Input area styling */
+    .chat-input-area { 
+      padding: 20px; 
+      background: #1e293b; 
+      border-top: 1px solid #334155; 
+      display: flex; 
+      gap: 10px; 
+    }
+    .chat-input-area input { 
+      flex: 1; 
+      padding: 12px 15px; 
+      border-radius: 6px; 
+      border: 1px solid #475569; 
+      background: #0f172a; 
+      color: #fff; 
+      outline: none;
+    }
+    .chat-input-area input:focus {
+      border-color: #3b82f6;
+    }
+    .chat-input-area button { 
+      padding: 12px 24px; 
+      background: #2563eb; 
+      border: none; 
+      border-radius: 6px; 
+      color: #fff; 
+      cursor: pointer; 
+      font-weight: 600; 
+      transition: background 0.2s;
+    }
+    .chat-input-area button:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div class="sidebar-header">Support Inbox</div>
+    <div class="user-list" id="user-list">
+      <!-- Example User -->
+      <div class="user-item" onclick="openChat('user_001', 'Alex M.')">
+        <div class="user-info">
+          <span style="font-weight: 600;">Alex M.</span>
+          <span class="user-code">Code: PROMO2024</span>
+        </div>
+        <span style="color: #ef4444; font-size: 12px;">● New</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-area">
+    <div class="chat-header" id="current-chat-header">Select a user to start chatting</div>
+    
+    <div class="chat-messages" id="admin-chat-body">
+      <!-- Messages will populate here -->
+      <div class="message msg-user" style="display: none;" id="demo-msg">Hello, I need help with my deposit.</div>
+    </div>
+    
+    <div class="chat-input-area">
+      <input type="text" id="admin-chat-input" placeholder="Type your reply to the customer...">
+      <button onclick="sendAdminMessage()">Send</button>
+    </div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="admin.js"></script>
+</body>
+  </html>
+  
