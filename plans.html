@@ -28,7 +28,7 @@
       <div style="font-size: 12px; color: #f59e0b; margin-top: 5px;">Upgrade to a tier to start earning and activate your account.</div>
     </div>
     
-    <div class="tier-card" onclick="openTierDetails('brass')">
+    <div class="tier-card" onclick="window.location.href='brass.html'">
       <div>
         <div class="tier-name">1. Brass Tier</div>
         <div class="tier-details">Total: $1,500 | Return: $7,000 | $50/day</div>
@@ -36,7 +36,7 @@
       <button class="tier-badge badge-select">Select</button>
     </div>
 
-    <div class="tier-card" onclick="openTierDetails('bronze')">
+    <div class="tier-card" onclick="window.location.href='bronze.html'">
       <div>
         <div class="tier-name">2. Bronze Tier</div>
         <div class="tier-details">Total: $3,000 | Return: $14,000 | $150/day</div>
@@ -44,7 +44,7 @@
       <button class="tier-badge badge-select">Select</button>
     </div>
 
-    <div class="tier-card" onclick="openTierDetails('silver')">
+    <div class="tier-card" onclick="window.location.href='silver.html'">
       <div>
         <div class="tier-name">3. Silver Tier</div>
         <div class="tier-details">Total: $5,000 | Return: $21,000 | $170/day</div>
@@ -52,7 +52,7 @@
       <button class="tier-badge badge-select">Select</button>
     </div>
 
-    <div class="tier-card" onclick="openTierDetails('gold')">
+    <div class="tier-card" onclick="window.location.href='gold.html'">
       <div>
         <div class="tier-name">4. Gold Tier</div>
         <div class="tier-details">Total: $15,000 | Return: $45,000 | $480/day</div>
@@ -60,7 +60,7 @@
       <button class="tier-badge badge-select">Select</button>
     </div>
 
-    <div class="tier-card" onclick="openTierDetails('platinum')">
+    <div class="tier-card" onclick="window.location.href='platinum.html'">
       <div>
         <div class="tier-name">5. Platinum Tier</div>
         <div class="tier-details">Total: $25,000 | Return: $80,000 | $720/day</div>
@@ -68,7 +68,7 @@
       <button class="tier-badge badge-select">Select</button>
     </div>
 
-    <div class="tier-card" onclick="openTierDetails('super-platinum')">
+    <div class="tier-card" onclick="window.location.href='super-platinum.html'">
       <div>
         <div class="tier-name">6. Super Platinum Tier</div>
         <div class="tier-details">Total: $50,000 | Return: $150,000 | $1,600/day</div>
@@ -76,7 +76,7 @@
       <button class="tier-badge badge-select">Select</button>
     </div>
 
-    <div class="tier-card" onclick="openTierDetails('platinum-god')">
+    <div class="tier-card" onclick="window.location.href='platinum-god.html'">
       <div>
         <div class="tier-name">7. Platinum God Tier</div>
         <div class="tier-details">Total: $100,000 | Return: $450,000 | $3,200/day</div>
@@ -85,38 +85,12 @@
     </div>
   </div>
 
-  <!-- Dynamic Individual Tier Detail View -->
-  <div id="tier-details-view" class="view-section" style="display: none;">
-    <div class="section-header">
-      <button class="back-btn" onclick="showPlansList()">← Back to Plans</button>
-      <div class="section-title" id="tier-detail-title">Tier Details</div>
-    </div>
-
-    <div class="card" style="margin-bottom: 15px;">
-      <h3 id="tier-detail-name" style="margin: 0 0 10px 0; color: #fff;">Plan Name</h3>
-      <p style="color: #94a3b8; font-size: 13px; margin: 4px 0;">Total Goal: <strong id="tier-total-cost" style="color: #fff;">$0</strong> | Expected Return: <strong id="tier-return" style="color: #10b981;">$0</strong></p>
-      <p style="color: #94a3b8; font-size: 13px; margin: 4px 0;">First Payment: <strong id="tier-first-payment" style="color: #3b82f6;">$0</strong> | Daily Payment (5 days/wk): <strong id="tier-daily-payment" style="color: #3b82f6;">$0</strong></p>
-      
-      <button id="activate-tier-btn" onclick="makeTierPayment()" style="width: 100%; margin-top: 15px; background: #2563eb; color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-        Make First Payment
-      </button>
-    </div>
-
-    <!-- Calendar Progress Tracker -->
-    <div class="card">
-      <div style="font-size: 14px; font-weight: bold; color: #fff; margin-bottom: 10px;">35-Day Payment Calendar Tracker</div>
-      <div id="calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; margin-top: 10px;">
-        <!-- Days generated dynamically -->
-      </div>
-    </div>
-  </div>
-
   <!-- Bottom Navigation -->
   <div class="bottom-nav">
     <button class="nav-item" onclick="window.location.href='dashboard.html'">
       <span class="nav-icon">🏠</span> Home
     </button>
-    <button class="nav-item active" onclick="showPlansList()">
+    <button class="nav-item active" onclick="window.location.href='plans.html'">
       <span class="nav-icon">📈</span> Plans
     </button>
     <button class="nav-item" onclick="window.location.href='dashboard.html'">
@@ -139,7 +113,7 @@
     <div class="drawer-links">
       <a onclick="window.location.href='dashboard.html'">Dashboard</a>
       <a onclick="window.location.href='dashboard.html'">Deposit Funds</a>
-      <a onclick="showPlansList()">Investment Plans</a>
+      <a onclick="window.location.href='plans.html'">Investment Plans</a>
     </div>
     <button class="logout-btn" onclick="logout()">Log Out</button>
   </div>
@@ -147,13 +121,5 @@
   <!-- External JavaScript Files -->
   <script src="config.js"></script>
   <script src="plans.js"></script>
-  <script>
-    function showPlansList() {
-      document.getElementById('tier-details-view').style.display = 'none';
-      document.getElementById('plans-list-view').style.display = 'block';
-      window.scrollTo(0, 0);
-    }
-  </script>
 </body>
-    </html>
-    
+</html>
