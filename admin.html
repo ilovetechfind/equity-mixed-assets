@@ -28,7 +28,6 @@
     .chat-input-area input { flex: 1; padding: 12px 15px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; outline: none; }
     .chat-input-area button { padding: 12px 24px; background: #2563eb; border: none; border-radius: 6px; color: #fff; cursor: pointer; font-weight: 600; }
     
-    /* Control Panel Drawer / Pane for User Balance */
     .control-pane { padding: 15px 20px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; gap: 10px; align-items: center; }
     .control-pane input { padding: 8px 12px; border-radius: 6px; border: 1px solid #475569; background: #0f172a; color: #fff; width: 120px; }
     .control-pane button { padding: 8px 15px; background: #10b981; border: none; border-radius: 6px; color: #fff; font-weight: 600; cursor: pointer; }
@@ -36,7 +35,6 @@
 </head>
 <body>
 
-  <!-- Sidebar with Assigned Users -->
   <div class="sidebar">
     <div class="sidebar-header">
       <span id="admin-welcome-text">My Users</span>
@@ -47,13 +45,11 @@
     </div>
   </div>
 
-  <!-- Main Interaction Area -->
   <div class="chat-area">
     <div class="chat-header" id="current-chat-header">
       <span>Select a user from the left</span>
     </div>
 
-    <!-- Balance Control Bar -->
     <div class="control-pane" id="control-pane" style="display: none;">
       <span style="font-size: 13px; color: #94a3b8;">Set Balance ($):</span>
       <input type="number" id="target-user-balance" placeholder="0.00">
@@ -76,7 +72,6 @@
     let activeUserCode = null;
     const currentAdminCode = localStorage.getItem('current_admin_code');
 
-    // Security check: redirect if not logged in
     if (!currentAdminCode) {
       window.location.href = 'admin-login.html';
     }
@@ -90,7 +85,6 @@
     async function loadAssignedUsers() {
       const userListContainer = document.getElementById('user-list');
       
-      // Fetch only users who registered using this specific admin's code
       const { data: users, error } = await supabase
         .from('profiles')
         .select('*')
