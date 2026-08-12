@@ -24,12 +24,12 @@
     <div id="login-section">
       <h2 style="margin-top: 0; font-size: 20px; margin-bottom: 20px;">Admin Login</h2>
       <div class="input-group">
-        <label>Admin Referral/Access Code</label>
-        <input type="text" id="admin-code-input" placeholder="Enter your referral code">
+        <label>Admin Email</label>
+        <input type="email" id="login-email" placeholder="admin@example.com">
       </div>
       <div class="input-group">
-        <label>Admin PIN</label>
-        <input type="password" id="admin-pin-input" placeholder="Enter your PIN">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Enter password">
       </div>
       <button class="btn" onclick="loginAdmin()">Login</button>
       <p style="text-align: center; font-size: 13px; color: #94a3b8; margin-top: 15px;">
@@ -45,14 +45,18 @@
         <input type="text" id="reg-name" placeholder="Your Name">
       </div>
       <div class="input-group">
-        <label>New Referral Code to Generate</label>
+        <label>Email Address</label>
+        <input type="email" id="reg-email" placeholder="admin@example.com">
+      </div>
+      <div class="input-group">
+        <label>Referral Code to Generate</label>
         <input type="text" id="reg-code" placeholder="e.g. ADMIN_JOHN">
       </div>
       <div class="input-group">
-        <label>Security PIN</label>
-        <input type="password" id="reg-pin" placeholder="Create a secure PIN">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Create a password">
       </div>
-      <button class="btn" style="background: #10b981;" onclick="registerAdmin()">Register Code</button>
+      <button class="btn" style="background: #10b981;" onclick="registerAdmin()">Create & Login</button>
       <p style="text-align: center; font-size: 13px; color: #94a3b8; margin-top: 15px;">
         Already registered? <a href="#" onclick="showLogin()" style="color: #3b82f6; text-decoration: none;">Log in</a>
       </p>
@@ -73,51 +77,54 @@
 
     async function registerAdmin() {
       const name = document.getElementById('reg-name').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
       const code = document.getElementById('reg-code').value.trim();
-      const pin = document.getElementById('reg-pin').value.trim();
+      const password = document.getElementById('reg-password').value.trim();
 
-      if (!name || !code || !pin) {
+      if (!name || !email || !code || !password) {
         alert("Please fill in all fields.");
         return;
       }
 
-      const { error } = await supabase.from('admins').insert([
-        { admin_name: name, referral_code: code, pin: pin }
-      ]);
+      // Insert into admins table (mapping password to pin column)
+      const { data, error } = await supabase.from('admins').insert([
+        { admin_name: name, email: email, referral_code: code, pin: password }
+      ]).select();
 
       if (error) {
         alert("Error creating admin: " + error.message);
       } else {
-        alert("Admin account & code created successfully! You can now log in.");
-        showLogin();
+        // Automatically save session and log them in instantly
+        localStorage.setItem('current_admin_code', code);
+        localStorage.setItem('current_admin_name', name);
+        window.location.href = 'admin.html';
       }
     }
 
     async function loginAdmin() {
-      const code = document.getElementById('admin-code-input').value.trim();
-      const pin = document.getElementById('admin-pin-input').value.trim();
+      const email = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value.trim();
 
-      if (!code || !pin) {
-        alert("Please enter both code and PIN.");
+      if (!email || !password) {
+        alert("Please enter both email and password.");
         return;
       }
 
       const { data, error } = await supabase
         .from('admins')
         .select('*')
-        .eq('referral_code', code)
-        .eq('pin', pin)
+        .eq('email', email)
+        .eq('pin', password)
         .single();
 
       if (error || !data) {
-        alert("Invalid referral code or PIN.");
+        alert("Invalid email or password.");
       } else {
-        // Save current logged-in admin session details
         localStorage.setItem('current_admin_code', data.referral_code);
         localStorage.setItem('current_admin_name', data.admin_name);
-        window.location.href = 'admin.html'; // Redirect to your full dashboard
+        window.location.href = 'admin.html';
       }
     }
   </script>
 </body>
-    </html>
+</html>
