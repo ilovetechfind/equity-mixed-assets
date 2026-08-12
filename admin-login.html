@@ -3,120 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login - Equity Mixed Assets</title>
+  <title>Admin Portal - Equity Mixed Assets</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { 
-      background-color: #0f172a; 
-      color: white; 
-      font-family: 'Inter', sans-serif; 
-      display: flex; 
-      justify-content: center; 
-      align-items: center; 
-      height: 100vh; 
-      margin: 0; 
-    }
-    .login-box { 
-      background-color: #1e293b; 
-      padding: 40px; 
-      border-radius: 8px; 
-      width: 100%; 
-      max-width: 400px; 
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
-      border: 1px solid #334155;
-    }
-    .title { 
-      text-align: center; 
-      font-size: 24px; 
-      font-weight: bold; 
-      margin-bottom: 20px; 
-      color: #3b82f6; 
-    }
-    .input-group { 
-      margin-bottom: 15px; 
-    }
-    .input-group label { 
-      display: block; 
-      margin-bottom: 5px; 
-      font-size: 14px; 
-      color: #94a3b8; 
-    }
-    .input-group input { 
-      width: 100%; 
-      padding: 10px; 
-      border-radius: 4px; 
-      border: 1px solid #334155; 
-      background-color: #0f172a; 
-      color: white; 
-      box-sizing: border-box; 
-    }
-    .btn { 
-      width: 100%; 
-      padding: 12px; 
-      background-color: #2563eb; 
-      color: white; 
-      border: none; 
-      border-radius: 4px; 
-      font-weight: bold; 
-      cursor: pointer; 
-      margin-top: 10px; 
-    }
-    .btn:hover { 
-      background-color: #1d4ed8; 
-    }
-    .links {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 14px;
-    }
-    .links a {
-      color: #3b82f6;
-      text-decoration: none;
-      display: block;
-      margin-top: 8px;
-    }
-    .links a:hover {
-      text-decoration: underline;
-    }
-    .error { 
-      color: #ef4444; 
-      font-size: 14px; 
-      text-align: center; 
-      margin-top: 10px; 
-      display: none; 
-    }
+    body { margin: 0; font-family: 'Inter', sans-serif; background: #0f172a; color: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .card { background: #1e293b; padding: 30px; border-radius: 12px; border: 1px solid #334155; width: 100%; max-width: 380px; box-sizing: border-box; }
+    .input-group { margin-bottom: 15px; }
+    .input-group label { display: block; font-size: 12px; color: #94a3b8; margin-bottom: 6px; font-weight: 600; text-transform: uppercase; }
+    .input-group input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; box-sizing: border-box; }
+    .btn { width: 100%; padding: 12px; background: #2563eb; border: none; border-radius: 8px; color: #fff; font-weight: 600; cursor: pointer; margin-top: 5px; }
+    .btn:hover { background: #1d4ed8; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
 
-  <div class="login-box">
-    <div class="title">Admin Portal</div>
-    <p style="text-align: center; font-size: 14px; color: #94a3b8; margin-bottom: 30px;">Sign in to manage users and support</p>
-    
-    <div class="input-group">
-      <label>Email Address</label>
-      <!-- Fixed ID matching JS -->
-      <input type="email" id="admin-email" placeholder="admin@example.com">
-    </div>
-    
-    <div class="input-group">
-      <label>Password</label>
-      <!-- Fixed ID matching JS -->
-      <input type="password" id="admin-password" placeholder="••••••••">
-    </div>
-    
-    <button class="btn" onclick="adminLogin()">Secure Login</button>
-    
-    <div class="links">
-      <a href="admin-signup.html">Don't have an account? Create one here</a>
+  <div class="card">
+    <!-- Login Form -->
+    <div id="login-section">
+      <h2 style="margin-top: 0; font-size: 20px; margin-bottom: 20px;">Admin Login</h2>
+      <div class="input-group">
+        <label>Admin Referral/Access Code</label>
+        <input type="text" id="admin-code-input" placeholder="Enter your referral code">
+      </div>
+      <div class="input-group">
+        <label>Admin PIN</label>
+        <input type="password" id="admin-pin-input" placeholder="Enter your PIN">
+      </div>
+      <button class="btn" onclick="loginAdmin()">Login</button>
+      <p style="text-align: center; font-size: 13px; color: #94a3b8; margin-top: 15px;">
+        Don't have an admin account? <a href="#" onclick="showRegister()" style="color: #3b82f6; text-decoration: none;">Create one</a>
+      </p>
     </div>
 
-    <div id="error-msg" class="error"></div>
+    <!-- Register New Admin Form -->
+    <div id="register-section" class="hidden">
+      <h2 style="margin-top: 0; font-size: 20px; margin-bottom: 20px;">Create Admin Account</h2>
+      <div class="input-group">
+        <label>Admin Name</label>
+        <input type="text" id="reg-name" placeholder="Your Name">
+      </div>
+      <div class="input-group">
+        <label>New Referral Code to Generate</label>
+        <input type="text" id="reg-code" placeholder="e.g. ADMIN_JOHN">
+      </div>
+      <div class="input-group">
+        <label>Security PIN</label>
+        <input type="password" id="reg-pin" placeholder="Create a secure PIN">
+      </div>
+      <button class="btn" style="background: #10b981;" onclick="registerAdmin()">Register Code</button>
+      <p style="text-align: center; font-size: 13px; color: #94a3b8; margin-top: 15px;">
+        Already registered? <a href="#" onclick="showLogin()" style="color: #3b82f6; text-decoration: none;">Log in</a>
+      </p>
+    </div>
   </div>
 
   <script src="config.js"></script>
-  <script src="admin-app.js"></script>
+  <script>
+    function showRegister() {
+      document.getElementById('login-section').classList.add('hidden');
+      document.getElementById('register-section').classList.remove('hidden');
+    }
+
+    function showLogin() {
+      document.getElementById('register-section').classList.add('hidden');
+      document.getElementById('login-section').classList.remove('hidden');
+    }
+
+    async function registerAdmin() {
+      const name = document.getElementById('reg-name').value.trim();
+      const code = document.getElementById('reg-code').value.trim();
+      const pin = document.getElementById('reg-pin').value.trim();
+
+      if (!name || !code || !pin) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      const { error } = await supabase.from('admins').insert([
+        { admin_name: name, referral_code: code, pin: pin }
+      ]);
+
+      if (error) {
+        alert("Error creating admin: " + error.message);
+      } else {
+        alert("Admin account & code created successfully! You can now log in.");
+        showLogin();
+      }
+    }
+
+    async function loginAdmin() {
+      const code = document.getElementById('admin-code-input').value.trim();
+      const pin = document.getElementById('admin-pin-input').value.trim();
+
+      if (!code || !pin) {
+        alert("Please enter both code and PIN.");
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('admins')
+        .select('*')
+        .eq('referral_code', code)
+        .eq('pin', pin)
+        .single();
+
+      if (error || !data) {
+        alert("Invalid referral code or PIN.");
+      } else {
+        // Save current logged-in admin session details
+        localStorage.setItem('current_admin_code', data.referral_code);
+        localStorage.setItem('current_admin_name', data.admin_name);
+        window.location.href = 'admin.html'; // Redirect to your full dashboard
+      }
+    }
+  </script>
 </body>
-</htm
-  l>
+    </html>
