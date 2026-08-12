@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid #334155; box-sizing: border-box; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+    .title { text-align: center; font-size: 22px; font-weight: 700; margin-bottom: 8px; color: #3b82f6; }
+    .subtitle { text-align: center; font-size: 14px; color: #94a3b8; margin-bottom: 24px; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
+    .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; transition: border-color 0.2s; }
+    .input-group input:focus { border-color: #3b82f6; }
+    .btn { width: 100%; padding: 12px; background-color: #2563eb; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
+    .btn:hover { background-color: #1d4ed8; }
+    .links { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
+    .links a { color: #3b82f6; text-decoration: none; font-weight: 500; }
+    .links a:hover { text-decoration: underline; }
+    .error { color: #ef4444; font-size: 13px; text-align: center; margin-top: 12px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="title">Create Account</div>
+    <div class="subtitle">Sign up to get started</div>
+    
+    <div class="input-group">
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="John Doe">
+    </div>
+
+    <div class="input-group">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="name@example.com">
+    </div>
+    
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••">
+    </div>
+    
+    <button class="btn" onclick="handleSignUp()">Sign Up</button>
+    
+    <div id="error-msg" class="error"></div>
+
+    <div class="links">
+      Already have an account? <a href="login.html">Log in</a>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    
+    let client;
+    function getClient() {
+      if (!client) {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+      return client;
+    }
+
+    async function handleSignUp() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorDiv = document.getElementById('error-msg');
+
+      errorDiv.style.display = 'none';
+
+      if (!name || !email || !password) {
+        errorDiv.innerText = "Please fill in all fields.";
+        errorDiv.style.display = 'block';
+        return;
+      }
+
+      try {
+        const db = getClient();
+        const { data, error } = await db.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { full_name: name }
+          }
+        });
+
+        if (error) {
+          errorDiv.innerText = error.message;
+          errorDiv.style.display = 'block';
+        } else {
+          window.location.href = `verify-email.html?email=${encodeURIComponent(email)}`;
+        }
+      } catch (err) {
+        errorDiv.innerText = "System Error: " + err.message;
+        errorDiv.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
