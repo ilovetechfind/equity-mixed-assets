@@ -19,7 +19,6 @@
     .links a { color: #3b82f6; text-decoration: none; display: block; margin-top: 8px; }
     .links a:hover { text-decoration: underline; }
     .error { color: #ef4444; font-size: 14px; text-align: center; margin-top: 15px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 4px; display: none; }
-    .success { color: #10b981; font-size: 14px; text-align: center; margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 4px; display: none; }
   </style>
 </head>
 <body>
@@ -50,7 +49,6 @@
     </div>
 
     <div id="error-msg" class="error"></div>
-    <div id="success-msg" class="success"></div>
   </div>
 
   <script src="config.js"></script>
@@ -60,10 +58,13 @@
       const email = document.getElementById('admin-signup-email').value.trim();
       const password = document.getElementById('admin-signup-password').value.trim();
       const errorDiv = document.getElementById('error-msg');
-      const successDiv = document.getElementById('success-msg');
 
       errorDiv.style.display = 'none';
-      successDiv.style.display = 'none';
+
+      if (typeof supabase === 'undefined') {
+        alert("Error: Supabase client is not loaded. Check if config.js exists and is correct.");
+        return;
+      }
 
       if (!name || !email || !password) {
         errorDiv.innerText = "Please fill in all fields.";
@@ -71,25 +72,25 @@
         return;
       }
 
-      const generatedCode = 'ADMIN_' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      try {
+        const generatedCode = 'ADMIN_' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-      const { error } = await supabase.from('admins').insert([
-        { admin_name: name, email: email, referral_code: generatedCode, pin: password }
-      ]);
+        const { data, error } = await supabase.from('admins').insert([
+          { admin_name: name, email: email, referral_code: generatedCode, pin: password }
+        ]);
 
-      if (error) {
-        errorDiv.innerText = "Error: " + error.message;
-        errorDiv.style.display = 'block';
-      } else {
-        successDiv.innerText = "Account created successfully! Redirecting...";
-        successDiv.style.display = 'block';
-        
-        localStorage.setItem('current_admin_code', generatedCode);
-        localStorage.setItem('current_admin_name', name);
-
-        setTimeout(() => {
+        if (error) {
+          alert("Database Error: " + error.message);
+          errorDiv.innerText = "Error: " + error.message;
+          errorDiv.style.display = 'block';
+        } else {
+          localStorage.setItem('current_admin_code', generatedCode);
+          localStorage.setItem('current_admin_name', name);
+          alert("Account created successfully! Redirecting...");
           window.location.href = 'admin.html';
-        }, 1000);
+        }
+      } catch (err) {
+        alert("System Error: " + err.message);
       }
     }
   </script>
