@@ -3,52 +3,105 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Client Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>User Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { margin: 0; font-family: 'Inter', sans-serif; background: #0f172a; color: #fff; min-height: 100vh; padding: 20px; box-sizing: border-box; }
-    .navbar { display: flex; justify-content: space-between; align-items: center; background: #1e293b; padding: 16px 24px; border-radius: 8px; border: 1px solid #334155; margin-bottom: 24px; }
-    .logo { font-size: 18px; font-weight: 700; color: #10b981; }
-    .btn-logout { background: #ef4444; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; }
-    .card { background: #1e293b; padding: 24px; border-radius: 8px; border: 1px solid #334155; }
+    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 600px; }
+    .card { background-color: #1e293b; padding: 24px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
+    .stat { font-size: 28px; font-weight: 700; color: #10b981; margin-top: 8px; }
+    .chat-box { height: 200px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 10px; overflow-y: scroll; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .msg { padding: 8px 12px; border-radius: 6px; font-size: 13px; max-width: 80%; }
+    .msg.client { background: #10b981; color: white; align-self: flex-end; }
+    .msg.admin { background: #334155; color: white; align-self: flex-start; }
+    .chat-input { display: flex; gap: 8px; }
+    .chat-input input { flex: 1; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; outline: none; }
+    .chat-input button { background: #10b981; border: none; color: white; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .logout { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: 600; cursor: pointer; }
   </style>
 </head>
 <body>
-
-  <div class="navbar">
-    <div class="logo">Client Portal</div>
-    <div>
-      <span id="client-email" style="margin-right: 15px; color: #94a3b8; font-size: 14px;"></span>
-      <button class="btn-logout" onclick="logout()">Log Out</button>
+  <div class="container">
+    <div class="card">
+      <h2 id="welcome-msg" style="margin-top:0;">Welcome</h2>
+      <p style="color: #94a3b8; margin-bottom: 4px;">Account Balance</p>
+      <div class="stat" id="bal-val">$0.00</div>
+      <p style="color: #94a3b8; margin-bottom: 4px; margin-top: 16px;">Trading Volume</p>
+      <div class="stat" id="vol-val" style="color: #38bdf8;">$0.00</div>
     </div>
+
+    <div class="card">
+      <h3>Customer Support Chat</h3>
+      <div class="chat-box" id="chat-messages"></div>
+      <div class="chat-input">
+        <input type="text" id="msg-input" placeholder="Type a message to admin...">
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <button class="logout" onclick="logout()">Log Out</button>
   </div>
 
-  <div class="card">
-    <h2>Welcome to your Client Dashboard</h2>
-    <p style="color: #94a3b8;">Your client account is active under /client/.</p>
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function checkAuth() {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        window.location.href = 'index.html';
-      } else {
-        document.getElementById('client-email').innerText = session.user.email;
+    let currentUser = null;
+
+    async function initDashboard() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) { window.location.href = 'index.html'; return; }
+      currentUser = user;
+
+      const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
+      if (profile) {
+        document.getElementById('welcome-msg').innerText = `Welcome, ${profile.full_name || 'Client'}`;
+        document.getElementById('bal-val').innerText = `$${Number(profile.balance).toLocaleString()}`;
+        document.getElementById('vol-val').innerText = `$${Number(profile.volume).toLocaleString()}`;
+      }
+
+      loadMessages();
+      setInterval(loadMessages, 3000);
+    }
+
+    async function loadMessages() {
+      const { data } = await client.from('messages').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
+      const box = document.getElementById('chat-messages');
+      box.innerHTML = '';
+      if (data) {
+        data.forEach(m => {
+          const div = document.createElement('div');
+          div.className = `msg ${m.sender}`;
+          div.innerText = m.message;
+          box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
       }
     }
 
+    async function sendMessage() {
+      const input = document.getElementById('msg-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      await client.from('messages').insert([{
+        user_id: currentUser.id,
+        sender: 'client',
+        message: text
+      }]);
+
+      input.value = '';
+      loadMessages();
+    }
+
     async function logout() {
-      await supabase.auth.signOut();
+      await client.auth.signOut();
       window.location.href = 'index.html';
     }
 
-    checkAuth();
+    initDashboard();
   </script>
 </body>
 </html>
