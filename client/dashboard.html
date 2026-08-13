@@ -67,7 +67,7 @@
     .nav-item.active { color: #4ade80; }
     .nav-icon { font-size: 18px; }
 
-    .support-bubble { position: fixed; bottom: 85px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); cursor: pointer; z-index: 99; border: 2px solid rgba(255, 255, 255, 0.2); transition: transform 0.2s ease; text-decoration: none; font-size: 22px; }
+    .support-bubble { position: fixed; bottom: 85px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: _6px 20px rgba(59, 130, 246, 0.5); cursor: pointer; z-index: 99; border: 2px solid rgba(255, 255, 255, 0.2); transition: transform 0.2s ease; text-decoration: none; font-size: 22px; }
     .support-bubble:hover { transform: scale(1.08); }
   </style>
 </head>
@@ -160,27 +160,29 @@
       }
       
       const user = session.user;
-      // Fetch all columns (*) to ensure we grab the image path regardless of what it's named
       const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
       
       if (profile) {
-        console.log("Loaded profile data:", profile);
-
         document.getElementById('user-balance').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         
         if (profile.username) {
           document.getElementById('user-greeting').innerText = `WELCOME, ${profile.username.toUpperCase()}`;
         }
         
-        // Check multiple possible keys for the profile picture column
         const avatarField = profile.avatar_url || profile.avatar || profile.image_url || profile.photo_url;
         
         if (avatarField) {
           let avatarSrc = avatarField;
           if (!avatarSrc.startsWith('http')) {
-            const { data } = client.storage.from('avatars').getPublicUrl(avatarField);
-            if (data && data.publicUrl) {
-              avatarSrc = data.publicUrl;
+            // Use signed URL to guarantee access even if bucket is private
+            const { data, error } = await client.storage.from('avatars').createSignedUrl(avatarField, 3600);
+            if (data && data.signedUrl) {
+              avatarSrc = data.signedUrl;
+            } else {
+              const { data: publicData } = client.storage.from('avatars').getPublicUrl(avatarField);
+              if (publicData && publicData.publicUrl) {
+                avatarSrc = publicData.publicUrl;
+              }
             }
           }
           document.getElementById('avatar-box').innerHTML = `<img src="${avatarSrc}" alt="Profile">`;
@@ -196,4 +198,5 @@
     checkUser();
   </script>
 </body>
-</html>
+                                                                                                                                                                           </html>
+                                                                                                                                                                           
