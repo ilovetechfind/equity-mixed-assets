@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Deposit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #0b1329; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 16px; padding-bottom: 90px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 480px; }
+    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .logo-text { color: #4ade80; font-size: 1.25rem; font-weight: bold; margin: 0; }
+    .menu-btn { background: #131b36; border: 1px solid #1e294b; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    
+    .nav-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .back-btn { background: #131b36; border: 1px solid #1e294b; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; text-decoration: none; }
+    .view-title { font-size: 1.15rem; font-weight: bold; margin: 0; }
+
+    .method-card { background-color: #131b36; border: 1px solid #1e294b; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: 0.2s; }
+    .method-card:hover { border-color: #3b82f6; }
+    .method-left { display: flex; align-items: center; gap: 14px; }
+    .method-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: #1e294b; }
+    .method-info h3 { font-size: 0.95rem; margin: 0 0 4px 0; }
+    .method-info p { font-size: 0.75rem; color: #94a3b8; margin: 0; }
+    .arrow-icon { color: #94a3b8; font-size: 1.1rem; }
+
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #131b36; border-top: 1px solid #1e294b; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+    .nav-item { color: #94a3b8; text-decoration: none; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .nav-item.active { color: #4ade80; }
+    .nav-icon { font-size: 18px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="app-header">
+      <h1 class="logo-text">Equity Mixed Assets</h1>
+      <button class="menu-btn">☰</button>
+    </header>
+
+    <div class="nav-bar">
+      <a href="dashboard.html" class="back-btn">← Back</a>
+      <h2 class="view-title">Select Payment Method</h2>
+    </div>
+
+    <div class="method-card" onclick="alert('Bitcoin Deposit Gateway Selected')">
+      <div class="method-left">
+        <div class="method-icon">₿</div>
+        <div class="method-info">
+          <h3>Pay through Bitcoin</h3>
+          <p>Instant crypto network deposit</p>
+        </div>
+      </div>
+      <span class="arrow-icon">→</span>
+    </div>
+
+    <div class="method-card" onclick="alert('Gift Card Upload Selected')">
+      <div class="method-left">
+        <div class="method-icon">🎁</div>
+        <div class="method-info">
+          <h3>Upload Gift Card</h3>
+          <p>Submit card details & receipt</p>
+        </div>
+      </div>
+      <span class="arrow-icon">→</span>
+    </div>
+
+    <div class="method-card" onclick="alert('Bank Transfer Details Loaded')">
+      <div class="method-left">
+        <div class="method-icon">🏦</div>
+        <div class="method-info">
+          <h3>Bank Transfer</h3>
+          <p>Direct wire or local bank deposit</p>
+        </div>
+      </div>
+      <span class="arrow-icon">→</span>
+    </div>
+
+    <div class="method-card" onclick="alert('Custom Payment Request Submitted')">
+      <div class="method-left">
+        <div class="method-icon">⚙️</div>
+        <div class="method-info">
+          <h3>Request Custom Payment</h3>
+          <p>Alternate payment arrangements</p>
+        </div>
+      </div>
+      <span class="arrow-icon">→</span>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
+    <a href="investment-plan.html" class="nav-item"><span class="nav-icon">📈</span>Plans</a>
+    <a href="deposit.html" class="nav-item active"><span class="nav-icon">💳</span>Deposit</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+  </nav>
+</body>
+  </html>
+  
