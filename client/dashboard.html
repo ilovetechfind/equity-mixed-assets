@@ -67,7 +67,7 @@
     .nav-item.active { color: #4ade80; }
     .nav-icon { font-size: 18px; }
 
-    .support-bubble { position: fixed; bottom: 85px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: _6px 20px rgba(59, 130, 246, 0.5); cursor: pointer; z-index: 99; border: 2px solid rgba(255, 255, 255, 0.2); transition: transform 0.2s ease; text-decoration: none; font-size: 22px; }
+    .support-bubble { position: fixed; bottom: 85px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); cursor: pointer; z-index: 99; border: 2px solid rgba(255, 255, 255, 0.2); transition: transform 0.2s ease; text-decoration: none; font-size: 22px; }
     .support-bubble:hover { transform: scale(1.08); }
   </style>
 </head>
@@ -173,19 +173,14 @@
         
         if (avatarField) {
           let avatarSrc = avatarField;
+          // If it's a relative path stored in Supabase, resolve it via getPublicUrl explicitly
           if (!avatarSrc.startsWith('http')) {
-            // Use signed URL to guarantee access even if bucket is private
-            const { data, error } = await client.storage.from('avatars').createSignedUrl(avatarField, 3600);
-            if (data && data.signedUrl) {
-              avatarSrc = data.signedUrl;
-            } else {
-              const { data: publicData } = client.storage.from('avatars').getPublicUrl(avatarField);
-              if (publicData && publicData.publicUrl) {
-                avatarSrc = publicData.publicUrl;
-              }
+            const { data } = client.storage.from('avatars').getPublicUrl(avatarField);
+            if (data && data.publicUrl) {
+              avatarSrc = data.publicUrl;
             }
           }
-          document.getElementById('avatar-box').innerHTML = `<img src="${avatarSrc}" alt="Profile">`;
+          document.getElementById('avatar-box').innerHTML = `<img src="${avatarSrc}" alt="Profile" onerror="this.onerror=null;this.src='';document.getElementById('avatar-box').innerHTML='👤';">`;
         }
       }
     }
@@ -198,5 +193,4 @@
     checkUser();
   </script>
 </body>
-                                                                                                                                                                           </html>
-                                                                                                                                                                           
+</html>
