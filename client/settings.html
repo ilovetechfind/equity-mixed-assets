@@ -23,12 +23,15 @@
     .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
     .card-title { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 14px; display: block; }
     
+    .profile-preview-container { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+    .avatar-preview { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,255,255,0.1); background: #1e294b; display: flex; align-items: center; justify-content: center; font-size: 28px; }
+
     label { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 6px; }
     input { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; margin-bottom: 14px; }
     input:focus { border-color: #3b82f6; }
     
-    .btn-save { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
-    .btn-logout { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; }
+    .btn-save { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); margin-bottom: 10px; }
+    .btn-logout { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; }
 
     .bottom-nav { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-around; padding: 10px 0; border-radius: 20px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
@@ -40,14 +43,29 @@
   <div class="container">
     <header class="app-header">
       <h1 class="logo-text">Equity Mixed Assets</h1>
-      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+      <button class="menu-btn" onclick="window.location.href='dashboard.html'">✕</button>
     </header>
 
     <div class="card">
-      <span class="card-title">ACCOUNT SETTINGS</span>
+      <span class="card-title">PROFILE CUSTOMIZATION</span>
+      
+      <div class="profile-preview-container">
+        <div id="avatar-container">
+          <div class="avatar-preview" id="avatar-placeholder">👤</div>
+        </div>
+        <div>
+          <h3 id="profile-name-display" style="margin:0 0 4px 0; font-size:1.1rem;">User</h3>
+          <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">Manage your public identity</p>
+        </div>
+      </div>
+
       <label>Username</label>
       <input type="text" id="username-input" placeholder="Enter your username">
-      <button class="btn-save" onclick="updateUsername()">Save Username</button>
+
+      <label>Profile Picture URL</label>
+      <input type="text" id="avatar-url-input" placeholder="https://example.com/your-image.jpg">
+
+      <button class="btn-save" onclick="updateProfile()">Save Profile Details</button>
     </div>
 
     <div class="card">
@@ -73,21 +91,34 @@
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'index.html'; return; }
       
-      const { data } = await client.from('profiles').select('username').eq('id', user.id).single();
-      if (data && data.username) {
-        document.getElementById('username-input').value = data.username;
+      const { data } = await client.from('profiles').select('username, avatar_url').eq('id', user.id).single();
+      if (data) {
+        if (data.username) {
+          document.getElementById('username-input').value = data.username;
+          document.getElementById('profile-name-display').innerText = data.username;
+        }
+        if (data.avatar_url) {
+          document.getElementById('avatar-url-input').value = data.avatar_url;
+          document.getElementById('avatar-container').innerHTML = `<img src="${data.avatar_url}" class="avatar-preview" alt="Avatar">`;
+        }
       }
     }
 
-    async function updateUsername() {
+    async function updateProfile() {
       const { data: { user } } = await client.auth.getUser();
       const newUsername = document.getElementById('username-input').value;
+      const newAvatarUrl = document.getElementById('avatar-url-input').value;
       
-      const { error } = await client.from('profiles').update({ username: newUsername }).eq('id', user.id);
+      const { error } = await client.from('profiles').update({ 
+        username: newUsername, 
+        avatar_url: newAvatarUrl 
+      }).eq('id', user.id);
+
       if (error) {
-        alert('Error updating username: ' + error.message);
+        alert('Error updating profile: ' + error.message);
       } else {
-        alert('Username updated successfully!');
+        alert('Profile updated successfully!');
+        loadProfile();
       }
     }
 
