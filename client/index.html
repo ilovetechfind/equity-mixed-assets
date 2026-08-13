@@ -3,16 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Client Login</title>
+  <title>Equity Mixed Assets - Login</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid #334155; box-sizing: border-box; }
+    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
+    .ticker-bar { width: 100%; background: #1e293b; border-bottom: 1px solid #334155; padding: 10px 0; overflow: hidden; white-space: nowrap; font-size: 13px; color: #94a3b8; }
+    .ticker-content { display: inline-block; animation: marquee 25s linear infinite; }
+    .ticker-item { margin-right: 40px; }
+    .ticker-item span { color: #10b981; font-weight: 600; }
+    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+    .card-container { display: flex; justify-content: center; align-items: center; flex: 1; width: 100%; padding: 20px; box-sizing: border-box; }
+    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 420px; border: 1px solid #334155; box-sizing: border-box; }
     .badge { background: #10b981; color: white; font-size: 11px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; display: inline-block; margin-bottom: 12px; }
-    .title { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
-    .input-group { margin-bottom: 16px; }
+    .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+    .input-group { margin-bottom: 16px; position: relative; }
     .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
     .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
+    .toggle-pass { position: absolute; right: 12px; top: 35px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; }
     .btn { width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
     .btn:disabled { opacity: 0.7; cursor: not-allowed; }
     .links { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
@@ -21,24 +30,38 @@
   </style>
 </head>
 <body>
-  <div class="card">
-    <span class="badge">Client Portal</span>
-    <div class="title">Client Login</div>
 
-    <div class="input-group">
-      <label>Email Address</label>
-      <input type="email" id="email" placeholder="client@example.com">
+  <div class="ticker-bar">
+    <div class="ticker-content">
+      <span class="ticker-item">Equity Mixed Assets Index: <span>$4,280.50 (+2.4%)</span></span>
+      <span class="ticker-item">Global Tech Blend: <span>$1,412.20 (+3.1%)</span></span>
+      <span class="ticker-item">Commodity Core Fund: <span>$892.40 (+0.9%)</span></span>
+      <span class="ticker-item">Stable Growth Portfolio: <span>$2,150.00 (+1.5%)</span></span>
     </div>
-    <div class="input-group">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="••••••••">
-    </div>
-    
-    <button class="btn" id="login-btn" onclick="handleLogin()">Log In</button>
-    <div id="alert-box" class="alert-msg"></div>
+  </div>
 
-    <div class="links">
-      Don't have an account? <a href="signup.html">Sign up</a>
+  <div class="card-container">
+    <div class="card">
+      <span class="badge">Equity Mixed Assets</span>
+      <div class="title">Client Portal Login</div>
+      <div class="subtitle">Access your investment dashboard</div>
+
+      <div class="input-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="client@example.com">
+      </div>
+      <div class="input-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="••••••••">
+        <button type="button" class="toggle-pass" onclick="togglePassword('password', this)">Show</button>
+      </div>
+      
+      <button class="btn" id="login-btn" onclick="handleLogin()">Log In</button>
+      <div id="alert-box" class="alert-msg"></div>
+
+      <div class="links">
+        Don't have an account? <a href="signup.html">Sign up</a>
+      </div>
     </div>
   </div>
 
@@ -47,6 +70,17 @@
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function togglePassword(fieldId, btn) {
+      const field = document.getElementById(fieldId);
+      if (field.type === 'password') {
+        field.type = 'text';
+        btn.innerText = 'Hide';
+      } else {
+        field.type = 'password';
+        btn.innerText = 'Show';
+      }
+    }
 
     async function handleLogin() {
       const email = document.getElementById('email').value.trim();
@@ -82,5 +116,4 @@
     }
   </script>
 </body>
-
 </html>
