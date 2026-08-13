@@ -33,6 +33,11 @@
     
     .input-group { margin-bottom: 16px; }
     .input-group label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
+    
+    .password-wrapper { position: relative; display: flex; align-items: center; }
+    .password-wrapper input { width: 100%; padding-right: 45px; box-sizing: border-box; }
+    .eye-btn { position: absolute; right: 12px; background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--text-muted); padding: 0; display: flex; align-items: center; justify-content: center; }
+
     input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 14px; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
     input:focus { border-color: #6366f1; }
     
@@ -53,7 +58,10 @@
         </div>
         <div class="input-group">
           <label>Password</label>
-          <input type="password" id="admin-password" placeholder="••••••••" required>
+          <div class="password-wrapper">
+            <input type="password" id="admin-password" placeholder="••••••••" required>
+            <button type="button" class="eye-btn" id="eye-icon" onclick="togglePassword()">👁️</button>
+          </div>
         </div>
         <button type="submit" class="submit-btn" id="submit-btn">Sign In to Dashboard</button>
       </form>
@@ -76,6 +84,18 @@
       document.getElementById('form-title').innerText = isSignUp ? "Create Admin Account" : "Admin Login";
       document.getElementById('submit-btn').innerText = isSignUp ? "Register Account" : "Sign In to Dashboard";
       document.getElementById('toggle-text').innerText = isSignUp ? "Already have an account? Sign in here" : "Need an admin account? Click here to sign up";
+    }
+
+    function togglePassword() {
+      const pwdInput = document.getElementById('admin-password');
+      const eyeIcon = document.getElementById('eye-icon');
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        eyeIcon.style.opacity = '1';
+      } else {
+        pwdInput.type = 'password';
+        eyeIcon.style.opacity = '0.6';
+      }
     }
 
     async function handleAuth(e) {
@@ -110,5 +130,6 @@
       }
     }
   </script>
-</body>
+</body
+  >
 </html>
