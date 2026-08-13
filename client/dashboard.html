@@ -153,9 +153,13 @@
     }
 
     async function checkUser() {
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { window.location.href = 'index.html'; return; }
+      const { data: { session } } = await client.auth.getSession();
+      if (!session) { 
+        window.location.href = 'index.html'; 
+        return; 
+      }
       
+      const user = session.user;
       const { data: profile } = await client.from('profiles').select('balance, username, avatar_url').eq('id', user.id).single();
       if (profile) {
         document.getElementById('user-balance').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -178,4 +182,5 @@
     checkUser();
   </script>
 </body>
-</html>
+  </html>
+  
