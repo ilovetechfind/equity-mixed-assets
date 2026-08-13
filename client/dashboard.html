@@ -169,7 +169,15 @@
         }
         
         if (profile.avatar_url) {
-          document.getElementById('avatar-box').innerHTML = `<img src="${profile.avatar_url}" alt="Profile">`;
+          let avatarSrc = profile.avatar_url;
+          // If the profile picture is stored as a storage bucket path instead of a full URL, resolve it automatically
+          if (!avatarSrc.startsWith('http')) {
+            const { data: publicUrlData } = client.storage.from('avatars').getPublicUrl(profile.avatar_url);
+            if (publicUrlData) {
+              avatarSrc = publicUrlData.publicUrl;
+            }
+          }
+          document.getElementById('avatar-box').innerHTML = `<img src="${avatarSrc}" alt="Profile" style="width:100%; height:100%; object-fit:cover;">`;
         }
       }
     }
@@ -182,5 +190,4 @@
     checkUser();
   </script>
 </body>
-  </html>
-  
+</html>
