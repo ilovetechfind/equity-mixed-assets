@@ -114,10 +114,9 @@
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'index.html'; return; }
       
-      const { data, error } = await client.from('profiles').select('username, avatar_url').eq('id', user.id).single();
+      const { data, error } = await client.from('profiles').select('username, avatar_url').eq('id', user.id).maybeSingle();
       
       if (data && data.username && data.username.trim() !== "") {
-        // Profile already exists -> show locked view card
         document.getElementById('profile-view-card').style.display = 'block';
         document.getElementById('profile-edit-card').style.display = 'none';
         
@@ -127,7 +126,6 @@
           document.getElementById('view-avatar-box').innerHTML = `<img src="${data.avatar_url}" alt="Avatar">`;
         }
       } else {
-        // No profile -> show setup screen
         document.getElementById('profile-view-card').style.display = 'none';
         document.getElementById('profile-edit-card').style.display = 'block';
       }
@@ -186,17 +184,16 @@
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'index.html'; return; }
 
-      const updatePayload = { username: username };
+      const upsertPayload = { id: user.id, username: username };
       if (currentAvatarData) {
-        updatePayload.avatar_url = currentAvatarData;
+        upsertPayload.avatar_url = currentAvatarData;
       }
 
-      const { error } = await client.from('profiles').update(updatePayload).eq('id', user.id);
+      const { error } = await client.from('profiles').upsert(upsertPayload);
 
       if (error) {
         alert('Save failed: ' + error.message);
       } else {
-        // Update view UI and lock back to profile display view
         document.getElementById('view-username').innerText = username;
         if (currentAvatarData) {
           document.getElementById('view-avatar-box').innerHTML = `<img src="${currentAvatarData}" alt="Avatar">`;
@@ -214,5 +211,5 @@
     loadProfile();
   </script>
 </body>
-        </html>
+    </html>
         
