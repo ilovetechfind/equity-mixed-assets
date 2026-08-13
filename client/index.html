@@ -14,26 +14,6 @@
     .input-group { margin-bottom: 16px; }
     .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
     .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
-
-    .password-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-    .password-wrapper input { width: 100%; padding-right: 48px; }
-    
-    .toggle-icon {
-      position: absolute;
-      right: 12px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #94a3b8;
-      cursor: pointer;
-      user-select: none;
-      -webkit-user-select: none;
-      z-index: 20;
-      padding: 0 4px;
-    }
-    .toggle-icon svg { pointer-events: none; }
-
     .btn { width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
     .links { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
     .links a { color: #10b981; text-decoration: none; }
@@ -53,11 +33,11 @@
     
     <div class="input-group">
       <label>Password</label>
-      <div class="password-wrapper">
-        <input type="password" id="password" placeholder="••••••••">
-        <div class="toggle-icon" id="eye-btn" onpointerdown="togglePass(event)">
+      <div style="position: relative; width: 100%;">
+        <input type="password" id="password" placeholder="••••••••" style="padding-right: 50px;">
+        <button type="button" id="eye-btn" onclick="togglePass()" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #94a3b8; padding: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 50;">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </div>
+        </button>
       </div>
     </div>
     
@@ -75,10 +55,7 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function togglePass(e) {
-      if (e) {
-        e.preventDefault();
-      }
+    function togglePass() {
       const input = document.getElementById('password');
       const btn = document.getElementById('eye-btn');
       
@@ -117,6 +94,6 @@
       }
     }
   </script>
-</bo
-  dy>
-        </html>
+</body
+  >
+</html>
