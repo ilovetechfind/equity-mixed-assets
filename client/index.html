@@ -3,10 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Client Login</title>
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
+  <title>Client Sign Up</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
@@ -21,14 +18,19 @@
     .btn:disabled { opacity: 0.7; cursor: not-allowed; }
     .links { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
     .links a { color: #10b981; text-decoration: none; }
-    .alert-msg { color: #ef4444; font-size: 13px; text-align: center; margin-top: 12px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; display: none; }
+    .alert-msg { font-size: 13px; text-align: center; margin-top: 12px; padding: 10px; border-radius: 6px; display: none; }
   </style>
 </head>
 <body>
 
   <div class="card">
     <span class="badge">Client Portal</span>
-    <div class="title">Client Login</div>
+    <div class="title">Create Client Account</div>
+    
+    <div class="input-group">
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="John Doe">
+    </div>
 
     <div class="input-group">
       <label>Email Address</label>
@@ -37,80 +39,67 @@
     
     <div class="input-group">
       <label>Password</label>
-      <div style="position: relative; width: 100%;">
-        <input type="password" id="password" placeholder="••••••••" style="padding-right: 50px;">
-        <button type="button" id="eye-btn" onclick="togglePass()" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #94a3b8; padding: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 50;">
-          <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      </div>
+      <input type="password" id="password" placeholder="••••••••">
     </div>
     
-    <button class="btn" id="login-btn" onclick="handleClientLogin()">Log In</button>
-    
+    <button class="btn" id="signup-btn" onclick="handleSignUp()">Sign Up</button>
     <div id="alert-box" class="alert-msg"></div>
 
     <div class="links">
-      Don't have an account? <a href="signup.html">Sign up</a>
+      Already have an account? <a href="index.html">Log in here</a>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    function togglePass() {
-      const input = document.getElementById('password');
-      const btn = document.getElementById('eye-btn');
-      
-      if (input.type === 'password') {
-        input.type = 'text';
-        btn.innerHTML = `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
-      } else {
-        input.type = 'password';
-        btn.innerHTML = `<svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-      }
-    }
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function handleClientLogin() {
+    async function handleSignUp() {
+      const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       const alertBox = document.getElementById('alert-box');
-      const loginBtn = document.getElementById('login-btn');
+      const btn = document.getElementById('signup-btn');
 
       alertBox.style.display = 'none';
-
-      if (!email || !password) {
+      if (!name || !email || !password) {
+        alertBox.style.color = '#ef4444';
+        alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
         alertBox.innerText = "Please fill in all fields.";
         alertBox.style.display = 'block';
         return;
       }
 
-      loginBtn.innerText = "Logging in...";
-      loginBtn.disabled = true;
+      btn.innerText = "Processing...";
+      btn.disabled = true;
 
-      try {
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error("Connection timed out. Check your network.")), 6000)
-        );
+      const { data, error } = await client.auth.signUp({
+        email,
+        password,
+        options: { data: { role: 'client', full_name: name } }
+      });
 
-        const loginPromise = supabase.auth.signInWithPassword({
-          email: email,
-          password: password
-        });
-
-        const { data, error } = await Promise.race([loginPromise, timeoutPromise]);
-
-        if (error) {
-          throw error;
+      if (error) {
+        alertBox.style.color = '#ef4444';
+        alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        alertBox.innerText = error.message;
+        alertBox.style.display = 'block';
+        btn.innerText = "Sign Up";
+        btn.disabled = false;
+      } else {
+        // Automatically sign them in right after registration to bypass email verification and go straight to dashboard
+        const loginCheck = await client.auth.signInWithPassword({ email, password });
+        if (loginCheck.error) {
+          window.location.href = 'index.html';
         } else {
           window.location.href = 'dashboard.html';
         }
-      } catch (err) {
-        alertBox.innerText = err.message;
-        alertBox.style.display = 'block';
-      } finally {
-        loginBtn.innerText = "Log In";
-        loginBtn.disabled = false;
       }
     }
   </script>
-</bo
-  dy>
+</body>
+  
 </html>
