@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Sign Up</title>
   
-  <!-- Load Supabase FIRST, then your config.js -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   
@@ -94,31 +93,40 @@
       signupBtn.innerText = "Processing...";
       signupBtn.disabled = true;
 
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: { data: { role: 'client', full_name: name } }
-      });
+      try {
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error("Connection timed out. Check your network.")), 6000)
+        );
 
-      signupBtn.innerText = "Sign Up";
-      signupBtn.disabled = false;
+        const signUpPromise = supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: { data: { role: 'client', full_name: name } }
+        });
 
-      if (error) {
+        const { data, error } = await Promise.race([signUpPromise, timeoutPromise]);
+
+        if (error) {
+          throw error;
+        } else if (data.user && !data.session) {
+          alertBox.style.color = '#10b981';
+          alertBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+          alertBox.innerText = "Success! Please check your email inbox to verify your account.";
+          alertBox.style.display = 'block';
+        } else {
+          window.location.href = 'dashboard.html';
+        }
+      } catch (err) {
         alertBox.style.color = '#ef4444';
         alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-        alertBox.innerText = error.message;
+        alertBox.innerText = err.message;
         alertBox.style.display = 'block';
-      } else if (data.user && !data.session) {
-        // Supabase requires email verification
-        alertBox.style.color = '#10b981';
-        alertBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-        alertBox.innerText = "Success! Please check your email inbox to verify your account.";
-        alertBox.style.display = 'block';
-      } else {
-        // No email verification required, auto-login successful
-        window.location.href = 'dashboard.html';
+      } finally {
+        signupBtn.innerText = "Sign Up";
+        signupBtn.disabled = false;
       }
     }
   </script>
-</body>
+</bo
+  dy>
 </html>
