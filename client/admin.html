@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 800px; }
+    .card { background-color: #1e293b; padding: 20px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid #334155; font-size: 14px; }
+    th { color: #94a3b8; font-size: 12px; text-transform: uppercase; }
+    button { background: #10b981; border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: 600; }
+    .chat-box { height: 150px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 10px; overflow-y: scroll; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
+    .msg { padding: 6px 10px; border-radius: 6px; font-size: 12px; max-width: 80%; }
+    .msg.client { background: #334155; color: white; align-self: flex-start; }
+    .msg.admin { background: #10b981; color: white; align-self: flex-end; }
+    .chat-input { display: flex; gap: 8px; }
+    .chat-input input { flex: 1; padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; outline: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h2>Admin Control Center</h2>
+      <p id="admin-info" style="color: #94a3b8;"></p>
+      <div style="background: #0f172a; padding: 12px; border-radius: 6px; margin-top: 10px; font-size: 14px;">
+        <strong>Your Unique Signup Link:</strong> <span id="ref-link" style="color: #10b981;"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Your Referred Users</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Balance ($)</th>
+            <th>Volume ($)</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="user-list"></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="management-card" style="display:none;">
+      <h3 id="selected-user-title">Manage User</h3>
+      <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <input type="number" id="edit-bal" placeholder="New Balance" style="padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; flex: 1;">
+        <input type="number" id="edit-vol" placeholder="New Volume" style="padding: 8px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; flex: 1;">
+        <button onclick="updateUserStats()">Save Changes</button>
+      </div>
+
+      <h4>Direct Support Chat</h4>
+      <div class="chat-box" id="admin-chat-box"></div>
+      <div class="chat-input">
+        <input type="text" id="admin-msg-input" placeholder="Type reply...">
+        <button onclick="sendAdminMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentAdmin = null;
+    let selectedUserId = null;
+
+    async function initAdmin() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) { window.location.href = 'index.html'; return; }
+      currentAdmin = user;
+
+      const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
+      if (!profile || profile.role !== 'admin') {
+        alert("Access Denied: Admins Only");
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('admin-info').innerText = `Logged in as: ${profile.full_name} (${profile.admin_code})`;
+      const refUrl = `${window.location.origin}/client/signup.html?ref=${profile.admin_code}`;
+      document.getElementById('ref-link').innerText = refUrl;
+
+      loadReferredUsers(profile.admin_code);
+    }
+
+    async function loadReferredUsers(adminCode) {
+      const { data: users } = await client.from('profiles').select('*').eq('referred_by', adminCode);
+      const tbody = document.getElementById('user-list');
+      tbody.innerHTML = '';
+
+      if (users && users.length > 0) {
+        users.forEach(u => {
+          tbody.innerHTML += `
+            <tr>
+              <td>${u.full_name}</td>
+              <td>$${u.balance}</td>
+              <td>$${u.volume}</td>
+              <td><button onclick="selectUser('${u.id}', '${u.full_name}', ${u.balance}, ${u.volume})">Manage</button></td>
+            </tr>`;
+        });
+      } else {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">No users registered with your link yet.</td></tr>`;
+      }
+    }
+
+    function selectUser(id, name, balance, volume) {
+      selectedUserId = id;
+      document.getElementById('management-card').style.display = 'block';
+      document.getElementById('selected-user-title').innerText = `Manage User: ${name}`;
+      document.getElementById('edit-bal').value = balance;
+      document.getElementById('edit-vol').value = volume;
+      loadAdminChat();
+    }
+
+    async function updateUserStats() {
+      const newBal = parseFloat(document.getElementById('edit-bal').value) || 0;
+      const newVol = parseFloat(document.getElementById('edit-vol').value) || 0;
+
+      await client.from('profiles').update({ balance: newBal, volume: newVol }).eq('id', selectedUserId);
+      alert("User account updated successfully!");
+      initAdmin();
+    }
+
+    async function loadAdminChat() {
+      if (!selectedUserId) return;
+      const { data } = await client.from('messages').select('*').eq('user_id', selectedUserId).order('created_at', { ascending: true });
+      const box = document.getElementById('admin-chat-box');
+      box.innerHTML = '';
+      if (data) {
+        data.forEach(m => {
+          const div = document.createElement('div');
+          div.className = `msg ${m.sender}`;
+          div.innerText = m.message;
+          box.appendChild(div);
+        });
+        box.scrollTop = box.scrollHeight;
+      }
+    }
+
+    async function sendAdminMessage() {
+      const input = document.getElementById('admin-msg-input');
+      const text = input.value.trim();
+      if (!text || !selectedUserId) return;
+
+      await client.from('messages').insert([{
+        user_id: selectedUserId,
+        sender: 'admin',
+        message: text
+      }]);
+
+      input.value = '';
+      loadAdminChat();
+    }
+
+    initAdmin();
+  </script>
+</body>
+                                                  </html>
+                                                  
