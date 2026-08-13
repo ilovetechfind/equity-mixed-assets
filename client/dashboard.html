@@ -160,18 +160,25 @@
       }
       
       const user = session.user;
-      const { data: profile } = await client.from('profiles').select('balance, username, avatar_url').eq('id', user.id).single();
+      // Fetch all columns (*) to ensure we grab the image path regardless of what it's named
+      const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
+      
       if (profile) {
+        console.log("Loaded profile data:", profile);
+
         document.getElementById('user-balance').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         
         if (profile.username) {
           document.getElementById('user-greeting').innerText = `WELCOME, ${profile.username.toUpperCase()}`;
         }
         
-        if (profile.avatar_url) {
-          let avatarSrc = profile.avatar_url;
+        // Check multiple possible keys for the profile picture column
+        const avatarField = profile.avatar_url || profile.avatar || profile.image_url || profile.photo_url;
+        
+        if (avatarField) {
+          let avatarSrc = avatarField;
           if (!avatarSrc.startsWith('http')) {
-            const { data } = client.storage.from('avatars').getPublicUrl(profile.avatar_url);
+            const { data } = client.storage.from('avatars').getPublicUrl(avatarField);
             if (data && data.publicUrl) {
               avatarSrc = data.publicUrl;
             }
@@ -189,5 +196,4 @@
     checkUser();
   </script>
 </body>
-  </html>
-    
+</html>
