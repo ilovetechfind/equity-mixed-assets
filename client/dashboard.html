@@ -10,121 +10,59 @@
       --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
       --card-bg: rgba(19, 27, 54, 0.7);
       --card-border: rgba(255, 255, 255, 0.07);
-      --primary-glow: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      --accent-green: #10b981;
       --text-muted: #94a3b8;
     }
 
-    body { 
-      background: var(--bg-gradient); 
-      background-attachment: fixed;
-      color: white; 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      margin: 0; 
-      padding: 16px; 
-      padding-bottom: 100px; 
-      display: flex; 
-      justify-content: center; 
-    }
-
+    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; padding-bottom: 100px; display: flex; justify-content: center; }
     .container { width: 100%; max-width: 480px; }
     
     .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 4px; }
     .logo-text { background: linear-gradient(90deg, #4ade80, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
-    .menu-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+    .menu-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     
     .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    .card-title { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
+    .card-title { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 14px; display: block; }
     
-    .balance-row { display: flex; align-items: center; gap: 14px; margin-top: 10px; margin-bottom: 20px; }
-    .user-avatar-icon { background: linear-gradient(135deg, #1e294b, #0f172a); border: 1px solid rgba(255,255,255,0.1); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(255,255,255,0.05); }
-    .user-avatar-icon img { width: 100%; height: 100%; object-fit: cover; }
-    .balance-amount { font-size: 2.2rem; font-weight: 800; margin: 0; letter-spacing: -1px; }
+    .welcome-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .welcome-user { display: flex; align-items: center; gap: 12px; }
     
-    .action-grid { display: flex; gap: 12px; }
-    .btn-primary { background: var(--primary-glow); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-    .btn-secondary { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+    .avatar-preview { width: 42px; height: 42px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.15); background: #1e294b; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; flex-shrink: 0; }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 
-    .volume-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-    .volume-title { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
-    .volume-status { color: #38bdf8; font-weight: 700; font-size: 0.85rem; background: rgba(56, 189, 248, 0.1); padding: 4px 10px; border-radius: 20px; }
+    .balance-display { font-size: 2.2rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px; }
     
-    .progress-bg { background-color: rgba(255, 255, 255, 0.05); height: 10px; border-radius: 6px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.03); }
-    .progress-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 15%; border-radius: 6px; }
-    
-    .warning-text { color: #facc15; font-size: 0.8rem; margin-bottom: 14px; line-height: 1.4; background: rgba(250, 204, 21, 0.08); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(250, 204, 21, 0.15); }
-    .ticker-box { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.04); padding: 12px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: #e2e8f0; }
-    
-    .input-row { display: flex; gap: 8px; margin-top: 10px; }
-    input[type="text"], input[type="number"] { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
-    input:focus { border-color: #3b82f6; }
-    
-    .submit-sm { background: rgba(255, 255, 255, 0.06); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 0 18px; border-radius: 12px; font-weight: 700; cursor: pointer; }
-    .submit-lg { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; }
+    .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-action { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
+    .btn-secondary { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: white; box-shadow: none; }
 
     .bottom-nav { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-around; padding: 10px 0; border-radius: 20px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
     .nav-item.active { color: #4ade80; }
     .nav-icon { font-size: 18px; }
+
+    .support-bubble { position: fixed; bottom: 85px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); cursor: pointer; z-index: 99; border: 2px solid rgba(255, 255, 255, 0.2); transition: transform 0.2s ease; text-decoration: none; font-size: 22px; }
+    .support-bubble:hover { transform: scale(1.08); }
   </style>
 </head>
 <body>
-
-  <!-- Slide-out Menu Overlay -->
-  <div id="side-menu" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: flex-end;">
-    <div style="width: 280px; background: #0f172a; height: 100%; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h3 style="margin:0; font-size: 1rem; color: #4ade80;">Menu</h3>
-        <button onclick="toggleMenu()" style="background:none; border:none; color:white; font-size: 1.2rem; cursor: pointer;">✕</button>
-      </div>
-      <a href="dashboard.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Dashboard</a>
-      <a href="investment-plan.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Investment Plans</a>
-      <a href="deposit.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Deposit Funds</a>
-      <a href="settings.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Settings</a>
-      <button onclick="logout()" style="margin-top: auto; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer;">Log Out</button>
-    </div>
-  </div>
-
   <div class="container">
     <header class="app-header">
       <h1 class="logo-text">Equity Mixed Assets</h1>
-      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+      <button class="menu-btn" onclick="window.location.href='settings.html'">⚙️</button>
     </header>
 
     <div class="card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <span class="card-title" id="user-greeting">TOTAL ACCOUNT BALANCE</span>
-        <span style="cursor: pointer; opacity: 0.7;">👁</span>
+      <div class="welcome-row">
+        <div class="welcome-user">
+          <div class="avatar-preview" id="dash-avatar">👤</div>
+          <span class="card-title" id="welcome-text" style="margin: 0;">WELCOME, USER</span>
+        </div>
       </div>
-      <div class="balance-row">
-        <div class="user-avatar-icon" id="avatar-box">👤</div>
-        <h2 class="balance-amount" id="user-balance">$0.00</h2>
-      </div>
+      <div class="balance-display">$0.00</div>
       <div class="action-grid">
-        <a href="deposit.html" class="btn-primary">Deposit</a>
-        <a href="investment-plan.html" class="btn-secondary">Investment Plan</a>
+        <a href="deposit.html" class="btn-action">Deposit</a>
+        <a href="investment-plan.html" class="btn-action btn-secondary">Investment Plan</a>
       </div>
-    </div>
-
-    <div class="card">
-      <div class="volume-header">
-        <span class="volume-title">VOLUME POSITION</span>
-        <span class="volume-status">15% Full</span>
-      </div>
-      <div class="progress-bg"><div class="progress-fill"></div></div>
-      <div class="warning-text">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
-      <div class="ticker-box">💎 <span>Jessica T. deposited $5,000 via Bitcoin</span></div>
-      
-      <div class="input-row">
-        <input type="text" placeholder="Enter Promo Code">
-        <button class="submit-sm">Enter</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <span class="card-title" style="display: block; margin-bottom: 10px;">WITHDRAW FUNDS</span>
-      <input type="number" placeholder="Enter amount">
-      <button class="submit-lg">Withdraw Funds</button>
     </div>
   </div>
 
@@ -135,42 +73,29 @@
     <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
   </nav>
 
+  <a href="customer-care.html" class="support-bubble" title="Customer Care">🎧</a>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function toggleMenu() {
-      const menu = document.getElementById('side-menu');
-      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-    }
-
-    async function checkUser() {
+    async function loadDashProfile() {
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'index.html'; return; }
       
-      const { data: profile } = await client.from('profiles').select('balance, username, avatar_url').eq('id', user.id).single();
-      if (profile) {
-        document.getElementById('user-balance').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-        
-        if (profile.username) {
-          document.getElementById('user-greeting').innerText = `WELCOME, ${profile.username.toUpperCase()}`;
+      const { data } = await client.from('profiles').select('username, avatar_url').eq('id', user.id).maybeSingle();
+      if (data) {
+        if (data.username) {
+          document.getElementById('welcome-text').innerText = `WELCOME, ${data.username.toUpperCase()}`;
         }
-        
-        if (profile.avatar_url) {
-          document.getElementById('avatar-box').innerHTML = `<img src="${profile.avatar_url}" alt="Profile">`;
+        if (data.avatar_url) {
+          document.getElementById('dash-avatar').innerHTML = `<img src="${data.avatar_url}" alt="Avatar">`;
         }
       }
     }
-
-    async function logout() {
-      await client.auth.signOut();
-      window.location.href = 'index.html';
-    }
-
-    checkUser();
+    loadDashProfile();
   </script>
 </body>
-    </html>
-    
+</html>
