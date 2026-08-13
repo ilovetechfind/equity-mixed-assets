@@ -4,7 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Client Sign Up</title>
+  
+  <!-- Load Supabase FIRST, then your config.js -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
@@ -15,9 +19,10 @@
     .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
     .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
     .btn { width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
+    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
     .links { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
     .links a { color: #10b981; text-decoration: none; }
-    .error { color: #ef4444; font-size: 13px; text-align: center; margin-top: 12px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; display: none; }
+    .alert-msg { font-size: 13px; text-align: center; margin-top: 12px; padding: 10px; border-radius: 6px; display: none; }
   </style>
 </head>
 <body>
@@ -46,9 +51,9 @@
       </div>
     </div>
     
-    <button class="btn" onclick="handleClientSignUp()">Sign Up</button>
+    <button class="btn" id="signup-btn" onclick="handleClientSignUp()">Sign Up</button>
     
-    <div id="error-msg" class="error"></div>
+    <div id="alert-box" class="alert-msg"></div>
 
     <div class="links">
       Already have an account? <a href="index.html">Log in here</a>
@@ -56,10 +61,6 @@
   </div>
 
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     function togglePass() {
       const input = document.getElementById('password');
       const btn = document.getElementById('eye-btn');
@@ -77,15 +78,21 @@
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-      const errorDiv = document.getElementById('error-msg');
+      const alertBox = document.getElementById('alert-box');
+      const signupBtn = document.getElementById('signup-btn');
 
-      errorDiv.style.display = 'none';
+      alertBox.style.display = 'none';
 
       if (!name || !email || !password) {
-        errorDiv.innerText = "Please fill in all fields.";
-        errorDiv.style.display = 'block';
+        alertBox.style.color = '#ef4444';
+        alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        alertBox.innerText = "Please fill in all fields.";
+        alertBox.style.display = 'block';
         return;
       }
+
+      signupBtn.innerText = "Processing...";
+      signupBtn.disabled = true;
 
       const { data, error } = await supabase.auth.signUp({
         email: email,
@@ -93,10 +100,22 @@
         options: { data: { role: 'client', full_name: name } }
       });
 
+      signupBtn.innerText = "Sign Up";
+      signupBtn.disabled = false;
+
       if (error) {
-        errorDiv.innerText = error.message;
-        errorDiv.style.display = 'block';
+        alertBox.style.color = '#ef4444';
+        alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        alertBox.innerText = error.message;
+        alertBox.style.display = 'block';
+      } else if (data.user && !data.session) {
+        // Supabase requires email verification
+        alertBox.style.color = '#10b981';
+        alertBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
+        alertBox.innerText = "Success! Please check your email inbox to verify your account.";
+        alertBox.style.display = 'block';
       } else {
+        // No email verification required, auto-login successful
         window.location.href = 'dashboard.html';
       }
     }
