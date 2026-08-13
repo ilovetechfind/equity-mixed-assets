@@ -117,7 +117,7 @@
       const { data, error } = await client.from('profiles').select('username, avatar_url').eq('id', user.id).single();
       
       if (data && data.username && data.username.trim() !== "") {
-        // Hide setup, show locked view card
+        // Profile already exists -> show locked view card
         document.getElementById('profile-view-card').style.display = 'block';
         document.getElementById('profile-edit-card').style.display = 'none';
         
@@ -127,7 +127,7 @@
           document.getElementById('view-avatar-box').innerHTML = `<img src="${data.avatar_url}" alt="Avatar">`;
         }
       } else {
-        // Show setup view
+        // No profile -> show setup screen
         document.getElementById('profile-view-card').style.display = 'none';
         document.getElementById('profile-edit-card').style.display = 'block';
       }
@@ -137,8 +137,6 @@
       document.getElementById('profile-view-card').style.display = 'none';
       document.getElementById('profile-edit-card').style.display = 'block';
       document.getElementById('setup-title').innerText = "EDIT PROFILE";
-      
-      // Populate inputs with current values
       document.getElementById('username-input').value = document.getElementById('view-username').innerText;
       if (currentAvatarData) {
         document.getElementById('edit-avatar-box').innerHTML = `<img src="${currentAvatarData}" alt="Avatar">`;
@@ -151,12 +149,11 @@
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        // Compress image using canvas to ensure it fits safely inside Supabase text columns
         const img = new Image();
         img.onload = function() {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          const maxSize = 200; // max dimension
+          const maxSize = 200;
           let width = img.width;
           let height = img.height;
           
@@ -199,8 +196,13 @@
       if (error) {
         alert('Save failed: ' + error.message);
       } else {
-        alert('Profile saved successfully!');
-        loadProfile();
+        // Update view UI and lock back to profile display view
+        document.getElementById('view-username').innerText = username;
+        if (currentAvatarData) {
+          document.getElementById('view-avatar-box').innerHTML = `<img src="${currentAvatarData}" alt="Avatar">`;
+        }
+        document.getElementById('profile-view-card').style.display = 'block';
+        document.getElementById('profile-edit-card').style.display = 'none';
       }
     }
 
@@ -212,4 +214,5 @@
     loadProfile();
   </script>
 </body>
-</html>
+        </html>
+        
