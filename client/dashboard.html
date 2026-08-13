@@ -6,48 +6,92 @@
   <title>Equity Mixed Assets - Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .container { width: 100%; max-width: 600px; }
-    .header-brand { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 15px; }
-    .header-brand h1 { font-size: 18px; margin: 0; color: #10b981; font-weight: 700; letter-spacing: 0.5px; }
-    .card { background-color: #1e293b; padding: 24px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 20px; }
-    .stat { font-size: 28px; font-weight: 700; color: #10b981; margin-top: 8px; }
-    .chat-box { height: 200px; background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 10px; overflow-y: scroll; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px; }
-    .msg { padding: 8px 12px; border-radius: 6px; font-size: 13px; max-width: 80%; }
-    .msg.client { background: #10b981; color: white; align-self: flex-end; }
-    .msg.admin { background: #334155; color: white; align-self: flex-start; }
-    .chat-input { display: flex; gap: 8px; }
-    .chat-input input { flex: 1; padding: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 6px; outline: none; }
-    .chat-input button { background: #10b981; border: none; color: white; padding: 0 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
-    .logout { background: #ef4444; color: white; border: none; padding: 10px; border-radius: 6px; width: 100%; font-weight: 600; cursor: pointer; }
+    body { background-color: #0b1329; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 16px; padding-bottom: 90px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 480px; }
+    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .logo-text { color: #4ade80; font-size: 1.25rem; font-weight: bold; margin: 0; }
+    .menu-btn { background: #131b36; border: 1px solid #1e294b; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+    
+    .card { background-color: #131b36; border: 1px solid #1e294b; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+    .card-title { font-size: 0.75rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px; }
+    .balance-row { display: flex; align-items: center; gap: 12px; margin-top: 8px; margin-bottom: 16px; }
+    .user-avatar-icon { background: #1e294b; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .balance-amount { font-size: 2rem; font-weight: bold; margin: 0; color: white; }
+    
+    .action-grid { display: flex; gap: 12px; }
+    .btn-primary { background-color: #2563eb; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: block; }
+    .btn-secondary { background-color: #1e294b; color: white; border: 1px solid #334155; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: block; }
+
+    .volume-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .volume-title { font-size: 0.75rem; color: #94a3b8; font-weight: 700; }
+    .volume-status { color: #38bdf8; font-weight: bold; font-size: 0.85rem; }
+    .progress-bg { background-color: #1e294b; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 12px; }
+    .progress-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 15%; }
+    .warning-text { color: #facc15; font-size: 0.8rem; margin-bottom: 12px; line-height: 1.4; }
+    .ticker-box { background-color: #0b1329; border: 1px solid #1e294b; padding: 10px; border-radius: 8px; font-size: 0.85rem; margin-bottom: 12px; }
+    
+    .input-row { display: flex; gap: 8px; margin-top: 8px; }
+    input[type="text"], input[type="number"] { background-color: #0b1329; border: 1px solid #334155; color: white; padding: 12px; border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+    .submit-sm { background-color: #1e294b; color: white; border: 1px solid #334155; padding: 0 16px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .submit-lg { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 8px; }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #131b36; border-top: 1px solid #1e294b; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+    .nav-item { color: #94a3b8; text-decoration: none; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .nav-item.active { color: #4ade80; }
+    .nav-icon { font-size: 18px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header-brand">
-      <h1>Equity Mixed Assets</h1>
-      <span style="font-size: 12px; color: #94a3b8;" id="user-email-label">Client Portal</span>
-    </div>
+    <header class="app-header">
+      <h1 class="logo-text">Equity Mixed Assets</h1>
+      <button class="menu-btn">☰</button>
+    </header>
 
     <div class="card">
-      <h2 id="welcome-msg" style="margin-top:0; font-size: 20px;">Welcome</h2>
-      <p style="color: #94a3b8; margin-bottom: 4px; font-size: 12px; text-transform: uppercase; font-weight: 600;">Account Balance</p>
-      <div class="stat" id="bal-val">$0.00</div>
-      <p style="color: #94a3b8; margin-bottom: 4px; margin-top: 16px; font-size: 12px; text-transform: uppercase; font-weight: 600;">Trading Volume</p>
-      <div class="stat" id="vol-val" style="color: #38bdf8;">$0.00</div>
-    </div>
-
-    <div class="card">
-      <h3 style="margin-top:0; font-size: 16px;">Customer Support Chat</h3>
-      <div class="chat-box" id="chat-messages"></div>
-      <div class="chat-input">
-        <input type="text" id="msg-input" placeholder="Type a message to admin...">
-        <button onclick="sendMessage()">Send</button>
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="card-title">TOTAL ACCOUNT BALANCE</span>
+        <span style="cursor: pointer;">👁</span>
+      </div>
+      <div class="balance-row">
+        <div class="user-avatar-icon">👤</div>
+        <h2 class="balance-amount" id="user-balance">$0.00</h2>
+      </div>
+      <div class="action-grid">
+        <a href="deposit.html" class="btn-primary">Deposit</a>
+        <a href="investment-plan.html" class="btn-secondary">Investment Plan</a>
       </div>
     </div>
 
-    <button class="logout" onclick="logout()">Log Out</button>
+    <div class="card">
+      <div class="volume-header">
+        <span class="volume-title">VOLUME POSITION</span>
+        <span class="volume-status">15% Full</span>
+      </div>
+      <div class="progress-bg"><div class="progress-fill"></div></div>
+      <div class="warning-text">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
+      <div class="ticker-box">💎 Jessica T. deposited $5,000 via Bitcoin</div>
+      
+      <div class="input-row">
+        <input type="text" placeholder="Enter Promo Code">
+        <button class="submit-sm">Enter</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-title" style="display: block; margin-bottom: 8px;">WITHDRAW FUNDS</span>
+      <input type="number" placeholder="Enter amount">
+      <button class="submit-lg" style="background-color: #10b981;">Withdraw</button>
+    </div>
   </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active"><span class="nav-icon">🏠</span>Home</a>
+    <a href="investment-plan.html" class="nav-item"><span class="nav-icon">📈</span>Plans</a>
+    <a href="deposit.html" class="nav-item"><span class="nav-icon">💳</span>Deposit</a>
+    <a href="dashboard.html" class="nav-item" onclick="logout()"><span class="nav-icon">⚙️</span>Logout</a>
+  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -55,53 +99,14 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let currentUser = null;
-
-    async function initDashboard() {
+    async function checkUser() {
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'index.html'; return; }
-      currentUser = user;
-      document.getElementById('user-email-label').innerText = user.email;
-
-      const { data: profile } = await client.from('profiles').select('*').eq('id', user.id).single();
+      
+      const { data: profile } = await client.from('profiles').select('balance').eq('id', user.id).single();
       if (profile) {
-        document.getElementById('welcome-msg').innerText = `Welcome, ${profile.full_name || 'Client'}`;
-        document.getElementById('bal-val').innerText = `$${Number(profile.balance).toLocaleString()}`;
-        document.getElementById('vol-val').innerText = `$${Number(profile.volume).toLocaleString()}`;
+        document.getElementById('user-balance').innerText = `$${Number(profile.balance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
       }
-
-      loadMessages();
-      setInterval(loadMessages, 3000);
-    }
-
-    async function loadMessages() {
-      const { data } = await client.from('messages').select('*').eq('user_id', currentUser.id).order('created_at', { ascending: true });
-      const box = document.getElementById('chat-messages');
-      box.innerHTML = '';
-      if (data) {
-        data.forEach(m => {
-          const div = document.createElement('div');
-          div.className = `msg ${m.sender}`;
-          div.innerText = m.message;
-          box.appendChild(div);
-        });
-        box.scrollTop = box.scrollHeight;
-      }
-    }
-
-    async function sendMessage() {
-      const input = document.getElementById('msg-input');
-      const text = input.value.trim();
-      if (!text) return;
-
-      await client.from('messages').insert([{
-        user_id: currentUser.id,
-        sender: 'client',
-        message: text
-      }]);
-
-      input.value = '';
-      loadMessages();
     }
 
     async function logout() {
@@ -109,8 +114,7 @@
       window.location.href = 'index.html';
     }
 
-    initDashboard();
+    checkUser();
   </script>
-</
-  body>
+</body>
 </html>
