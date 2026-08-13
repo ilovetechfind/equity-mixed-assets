@@ -60,7 +60,7 @@
     input:focus { border-color: #3b82f6; }
     
     .submit-sm { background: rgba(255, 255, 255, 0.06); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 0 18px; border-radius: 12px; font-weight: 700; cursor: pointer; }
-    .submit-lg { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; }
+    .submit-lg { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
 
     .bottom-nav { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-around; padding: 10px 0; border-radius: 20px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
@@ -117,7 +117,6 @@
       <div class="progress-bg"><div class="progress-fill"></div></div>
       <div class="warning-text">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
       
-      <!-- ADDED id="live-ticker" right here -->
       <div class="ticker-box" id="live-ticker">💎 <span>Jessica T. deposited $5,000 via Bitcoin</span></div>
       
       <div class="input-row">
@@ -128,8 +127,7 @@
 
     <div class="card">
       <span class="card-title" style="display: block; margin-bottom: 10px;">WITHDRAW FUNDS</span>
-      <input type="number" placeholder="Enter amount">
-      <button class="submit-lg">Withdraw Funds</button>
+      <a href="withdraw.html" class="submit-lg">Withdraw Funds</a>
     </div>
   </div>
 
@@ -144,8 +142,6 @@
   <a href="customer-care.html" class="support-bubble" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <!-- ADDED ticker.js script link right here -->
   <script src="ticker.js"></script>
   
   <script>
@@ -184,5 +180,4 @@
     checkUser();
   </script>
 </body>
-    </html>
-    
+</html>
