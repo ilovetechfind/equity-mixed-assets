@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Support</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
+      --card-bg: rgba(19, 27, 54, 0.85);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+
+    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
+    .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; justify-content: space-between; }
+    
+    .chat-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; backdrop-filter: blur(12px); margin-bottom: 16px; }
+    .agent-info { display: flex; align-items: center; gap: 12px; }
+    .agent-avatar { width: 40px; height: 40px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; border: 1px solid rgba(255,255,255,0.2); }
+    .agent-details h4 { margin: 0; font-size: 0.95rem; }
+    .agent-details p { margin: 2px 0 0 0; font-size: 0.75rem; color: #4ade80; display: flex; align-items: center; gap: 4px; }
+    .agent-details p::before { content: ''; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; display: inline-block; }
+    
+    .close-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: white; width: 32px; height: 32px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+    .chat-box { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px; backdrop-filter: blur(12px); display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: calc(100vh - 180px); margin-bottom: 16px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); }
+    
+    .message { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
+    .message.incoming { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.05); align-self: flex-start; border-bottom-left-radius: 4px; color: #e2e8f0; }
+    .message.outgoing { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); align-self: flex-end; border-bottom-right-radius: 4px; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+
+    .chat-input-area { display: flex; gap: 10px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px; border-radius: 16px; backdrop-filter: blur(12px); }
+    .chat-input-area input { flex: 1; background: transparent; border: none; outline: none; color: white; padding: 10px; font-size: 0.9rem; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .chat-input-area input::placeholder { color: var(--text-muted); }
+    .send-btn { background: #3b82f6; border: none; color: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 16px; }
+    .send-btn:hover { background: #2563eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="chat-header">
+      <div class="agent-info">
+        <div class="agent-avatar">🎧</div>
+        <div class="agent-details">
+          <h4>Support Assistant</h4>
+          <p>Online & Ready</p>
+        </div>
+      </div>
+      <button class="close-btn" onclick="window.location.href='dashboard.html'">✕</button>
+    </div>
+
+    <div class="chat-box" id="chat-messages">
+      <div class="message incoming">Hello! Welcome to Equity Mixed Assets support. How can we help you with your deposits or investment plans today?</div>
+    </div>
+
+    <div class="chat-input-area">
+      <input type="text" id="user-msg" placeholder="Type your message..." onkeypress="handleKey(event)">
+      <button class="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <script>
+    function sendMessage() {
+      const input = document.getElementById('user-msg');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const chatBox = document.getElementById('chat-messages');
+      
+      // Append user message
+      const userDiv = document.createElement('div');
+      userDiv.className = 'message outgoing';
+      userDiv.innerText = text;
+      chatBox.appendChild(userDiv);
+
+      input.value = '';
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      // Simulate automated support response
+      setTimeout(() => {
+        const replyDiv = document.createElement('div');
+        replyDiv.className = 'message incoming';
+        replyDiv.innerText = "Thank you for reaching out. A live specialist has received your request and will assist you shortly. For immediate wallet synchronization, please ensure your account requirements are met.";
+        chatBox.appendChild(replyDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }, 1000);
+    }
+
+    function handleKey(e) {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    }
+  </script>
+</body
+  >
+  </html>
