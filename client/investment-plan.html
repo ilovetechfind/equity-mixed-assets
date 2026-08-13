@@ -4,33 +4,44 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Equity Mixed Assets - Investment Plans</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #0b1329; color: white; font-family: 'Inter', sans-serif; margin: 0; padding: 16px; padding-bottom: 90px; display: flex; justify-content: center; }
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
+      --card-bg: rgba(19, 27, 54, 0.7);
+      --card-border: rgba(255, 255, 255, 0.07);
+      --text-muted: #94a3b8;
+    }
+
+    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; padding-bottom: 100px; display: flex; justify-content: center; }
     .container { width: 100%; max-width: 480px; }
-    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .logo-text { color: #4ade80; font-size: 1.25rem; font-weight: bold; margin: 0; }
-    .menu-btn { background: #131b36; border: 1px solid #1e294b; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
     
-    .nav-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .back-btn { background: #131b36; border: 1px solid #1e294b; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; text-decoration: none; }
-    .view-title { font-size: 1.15rem; font-weight: bold; margin: 0; }
-
-    .active-banner { background-color: #131b36; border: 1px solid #1e294b; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-    .banner-subtitle { font-size: 0.7rem; color: #94a3b8; font-weight: 700; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
-    .banner-title { font-size: 1.2rem; font-weight: bold; margin: 0; color: white; }
-
-    .tier-card { background-color: #131b36; border: 1px solid #1e294b; border-radius: 12px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; }
-    .tier-card.active-tier { border-color: #10b981; }
-    .tier-info h4 { font-size: 0.95rem; margin: 0 0 4px 0; }
-    .tier-info p { font-size: 0.75rem; color: #94a3b8; margin: 0; }
+    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 4px; }
+    .logo-text { background: linear-gradient(90deg, #4ade80, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+    .menu-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
     
-    .status-btn { padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: bold; cursor: pointer; border: none; }
-    .status-btn.active { background-color: rgba(16, 185, 129, 0.2); color: #10b981; }
-    .status-btn.select { background-color: #2563eb; color: white; }
+    .nav-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .back-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; transition: 0.2s; }
+    .back-btn:hover { border-color: rgba(255,255,255,0.2); }
+    .view-title { font-size: 1.2rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
 
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #131b36; border-top: 1px solid #1e294b; display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
-    .nav-item { color: #94a3b8; text-decoration: none; font-size: 0.75rem; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .active-banner { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(19, 27, 54, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.3); backdrop-filter: blur(12px); border-radius: 18px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+    .banner-subtitle { font-size: 0.7rem; color: #34d399; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 6px; }
+    .banner-title { font-size: 1.3rem; font-weight: 800; margin: 0; color: white; letter-spacing: -0.5px; }
+
+    .tier-card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 18px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
+    .tier-card.active-tier { border-color: #10b981; background: linear-gradient(135deg, rgba(19, 27, 54, 0.9) 0%, rgba(16, 185, 129, 0.05) 100%); }
+    
+    .tier-info h4 { font-size: 1rem; font-weight: 700; margin: 0 0 4px 0; color: #f8fafc; }
+    .tier-info p { font-size: 0.78rem; color: var(--text-muted); margin: 0; font-weight: 500; }
+    
+    .status-btn { padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
+    .status-btn.active { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .status-btn.select { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .status-btn.select:active { transform: scale(0.96); }
+
+    .bottom-nav { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-around; padding: 10px 0; border-radius: 20px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
     .nav-item.active { color: #4ade80; }
     .nav-icon { font-size: 18px; }
   </style>
@@ -99,6 +110,6 @@
     <a href="deposit.html" class="nav-item"><span class="nav-icon">💳</span>Deposit</a>
     <a href="dashboard.html" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
   </nav>
-</body>
-  </html>
-  
+</bo
+  dy>
+</html>
