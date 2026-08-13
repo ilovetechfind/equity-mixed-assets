@@ -73,7 +73,6 @@
 </head>
 <body>
 
-  <!-- Slide-out Menu Overlay -->
   <div id="side-menu" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: flex-end;">
     <div style="width: 280px; background: #0f172a; height: 100%; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -138,7 +137,6 @@
     <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
   </nav>
 
-  <!-- Customer Care Support Bubble Widget -->
   <a href="customer-care.html" class="support-bubble" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -168,20 +166,24 @@
         if (profile.username) {
           document.getElementById('user-greeting').innerText = `WELCOME, ${profile.username.toUpperCase()}`;
         }
+      }
+
+      // Check the profile table first, but fallback to the user session metadata if it is missing
+      const profileAvatar = profile ? (profile.avatar_url || profile.avatar || profile.image_url) : null;
+      const metaAvatar = user.user_metadata?.avatar_url || user.user_metadata?.picture || user.user_metadata?.custom_claims?.avatar;
+      const avatarField = profileAvatar || metaAvatar;
+      
+      if (avatarField) {
+        let avatarSrc = avatarField;
         
-        const avatarField = profile.avatar_url || profile.avatar || profile.image_url || profile.photo_url;
-        
-        if (avatarField) {
-          let avatarSrc = avatarField;
-          // If it's a relative path stored in Supabase, resolve it via getPublicUrl explicitly
-          if (!avatarSrc.startsWith('http')) {
-            const { data } = client.storage.from('avatars').getPublicUrl(avatarField);
-            if (data && data.publicUrl) {
-              avatarSrc = data.publicUrl;
-            }
+        if (!avatarSrc.startsWith('http') && !avatarSrc.startsWith('data:')) {
+          const { data } = client.storage.from('avatars').getPublicUrl(avatarField);
+          if (data && data.publicUrl) {
+            avatarSrc = data.publicUrl;
           }
-          document.getElementById('avatar-box').innerHTML = `<img src="${avatarSrc}" alt="Profile" onerror="this.onerror=null;this.src='';document.getElementById('avatar-box').innerHTML='👤';">`;
         }
+        
+        document.getElementById('avatar-box').innerHTML = `<img src="${avatarSrc}" alt="Profile">`;
       }
     }
 
