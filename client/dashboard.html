@@ -116,7 +116,9 @@
       </div>
       <div class="progress-bg"><div class="progress-fill"></div></div>
       <div class="warning-text">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
-      <div class="ticker-box">💎 <span>Jessica T. deposited $5,000 via Bitcoin</span></div>
+      
+      <!-- ADDED id="live-ticker" right here -->
+      <div class="ticker-box" id="live-ticker">💎 <span>Jessica T. deposited $5,000 via Bitcoin</span></div>
       
       <div class="input-row">
         <input type="text" placeholder="Enter Promo Code">
@@ -142,6 +144,10 @@
   <a href="customer-care.html" class="support-bubble" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- ADDED ticker.js script link right here -->
+  <script src="ticker.js"></script>
+  
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
@@ -178,5 +184,5 @@
     checkUser();
   </script>
 </body>
-      </html>
-  
+    </html>
+    
