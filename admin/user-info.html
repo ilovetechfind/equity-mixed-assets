@@ -55,15 +55,14 @@
     
     .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
 
-    /* Chat Section Styles */
-    .chat-container { display: flex; flex-direction: column; height: 350px; border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; background: rgba(0, 0, 0, 0.2); overflow: hidden; margin-bottom: 12px; }
-    .chat-messages { flex: 1; padding: 12px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-    .chat-bubble { max-width: 80%; padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
-    .chat-bubble.admin { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-    .chat-bubble.client { background: rgba(255, 255, 255, 0.1); color: #f8fafc; align-self: flex-start; border-bottom-left-radius: 2px; }
-    .chat-input-row { display: flex; gap: 8px; padding: 10px; background: rgba(0, 0, 0, 0.3); border-top: 1px solid rgba(255, 255, 255, 0.05); }
-    .chat-input-row input { flex: 1; padding: 10px; border-radius: 8px; }
-    .chat-send-btn { background: var(--primary); border: none; color: white; padding: 0 16px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+    /* Management Navigation Grid */
+    .admin-nav-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    .admin-nav-btn { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px 16px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; text-decoration: none; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+    .admin-nav-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
+
+    /* Small Floating Bubble */
+    .floating-bubble { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); cursor: pointer; z-index: 999; text-decoration: none; font-size: 20px; border: 2px solid rgba(255,255,255,0.2); transition: transform 0.2s; }
+    .floating-bubble:hover { transform: scale(1.08); }
   </style>
 </head>
 <body>
@@ -115,20 +114,28 @@
       </form>
     </div>
 
-    <!-- Live Customer Care Chat Card -->
+    <!-- Management Files Card -->
     <div class="card">
-      <span class="card-title">Customer Care Live Chat</span>
-      <div class="chat-container">
-        <div class="chat-messages" id="chat-box">
-          <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin: auto;">Loading messages...</div>
-        </div>
-        <div class="chat-input-row">
-          <input type="text" id="chat-input" placeholder="Type a message to client..." onkeypress="handleKey(event)">
-          <button class="chat-send-btn" onclick="sendAdminMessage()">Send</button>
-        </div>
+      <span class="card-title">Client Control Files</span>
+      <div class="admin-nav-grid">
+        <a href="payment-methods.html" id="btn-payment" class="admin-nav-btn">
+          <span>Payment Method Control</span>
+          <span>💳</span>
+        </a>
+        <a href="investment-plans-admin.html" id="btn-plan" class="admin-nav-btn">
+          <span>Investment Plan Control</span>
+          <span>📈</span>
+        </a>
+        <a href="customer-care-admin.html" id="btn-chat" class="admin-nav-btn">
+          <span>Customer Care Chat Control</span>
+          <span>🎧</span>
+        </a>
       </div>
     </div>
   </div>
+
+  <!-- Clickable Small Floating Bubble -->
+  <a href="customer-care-admin.html" id="bubble-link" class="floating-bubble" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -136,6 +143,16 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id');
     let isEditing = false;
+
+    // Append user ID to control file links if available so the files know which user is being managed
+    if (targetUserId) {
+      ['btn-payment', 'btn-plan', 'btn-chat', 'bubble-link'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.setAttribute('href', el.getAttribute('href') + '?id=' + targetUserId);
+        }
+      });
+    }
 
     function updateRangeText(val) {
       document.getElementById('range-val-text').innerText = val + '%';
@@ -149,7 +166,6 @@
       const saveBtn = document.getElementById('save-btn');
       const toggleBtn = document.getElementById('toggle-edit-btn');
 
-      // Email remains locked/disabled as per your rule: "can't change email address of user"
       usernameInput.disabled = !isEditing;
       balanceInput.disabled = !isEditing;
       volumeInput.disabled = !isEditing;
@@ -174,7 +190,6 @@
         return;
       }
 
-      // Fetch profile data
       const { data, error } = await client
         .from('profiles')
         .select('*')
@@ -193,9 +208,6 @@
       const vol = data.volume_percentage || 0;
       document.getElementById('user-volume').value = vol;
       updateRangeText(vol);
-
-      loadMessages();
-      subscribeToChat();
     }
 
     async function updateUserData(e) {
@@ -229,67 +241,9 @@
       } else {
         statusEl.style.color = "#34d399";
         statusEl.innerText = "Changes saved successfully!";
-        toggleEditMode(); // Locks fields automatically after save
+        toggleEditMode();
         setTimeout(() => { statusEl.innerText = ""; }, 3000);
       }
-    }
-
-    async function loadMessages() {
-      const { data, error } = await client
-        .from('support_messages')
-        .select('*')
-        .eq('user_id', targetUserId)
-        .order('created_at', { ascending: true });
-
-      const chatBox = document.getElementById('chat-box');
-      if (error || !data || data.length === 0) {
-        chatBox.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin: auto;">No messages yet. Start the conversation!</div>`;
-        return;
-      }
-
-      chatBox.innerHTML = data.map(m => `
-        <div class="chat-bubble ${m.sender}">
-          <div>${m.message}</div>
-        </div>
-      `).join('');
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    function subscribeToChat() {
-      client
-        .channel('admin-chat-' + targetUserId)
-        .on('postgres_changes', {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'support_messages',
-          filter: `user_id=eq.${targetUserId}`
-        }, payload => {
-          loadMessages();
-        })
-        .subscribe();
-    }
-
-    async function sendAdminMessage() {
-      const input = document.getElementById('chat-input');
-      const msg = input.value.trim();
-      if (!msg) return;
-
-      const { error } = await client
-        .from('support_messages')
-        .insert({
-          user_id: targetUserId,
-          sender: 'admin',
-          message: msg
-        });
-
-      if (!error) {
-        input.value = '';
-        loadMessages();
-      }
-    }
-
-    function handleKey(e) {
-      if (e.key === 'Enter') sendAdminMessage();
     }
 
     async function logout() {
