@@ -12,6 +12,7 @@
       --card-border: rgba(255, 255, 255, 0.08);
       --text-muted: #94a3b8;
       --primary: #6366f1;
+      --primary-hover: #4f46e5;
     }
 
     body { 
@@ -38,9 +39,11 @@
     th { color: var(--text-muted); font-weight: 600; }
     td { color: #f8fafc; }
     
+    .view-btn { background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 0.75rem; transition: background 0.2s; display: inline-block; }
+    .view-btn:hover { background: rgba(99, 102, 241, 0.25); }
+
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
-    /* Bottom Navigation Bar */
     .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(19, 17, 53, 0.85); backdrop-filter: blur(16px); border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
     .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 600; gap: 6px; transition: color 0.2s; }
     .nav-item:hover, .nav-item.active { color: #818cf8; }
@@ -55,7 +58,6 @@
       <button class="logout-btn" onclick="logout()">Log Out</button>
     </header>
 
-    <!-- Referred Users Table Card -->
     <div class="card">
       <span class="card-title">Users Who Joined With Your Code</span>
       <div class="stats-box" id="user-count-display">Total Users Joined: 0</div>
@@ -67,7 +69,7 @@
               <th>Username</th>
               <th>Gmail</th>
               <th>Balance</th>
-              <th>Joined Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="referred-users-body">
@@ -78,7 +80,6 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <a href="dashboard.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
@@ -108,7 +109,6 @@
         currentUser = session.user;
       }
 
-      // Fetch admin's referral code from profiles table
       const { data: profile } = await client
         .from('profiles')
         .select('referral_code')
@@ -149,7 +149,7 @@
           <td><strong>${user.username || 'N/A'}</strong></td>
           <td>${user.email || 'N/A'}</td>
           <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td>${new Date(user.created_at).toLocaleDateString()}</td>
+          <td><a href="user-info.html?id=${user.id}" class="view-btn">View Info</a></td>
         </tr>
       `).join('');
     }
