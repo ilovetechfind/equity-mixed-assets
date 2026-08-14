@@ -51,6 +51,7 @@
     
     .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -60,6 +61,40 @@
       <h1 class="logo-text">Admin Control Panel</h1>
       <button class="logout-btn" onclick="logout()">Log Out</button>
     </header>
+
+    <!-- Admin Referral Code Card -->
+    <div class="card">
+      <span class="card-title">YOUR ADMIN REFERRAL CODE</span>
+      <div>
+        <div class="code-display" id="admin-ref-code">Loading...</div>
+      </div>
+      <div class="form-row" style="margin-top: 10px;">
+        <div class="input-group" style="max-width: 300px;">
+          <input type="text" id="new-ref-code" placeholder="Set custom code">
+        </div>
+        <button class="submit-btn" onclick="saveAdminCode()">Save Code</button>
+      </div>
+    </div>
+
+    <!-- Users Joined Using Admin Code -->
+    <div class="card">
+      <span class="card-title">USERS WHO JOINED WITH YOUR REFERRAL CODE</span>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Gmail</th>
+              <th>Balance</th>
+              <th>Joined Date</th>
+            </tr>
+          </thead>
+          <tbody id="referred-users-body">
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading referred users...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
     <!-- Balance Management Card -->
     <div class="card">
@@ -116,10 +151,70 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    let currentAdminId = null;
+
     async function checkAdmin() {
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
+      currentAdminId = user.id;
+      loadAdminCode();
       loadVerifications();
+    }
+
+    async function loadAdminCode() {
+      // Check if admin has a referral code stored in profiles or a separate table
+      const { data: profile } = await client
+        .from('profiles')
+        .select('referral_code, username')
+        .eq('id', currentAdminId)
+        .single();
+
+      let code = profile?.referral_code || 'ADMIN123';
+      document.getElementById('admin-ref-code').innerText = code;
+      document.getElementById('new-ref-code').value = code;
+
+      loadReferredUsers(code);
+    }
+
+    async function saveAdminCode() {
+      const newCode = document.getElementById('new-ref-code').value.trim();
+      if (!newCode) return;
+
+      const { error } = await client
+        .from('profiles')
+        .update({ referral_code: newCode })
+        .eq('id', currentAdminId);
+
+      if (error) {
+        alert("Failed to save code: " + error.message);
+      } else {
+        alert("Admin referral code updated successfully!");
+        loadAdminCode();
+      }
+    }
+
+    async function loadReferredUsers(code) {
+      const { data, error } = await client
+        .from('profiles')
+        .select('username, email, balance, created_at')
+        .eq('referred_by', code)
+        .order('created_at', { ascending: false });
+
+      const tbody = document.getElementById('referred-users-body');
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No users joined with this code yet.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(user => `
+        <tr>
+          <td><strong>${user.username || 'N/A'}</strong></td>
+          <td>${user.email || 'N/A'}</td>
+          <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+          <td>${new Date(user.created_at).toLocaleDateString()}</td>
+        </tr>
+      `).join('');
     }
 
     async function loadVerifications() {
@@ -177,7 +272,6 @@
       btn.innerText = "Updating...";
       btn.disabled = true;
 
-      // Find user profile by email
       const { data: profile, error: profileError } = await client
         .from('profiles')
         .select('id, balance')
