@@ -33,23 +33,10 @@
     th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     th { color: var(--text-muted); font-weight: 600; }
     
-    .id-img { width: 45px; height: 32px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
-    .badge.pending { background: rgba(250, 204, 21, 0.15); color: #facc15; }
-    .badge.approved { background: rgba(16, 185, 129, 0.15); color: #34d399; }
-    .badge.rejected { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-
-    .action-btns { display: flex; gap: 6px; }
-    .btn-approve { background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
-    .btn-reject { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
-    .btn-view { background: rgba(129, 140, 248, 0.2); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.4); padding: 5px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
-    .btn-edit-page { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 16px; text-decoration: none; display: block; text-align: center; box-sizing: border-box; }
-
     .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
     .input-group { flex: 1; min-width: 200px; }
-    .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
-    input, select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
-    input:focus, select:focus { border-color: #6366f1; }
+    input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+    input:focus { border-color: #6366f1; }
     
     .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
     .copy-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
@@ -57,16 +44,7 @@
     
     .code-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; }
-
-    /* Modal Styling */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 16px; box-sizing: border-box; }
-    .modal-card { background: #131135; border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 20px; width: 100%; max-width: 450px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-    .modal-title { font-size: 1.1rem; font-weight: 700; color: white; margin: 0; }
-    .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
-    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
-    .info-label { color: var(--text-muted); font-weight: 600; }
-    .info-value { color: white; font-weight: 700; text-align: right; }
+    .stats-box { font-size: 1.1rem; font-weight: 700; color: #34d399; margin-bottom: 14px; }
   </style>
 </head>
 <body>
@@ -81,7 +59,7 @@
     <div class="card">
       <span class="card-title">YOUR ADMIN REFERRAL CODE</span>
       
-      <!-- View / Copy Mode (Shown when code exists) -->
+      <!-- View / Copy Mode -->
       <div id="code-view-section" style="display: none;">
         <div class="code-container">
           <div class="code-display" id="displayed-admin-code"></div>
@@ -89,7 +67,7 @@
         </div>
       </div>
 
-      <!-- Set Mode (Shown only when code is not set yet) -->
+      <!-- Set / Generate Mode -->
       <div id="code-set-section" style="display: none;">
         <form onsubmit="saveAdminCode(event)" class="form-row">
           <div class="input-group" style="max-width: 300px;">
@@ -100,9 +78,10 @@
       </div>
     </div>
 
-    <!-- Users Joined Using Admin Code -->
+    <!-- Users Joined Using Admin Code Section -->
     <div class="card">
       <span class="card-title">USERS WHO JOINED WITH YOUR REFERRAL CODE</span>
+      <div class="stats-box" id="user-count-display">Total Users Joined: 0</div>
       <div style="overflow-x: auto;">
         <table>
           <thead>
@@ -111,99 +90,12 @@
               <th>Gmail</th>
               <th>Balance</th>
               <th>Joined Date</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody id="referred-users-body">
-            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading referred users...</td></tr>
+            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading referred users...</td></tr>
           </tbody>
         </table>
-      </div>
-    </div>
-
-    <!-- Client Payment & Deposit Submissions Card -->
-    <div class="card">
-      <span class="card-title">CLIENT PAYMENT & DEPOSIT SUBMISSIONS</span>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Client Email</th>
-              <th>Method</th>
-              <th>Details / Code</th>
-              <th>Receipt / Proof</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="client-deposits-body">
-            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading submissions...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Balance Management Card -->
-    <div class="card">
-      <span class="card-title">MANAGE USER BALANCES</span>
-      <form onsubmit="updateBalance(event)" class="form-row">
-        <div class="input-group">
-          <label>User Gmail</label>
-          <input type="email" id="target-email" placeholder="user@gmail.com" required>
-        </div>
-        <div class="input-group">
-          <label>Amount ($)</label>
-          <input type="number" step="0.01" id="target-amount" placeholder="5000.00" required>
-        </div>
-        <div class="input-group" style="max-width: 150px;">
-          <label>Action</label>
-          <select id="balance-action">
-            <option value="add">Add (+)</option>
-            <option value="subtract">Subtract (-)</option>
-            <option value="set">Set Exact</option>
-          </select>
-        </div>
-        <button type="submit" class="submit-btn" id="balance-btn">Update Balance</button>
-      </form>
-    </div>
-
-    <!-- Verifications Card -->
-    <div class="card">
-      <span class="card-title">USER SUBMITTED KYC VERIFICATIONS</span>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Full Name</th>
-              <th>Gmail</th>
-              <th>Phone</th>
-              <th>SSN</th>
-              <th>ID Front</th>
-              <th>ID Back</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="verification-table-body">
-            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading records...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-
-  <!-- User Details Modal -->
-  <div class="modal-overlay" id="userModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 class="modal-title">User Profile Details</h3>
-        <button class="close-modal" onclick="closeUserModal()">&times;</button>
-      </div>
-      <div id="modal-content">
-        <!-- Dynamic User Info Goes Here -->
-      </div>
-      <div id="modal-action-container">
-        <!-- Dynamic Edit Button Goes Here -->
       </div>
     </div>
   </div>
@@ -211,19 +103,20 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24ildpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentAdminUser = null;
     let savedCodeValue = '';
-    let fetchedUsersCache = [];
 
     async function checkAdmin() {
       const { data: { user } } = await client.auth.getUser();
-      if (!user) { window.location.href = 'login.html'; return; }
+      if (!user) { 
+        window.location.replace('login.html'); 
+        return; 
+      }
       currentAdminUser = user;
       loadAdminCode();
-      loadVerifications();
     }
 
     async function loadAdminCode() {
@@ -240,12 +133,11 @@
         document.getElementById('code-view-section').style.display = 'block';
         document.getElementById('code-set-section').style.display = 'none';
         loadReferredUsers(savedCodeValue);
-        loadClientDeposits();
       } else {
         document.getElementById('code-view-section').style.display = 'none';
         document.getElementById('code-set-section').style.display = 'block';
-        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
-        document.getElementById('client-deposits-body').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
+        document.getElementById('user-count-display').innerText = "Total Users Joined: 0";
+        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
       }
     }
 
@@ -292,144 +184,33 @@
         .order('created_at', { ascending: false });
 
       const tbody = document.getElementById('referred-users-body');
+      const countDisplay = document.getElementById('user-count-display');
 
       if (error || !data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No users joined with this code yet.</td></tr>`;
+        countDisplay.innerText = "Total Users Joined: 0";
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No users joined with this code yet.</td></tr>`;
         return;
       }
 
-      fetchedUsersCache = data;
+      countDisplay.innerText = `Total Users Joined: ${data.length}`;
 
-      tbody.innerHTML = data.map((user, index) => `
+      tbody.innerHTML = data.map(user => `
         <tr>
           <td><strong>${user.username || 'N/A'}</strong></td>
-          <td><span style="color: #818cf8; cursor: pointer; text-decoration: underline;" onclick="openUserModal(${index})">${user.email || 'N/A'}</span></td>
+          <td>${user.email || 'N/A'}</td>
           <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
           <td>${new Date(user.created_at).toLocaleDateString()}</td>
-          <td><button class="btn-view" onclick="openUserModal(${index})">View Info</button></td>
         </tr>
       `).join('');
     }
 
-    async function loadClientDeposits() {
-      if (!savedCodeValue) return;
-
-      const { data, error } = await client
-        .from('client_deposits')
-        .select('*, profiles(email)')
-        .eq('admin_referral_code', savedCodeValue)
-        .order('created_at', { ascending: false });
-
-      const tbody = document.getElementById('client-deposits-body');
-
-      if (error || !data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No payment submissions found.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(item => `
-        <tr>
-          <td><strong>${item.profiles?.email || 'N/A'}</strong></td>
-          <td><span class="badge" style="background: rgba(129, 140, 248, 0.15); color: #818cf8;">${item.payment_type.toUpperCase()}</span></td>
-          <td><code>${item.details || 'N/A'}</code></td>
-          <td>${item.receipt_url ? `<a href="${item.receipt_url}" target="_blank"><img src="${item.receipt_url}" class="id-img" alt="Proof"></a>` : 'None'}</td>
-          <td><span class="badge ${item.status}">${item.status}</span></td>
-          <td>
-            <div class="action-btns">
-              <button class="btn-approve" onclick="updateDepositStatus('${item.id}', 'approved')">Approve</button>
-              <button class="btn-reject" onclick="updateDepositStatus('${item.id}', 'rejected')">Reject</button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
+    async function logout() {
+      await client.auth.signOut();
+      window.location.replace('login.html');
     }
 
-    async function updateDepositStatus(id, newStatus) {
-      const { error } = await client
-        .from('client_deposits')
-        .update({ status: newStatus })
-        .eq('id', id);
-
-      if (error) {
-        alert("Failed to update status: " + error.message);
-      } else {
-        loadClientDeposits();
-      }
-    }
-
-    function openUserModal(index) {
-      const user = fetchedUsersCache[index];
-      if (!user) return;
-
-      const content = document.getElementById('modal-content');
-      content.innerHTML = `
-        <div class="info-row"><span class="info-label">Email:</span><span class="info-value">${user.email || 'N/A'}</span></div>
-        <div class="info-row"><span class="info-label">Username:</span><span class="info-value">${user.username || 'N/A'}</span></div>
-        <div class="info-row"><span class="info-label">Full Name:</span><span class="info-value">${user.full_name || 'N/A'}</span></div>
-        <div class="info-row"><span class="info-label">Active Plan:</span><span class="info-value" style="color: #34d399;">${user.plan || 'Standard'}</span></div>
-        <div class="info-row"><span class="info-label">Wallet Balance:</span><span class="info-value">$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</span></div>
-        <div class="info-row"><span class="info-label">Referred By Code:</span><span class="info-value">${user.referred_by || 'None'}</span></div>
-        <div class="info-row" style="border-bottom: none;"><span class="info-label">Joined Date:</span><span class="info-value">${new Date(user.created_at).toLocaleString()}</span></div>
-      `;
-
-      document.getElementById('modal-action-container').innerHTML = `
-        <a href="edit-user.html?id=${user.id}" class="btn-edit-page">Edit Full Info on Separate Page</a>
-      `;
-
-      document.getElementById('userModal').style.display = 'flex';
-    }
-
-    function closeUserModal() {
-      document.getElementById('userModal').style.display = 'none';
-    }
-
-    async function loadVerifications() {
-      const { data, error } = await client
-        .from('user_verifications')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      const tbody = document.getElementById('verification-table-body');
-      
-      if (error || !data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No verification records found.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(item => `
-        <tr>
-          <td><strong>${item.full_name || 'N/A'}</strong></td>
-          <td>${item.gmail || 'N/A'}</td>
-          <td>${item.phone_number || 'N/A'}</td>
-          <td><code>${item.ssn || 'N/A'}</code></td>
-          <td><a href="${item.id_front_url}" target="_blank"><img src="${item.id_front_url}" class="id-img" alt="Front"></a></td>
-          <td><a href="${item.id_back_url}" target="_blank"><img src="${item.id_back_url}" class="id-img" alt="Back"></a></td>
-          <td><span class="badge ${item.status}">${item.status}</span></td>
-          <td>
-            <div class="action-btns">
-              <button class="btn-approve" onclick="updateStatus('${item.id}', 'approved')">Approve</button>
-              <button class="btn-reject" onclick="updateStatus('${item.id}', 'rejected')">Reject</button>
-            </div>
-          </td>
-        </tr>
-      `).join('');
-    }
-
-    async function updateStatus(id, newStatus) {
-      const { error } = await client
-        .from('user_verifications')
-        .update({ status: newStatus })
-        .eq('id', id);
-
-      if (error) {
-        alert("Failed to update status: " + error.message);
-      } else {
-        loadVerifications();
-      }
-    }
-
-    async function updateBalance(e) {
-      e.preventDefault();
-      const email = document.getElementById('target-email').value;
-      const amount = parseFloat(document.getElementById('target-amount').value);
-      const action = doc
+    checkAdmin();
+  </script>
+</body>
+  </html>
+  
