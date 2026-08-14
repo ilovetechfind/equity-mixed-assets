@@ -104,8 +104,8 @@
         <h2 class="balance-amount" id="user-balance">$0.00</h2>
       </div>
       <div class="action-grid">
-        <a href="deposit.html" class="btn-primary">Deposit</a>
-        <a href="investment-plan.html" class="btn-secondary">Investment Plan</a>
+        <a href="deposit.html" class="btn-primary" id="deposit-link">Deposit</a>
+        <a href="investment-plan.html" class="btn-secondary" id="plan-link">Investment Plan</a>
       </div>
     </div>
 
@@ -127,19 +127,19 @@
 
     <div class="card">
       <span class="card-title" style="display: block; margin-bottom: 10px;">WITHDRAW FUNDS</span>
-      <a href="withdraw.html" class="submit-lg">Withdraw Funds</a>
+      <a href="withdraw.html" class="submit-lg" id="withdraw-link">Withdraw Funds</a>
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item active"><span class="nav-icon">🏠</span>Home</a>
-    <a href="investment-plan.html" class="nav-item"><span class="nav-icon">📈</span>Plans</a>
-    <a href="deposit.html" class="nav-item"><span class="nav-icon">💳</span>Deposit</a>
-    <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+    <a href="dashboard.html" class="nav-item active" id="nav-home"><span class="nav-icon">🏠</span>Home</a>
+    <a href="investment-plan.html" class="nav-item" id="nav-plans"><span class="nav-icon">📈</span>Plans</a>
+    <a href="deposit.html" class="nav-item" id="nav-deposit"><span class="nav-icon">💳</span>Deposit</a>
+    <a href="settings.html" class="nav-item" id="nav-settings"><span class="nav-icon">⚙️</span>Settings</a>
   </nav>
 
   <!-- Customer Care Support Bubble Widget -->
-  <a href="customer-care.html" class="support-bubble" title="Customer Care">🎧</a>
+  <a href="customer-care.html" class="support-bubble" id="support-link" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="ticker.js"></script>
@@ -155,10 +155,26 @@
     }
 
     async function checkUser() {
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { window.location.href = 'index.html'; return; }
+      // Check if an explicit target user ID is passed via URL query parameter (from admin panel preview)
+      const urlParams = new URLSearchParams(window.location.search);
+      let targetUserId = urlParams.get('id');
+
+      // If no ID is in the URL, fallback to the currently logged-in user session
+      if (!targetUserId) {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) { window.location.href = 'index.html'; return; }
+        targetUserId = user.id;
+      } else {
+        // If we are viewing a target user via admin query parameter, append ?id= to internal navigation links so it persists across pages
+        ['deposit-link', 'plan-link', 'withdraw-link', 'nav-home', 'nav-plans', 'nav-deposit', 'nav-settings', 'support-link'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.getAttribute('href')) {
+            el.setAttribute('href', el.getAttribute('href') + '?id=' + targetUserId);
+          }
+        });
+      }
       
-      const { data: profile } = await client.from('profiles').select('balance, username, avatar_url, volume_percentage').eq('id', user.id).single();
+      const { data: profile } = await client.from('profiles').select('balance, username, avatar_url, volume_percentage').eq('id', targetUserId).single();
       if (profile) {
         document.getElementById('user-balance').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         
@@ -177,8 +193,8 @@
 
       // Realtime listener so updates from admin panel show instantly on user dashboard
       client
-        .channel('public:profiles:' + user.id)
-        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, payload => {
+        .channel('public:profiles:' + targetUserId)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${targetUserId}` }, payload => {
           const newDat = payload.new;
           if (newDat.balance !== undefined) {
             document.getElementById('user-balance').innerText = `$${Number(newDat.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
@@ -203,4 +219,5 @@
     checkUser();
   </script>
 </body>
-</html>
+  </html>
+  
