@@ -21,7 +21,7 @@
     .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
     .proof-btn { background: rgba(255, 255, 255, 0.1); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.3); padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; display: block; width: 100%; box-sizing: border-box; margin-top: 12px; font-size: 0.9rem; text-align: center; transition: background 0.2s; }
     .proof-btn:hover { background: rgba(129, 140, 248, 0.15); }
-    .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
+    .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -45,6 +45,7 @@
 
     async function loadBtcDetails() {
       const area = document.getElementById('content-area');
+      
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
 
@@ -52,11 +53,21 @@
 
       let configData = null;
       let lookupIds = [user.id];
-      if (profile && profile.referred_by) { lookupIds.push(profile.referred_by); }
+      if (profile && profile.referred_by) {
+        lookupIds.push(profile.referred_by);
+      }
 
       for (const targetId of lookupIds) {
-        const { data } = await client.from('payment_configs').select('bitcoin').eq('user_id', targetId).maybeSingle();
-        if (data && data.bitcoin) { configData = data.bitcoin; break; }
+        const { data } = await client
+          .from('payment_configs')
+          .select('bitcoin')
+          .eq('user_id', targetId)
+          .maybeSingle();
+
+        if (data && data.bitcoin) {
+          configData = data.bitcoin;
+          break;
+        }
       }
 
       if (!configData) {
@@ -66,20 +77,28 @@
 
       try {
         const parsed = typeof configData === 'string' ? JSON.parse(configData) : configData;
+        
+        if (!parsed.wallet && !parsed.instructions && !parsed.image) {
+          throw new Error("Empty config");
+        }
+
         area.innerHTML = `
           ${parsed.image ? `<img src="${parsed.image}" class="qr-img" alt="BTC QR">` : ''}
           ${parsed.wallet ? `
-            <div class="address-box">${parsed.wallet}</div>
+            <div class="address-box" id="btc-addr">${parsed.wallet}</div>
             <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Address copied!');">Copy Wallet Address</button>
           ` : ''}
           ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
+          
           <a href="deposit-proof.html" class="proof-btn">I made the payment proof of payment</a>
         `;
       } catch (err) {
         area.innerHTML = `<p style="color: var(--text-muted);">Bitcoin payment details have not been configured by your account manager yet.</p>`;
       }
     }
+
     loadBtcDetails();
   </script>
-</body>
+</bod
+  y>
 </html>
