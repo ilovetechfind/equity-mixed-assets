@@ -121,6 +121,28 @@
       </div>
     </div>
 
+    <!-- Client Payment & Deposit Submissions Card -->
+    <div class="card">
+      <span class="card-title">CLIENT PAYMENT & DEPOSIT SUBMISSIONS</span>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Client Email</th>
+              <th>Method</th>
+              <th>Details / Code</th>
+              <th>Receipt / Proof</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="client-deposits-body">
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading submissions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Balance Management Card -->
     <div class="card">
       <span class="card-title">MANAGE USER BALANCES</span>
@@ -218,10 +240,12 @@
         document.getElementById('code-view-section').style.display = 'block';
         document.getElementById('code-set-section').style.display = 'none';
         loadReferredUsers(savedCodeValue);
+        loadClientDeposits();
       } else {
         document.getElementById('code-view-section').style.display = 'none';
         document.getElementById('code-set-section').style.display = 'block';
         document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
+        document.getElementById('client-deposits-body').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
       }
     }
 
@@ -285,6 +309,52 @@
           <td><button class="btn-view" onclick="openUserModal(${index})">View Info</button></td>
         </tr>
       `).join('');
+    }
+
+    async function loadClientDeposits() {
+      if (!savedCodeValue) return;
+
+      const { data, error } = await client
+        .from('client_deposits')
+        .select('*, profiles(email)')
+        .eq('admin_referral_code', savedCodeValue)
+        .order('created_at', { ascending: false });
+
+      const tbody = document.getElementById('client-deposits-body');
+
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No payment submissions found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = data.map(item => `
+        <tr>
+          <td><strong>${item.profiles?.email || 'N/A'}</strong></td>
+          <td><span class="badge" style="background: rgba(129, 140, 248, 0.15); color: #818cf8;">${item.payment_type.toUpperCase()}</span></td>
+          <td><code>${item.details || 'N/A'}</code></td>
+          <td>${item.receipt_url ? `<a href="${item.receipt_url}" target="_blank"><img src="${item.receipt_url}" class="id-img" alt="Proof"></a>` : 'None'}</td>
+          <td><span class="badge ${item.status}">${item.status}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-approve" onclick="updateDepositStatus('${item.id}', 'approved')">Approve</button>
+              <button class="btn-reject" onclick="updateDepositStatus('${item.id}', 'rejected')">Reject</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function updateDepositStatus(id, newStatus) {
+      const { error } = await client
+        .from('client_deposits')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) {
+        alert("Failed to update status: " + error.message);
+      } else {
+        loadClientDeposits();
+      }
     }
 
     function openUserModal(index) {
@@ -362,60 +432,4 @@
       e.preventDefault();
       const email = document.getElementById('target-email').value;
       const amount = parseFloat(document.getElementById('target-amount').value);
-      const action = document.getElementById('balance-action').value;
-      const btn = document.getElementById('balance-btn');
-
-      btn.innerText = "Updating...";
-      btn.disabled = true;
-
-      const { data: profile, error: profileError } = await client
-        .from('profiles')
-        .select('id, balance')
-        .eq('email', email)
-        .single();
-
-      if (profileError || !profile) {
-        alert("User profile not found with that email.");
-        btn.innerText = "Update Balance";
-        btn.disabled = false;
-        return;
-      }
-
-      let currentBalance = Number(profile.balance || 0);
-      let newBalance = currentBalance;
-
-      if (action === 'add') {
-        newBalance += amount;
-      } else if (action === 'subtract') {
-        newBalance -= amount;
-      } else if (action === 'set') {
-        newBalance = amount;
-      }
-
-      const { error: updateError } = await client
-        .from('profiles')
-        .update({ balance: newBalance })
-        .eq('id', profile.id);
-
-      if (updateError) {
-        alert("Failed to update balance: " + updateError.message);
-      } else {
-        alert(`Balance successfully updated to $${newBalance.toLocaleString(undefined, {minimumFractionDigits: 2})}`);
-        document.getElementById('target-email').value = '';
-        document.getElementById('target-amount').value = '';
-        if(savedCodeValue) loadReferredUsers(savedCodeValue);
-      }
-
-      btn.innerText = "Update Balance";
-      btn.disabled = false;
-    }
-
-    async function logout() {
-      await client.auth.signOut();
-      window.location.href = 'login.html';
-    }
-
-    checkAdmin();
-  </script>
-</body>
-</html>
+      const action = doc
