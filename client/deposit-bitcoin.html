@@ -15,8 +15,9 @@
     body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; }
     .container { width: 100%; max-width: 500px; margin: 30px auto; }
     .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    .qr-img { width: 180px; height: 180px; object-fit: contain; background: white; padding: 10px; border-radius: 12px; margin: 15px 0; }
-    .address-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.85rem; word-break: break-all; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1); }
+    .qr-img { width: 180px; height: 180px; object-fit: contain; background: white; padding: 10px; border-radius: 12px; margin: 15px auto; display: block; }
+    .address-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.85rem; word-break: break-all; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
+    .instructions-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; font-size: 0.85rem; color: var(--text-muted); margin: 15px 0; text-align: left; white-space: pre-wrap; }
     .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
     .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; }
   </style>
@@ -41,30 +42,54 @@
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function loadBtcDetails() {
+      const area = document.getElementById('content-area');
+      
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
 
-      const { data: profile } = await client.from('profiles').select('referred_by').eq('id', user.id).single();
-      if (!profile || !profile.referred_by) {
-        document.getElementById('content-area').innerHTML = `<p style="color: #fca5a5;">No referrer found for this account.</p>`;
+      // Get the manager / referrer ID or profile ID that links to payment_configs
+      const { data: profile } = await client.from('profiles').select('referred_by, id').eq('id', user.id).single();
+      if (!profile) {
+        area.innerHTML = `<p style="color: #fca5a5;">Profile not found.</p>`;
         return;
       }
 
-      const { data: settings } = await client.from('admin_payment_settings').select('*').eq('referral_code', profile.referred_by).single();
-      const area = document.getElementById('content-area');
+      // Check configs using referred_by or fall back to user.id depending on how your admin saves it
+      let targetManagerId = profile.referred_by || user.id;
 
-      if (!settings || !settings.btc_address) {
+      const { data: configData } = await client
+        .from('payment_configs')
+        .select('bitcoin')
+        .eq('user_id', targetManagerId)
+        .maybeSingle();
+
+      if (!configData || !configData.bitcoin) {
         area.innerHTML = `<p style="color: var(--text-muted);">Bitcoin payment details have not been configured by your account manager yet.</p>`;
         return;
       }
 
-      area.innerHTML = `
-        ${settings.btc_qr_url ? `<img src="${settings.btc_qr_url}" class="qr-img" alt="BTC QR">` : ''}
-        <div class="address-box" id="btc-addr">${settings.btc_address}</div>
-        <button class="btn" onclick="navigator.clipboard.writeText('${settings.btc_address}'); alert('Address copied!');">Copy Wallet Address</button>
-      `;
+      try {
+        const parsed = typeof configData.bitcoin === 'string' ? JSON.parse(configData.bitcoin) : configData.bitcoin;
+        
+        if (!parsed.wallet && !parsed.instructions && !parsed.image) {
+          throw new Error("Empty config");
+        }
+
+        area.innerHTML = `
+          ${parsed.image ? `<img src="${parsed.image}" class="qr-img" alt="BTC QR">` : ''}
+          ${parsed.wallet ? `
+            <div class="address-box" id="btc-addr">${parsed.wallet}</div>
+            <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Address copied!');">Copy Wallet Address</button>
+          ` : ''}
+          ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
+        `;
+      } catch (err) {
+        area.innerHTML = `<p style="color: var(--text-muted);">Bitcoin payment details have not been configured by your account manager yet.</p>`;
+      }
     }
+
     loadBtcDetails();
   </script>
 </body>
+  
 </html>
