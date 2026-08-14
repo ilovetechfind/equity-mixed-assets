@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Edit Payment Detail</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+    }
+
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+    }
+
+    .container { width: 100%; max-width: 720px; margin: 0 auto; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 20px; }
+    .back-link:hover { text-decoration: underline; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 1.2rem; font-weight: 700; margin-top: 0; margin-bottom: 8px; }
+    .card-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    textarea, input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; font-family: inherit; }
+    textarea:focus, input:focus { border-color: var(--primary); }
+
+    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
+    .submit-btn:hover { opacity: 0.9; }
+    .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
+
+    /* Proof table/list layout */
+    .proof-item { background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .proof-info span { display: block; font-size: 0.8rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="#" id="back-hub" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Payment Hub
+    </a>
+
+    <div class="card">
+      <h2 id="page-title" class="card-title">Loading...</h2>
+      <p id="page-subtitle" class="card-subtitle">Please wait while we load configuration details.</p>
+
+      <!-- Form for setting configurations -->
+      <div id="config-form-container" style="display: none;">
+        <form onsubmit="saveConfig(event)">
+          <div class="form-group">
+            <label id="input-label">Details / Instructions</label>
+            <textarea id="config-value" rows="5" placeholder="Enter instructions or wallet details here..."></textarea>
+          </div>
+          <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
+          <span id="form-status" class="status-msg"></span>
+        </form>
+      </div>
+
+      <!-- Section for viewing Payment Proofs -->
+      <div id="proof-container" style="display: none;">
+        <div id="proofs-list">
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Fetching user uploaded receipts...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id');
+    const paymentType = urlParams.get('type'); // bitcoin, giftcard, bank, custom, proof
+
+    document.getElementById('back-hub').setAttribute('href', `payment-methods.html?id=${targetUserId}`);
+
+    const titles = {
+      bitcoin: { title: "Pay Through Bitcoin", sub: "Manage active wallet address & network notes", label: "Bitcoin Deposit Address / QR Details" },
+      giftcard: { title: "Upload Gift Card Instructions", sub: "Manage guidelines for gift card uploads", label: "Accepted Cards & Instructions" },
+      bank: { title: "Bank Transfer Details", sub: "Manage wire transfer instructions & account routing", label: "Bank Account / IBAN / SWIFT Details" },
+      custom: { title: "Custom Payment Instructions", sub: "Manage alternate manual payment notes", label: "Custom Instructions" },
+      proof: { title: "Client Payment Proofs", sub: "Review transaction receipts submitted by this user", label: "" }
+    };
+
+    if (titles[paymentType]) {
+      document.getElementById('page-title').innerText = titles[paymentType].title;
+      document.getElementById('page-subtitle').innerText = titles[paymentType].sub;
+      
+      if (paymentType === 'proof') {
+        document.getElementById('proof-container').style.display = 'block';
+        loadProofs();
+      } else {
+        document.getElementById('config-form-container').style.display = 'block';
+        document.getElementById('input-label').innerText = titles[paymentType].label;
+        loadExistingValue();
+      }
+    }
+
+    async function loadExistingValue() {
+      if (!targetUserId) return;
+      const { data } = await client
+        .from('payment_configs')
+        .select(paymentType)
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+
+      if (data && data[paymentType]) {
+        document.getElementById('config-value').value = data[paymentType];
+      }
+    }
+
+    async function saveConfig(e) {
+      e.preventDefault();
+      const val = document.getElementById('config-value').value.trim();
+      const statusEl = document.getElementById('form-status');
+      const btn = document.getElementById('save-btn');
+
+      if (!targetUserId) {
+        alert("User ID missing.");
+        return;
+      }
+
+      btn.innerText = "Saving...";
+      btn.disabled = true;
+
+      // Upsert dynamic column value
+      let updatePayload = { user_id: targetUserId };
+      updatePayload[paymentType] = val;
+
+      const { error } = await client
+        .from('payment_configs')
+        .upsert(updatePayload, { onConflict: 'user_id' });
+
+      btn.innerText = "Save Changes";
+      btn.disabled = false;
+
+      if (error) {
+        statusEl.style.color = "#f87171";
+        statusEl.innerText = "Error: " + error.message;
+      } else {
+        statusEl.style.color = "#34d399";
+        statusEl.innerText = "Saved successfully!";
+        setTimeout(() => { statusEl.innerText = ""; }, 3000);
+      }
+    }
+
+    async function loadProofs() {
+      const container = document.getElementById('proofs-list');
+      if (!targetUserId) {
+        container.innerHTML = "<p>User ID missing.</p>";
+        return;
+      }
+
+      const { data, error } = await client
+        .from('payment_proofs') // table for uploaded receipts/giftcards
+        .select('*')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false });
+
+      if (error || !data || data.length === 0) {
+        container.innerHTML = "<p style='color: var(--text-muted);'>No payment proofs uploaded by this client yet.</p>";
+        return;
+      }
+
+      container.innerHTML = data.map(item => `
+        <div class="proof-item">
+          <div>
+            <strong>${item.method_type || 'Payment Receipt'}</strong>
+            <span>Submitted on: ${new Date(item.created_at).toLocaleString()}</span>
+          </div>
+          ${item.file_url ? `<a href="${item.file_url}" target="_blank" style="background:var(--primary); color:white; padding:6px 12px; border-radius:6px; text-decoration:none; font-size:0.8rem; font-weight:600;">View File</a>` : '<span>No file attached</span>'}
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
