@@ -38,7 +38,7 @@
           <label>Upload Gift Card Photo / Receipt</label>
           <input type="file" id="card-photo" accept="image/*" required>
         </div>
-        <button type="submit" class="submit-btn" id="submit-btn">Submit Gift Card</button>
+        <button type="submit" class="btn" id="submit-btn">Submit Gift Card</button>
       </form>
     </div>
   </div>
@@ -71,6 +71,8 @@
       btn.disabled = true;
 
       const { data: { user } } = await client.auth.getUser();
+      const { data: profile } = await client.from('profiles').select('referred_by').eq('id', user.id).single();
+
       const file = document.getElementById('card-photo').files[0];
       const fileName = `gc_${user.id}_${Date.now()}.${file.name.split('.').pop()}`;
 
@@ -84,12 +86,28 @@
 
       const { data: publicURL } = client.storage.from('kyc-bucket').getPublicUrl(fileName);
 
-      // Save submission to database or notify admin
-      alert("Gift card submitted successfully for verification!");
-      window.location.href = 'deposit.html';
+      const { error: insertError } = await client.from('client_deposits').insert({
+        user_id: user.id,
+        admin_referral_code: profile?.referred_by || '',
+        payment_type: 'gift_card',
+        details: document.getElementById('card-code').value.trim(),
+        receipt_url: publicURL.publicUrl,
+        status: 'pending'
+      });
+
+      if (insertError) {
+        alert("Submission failed: " + insertError.message);
+      } else {
+        alert("Gift card submitted successfully for review!");
+        window.location.href = 'deposit.html';
+      }
+
+      btn.innerText = "Submit Gift Card";
+      btn.disabled = false;
     }
 
     loadInfo();
   </script>
-</body>
+</b
+  ody>
 </html>
