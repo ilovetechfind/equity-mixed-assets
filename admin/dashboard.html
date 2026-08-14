@@ -48,11 +48,13 @@
     .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
     input, select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
     input:focus, select:focus { border-color: #6366f1; }
-    input:disabled { opacity: 0.7; cursor: not-allowed; }
     
     .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
+    .copy-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
-    .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; margin-bottom: 10px; }
+    
+    .code-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; }
   </style>
 </head>
 <body>
@@ -66,14 +68,23 @@
     <!-- Admin Referral Code Card -->
     <div class="card">
       <span class="card-title">YOUR ADMIN REFERRAL CODE</span>
-      <div>
-        <div class="code-display" id="admin-ref-code">Loading...</div>
-      </div>
-      <div class="form-row" id="code-input-container" style="margin-top: 10px; display: none;">
-        <div class="input-group" style="max-width: 300px;">
-          <input type="text" id="new-ref-code" placeholder="Set custom code">
+      
+      <!-- View / Copy Mode (Shown when code exists) -->
+      <div id="code-view-section" style="display: none;">
+        <div class="code-container">
+          <div class="code-display" id="displayed-admin-code"></div>
+          <button class="copy-btn" onclick="copyAdminCode()">Copy Code</button>
         </div>
-        <button class="submit-btn" id="save-code-btn" onclick="saveAdminCode()">Save Code</button>
+      </div>
+
+      <!-- Set Mode (Shown only when code is not set yet) -->
+      <div id="code-set-section" style="display: none;">
+        <form onsubmit="saveAdminCode(event)" class="form-row">
+          <div class="input-group" style="max-width: 300px;">
+            <input type="text" id="new-ref-code" placeholder="Enter referral code (e.g. ADMIN500)" required>
+          </div>
+          <button type="submit" class="submit-btn" id="save-code-btn">Save & Lock Code</button>
+        </form>
       </div>
     </div>
 
@@ -153,6 +164,7 @@
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentAdminId = null;
+    let savedCodeValue = '';
 
     async function checkAdmin() {
       const { data: { user } } = await client.auth.getUser();
@@ -163,33 +175,36 @@
     }
 
     async function loadAdminCode() {
-      const { data: profile } = await client
+      const { data: profile, error } = await client
         .from('profiles')
         .select('referral_code')
         .eq('id', currentAdminId)
-        .single();
+        .maybeSingle();
 
-      const existingCode = profile?.referral_code;
+      savedCodeValue = profile?.referral_code;
 
-      if (existingCode && existingCode.trim() !== '') {
-        // Code is already set and locked in
-        document.getElementById('admin-ref-code').innerText = existingCode;
-        document.getElementById('code-input-container').style.display = 'none';
-        loadReferredUsers(existingCode);
+      if (savedCodeValue && savedCodeValue.trim() !== '') {
+        // Code is locked in! Show view/copy section, hide input section
+        document.getElementById('displayed-admin-code').innerText = savedCodeValue;
+        document.getElementById('code-view-section').style.display = 'block';
+        document.getElementById('code-set-section').style.display = 'none';
+        loadReferredUsers(savedCodeValue);
       } else {
-        // No code set yet, show input and save button
-        document.getElementById('admin-ref-code').innerText = 'Not Set Yet';
-        document.getElementById('code-input-container').style.display = 'flex';
+        // No code set yet. Show input form to create and lock it.
+        document.getElementById('code-view-section').style.display = 'none';
+        document.getElementById('code-set-section').style.display = 'block';
         document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
       }
     }
 
-    async function saveAdminCode() {
+    async function saveAdminCode(e) {
+      e.preventDefault();
       const newCode = document.getElementById('new-ref-code').value.trim();
-      if (!newCode) {
-        alert("Please enter a valid referral code.");
-        return;
-      }
+      if (!newCode) return;
+
+      const btn = document.getElementById('save-code-btn');
+      btn.innerText = "Saving...";
+      btn.disabled = true;
 
       const { error } = await client
         .from('profiles')
@@ -198,10 +213,21 @@
 
       if (error) {
         alert("Failed to save code: " + error.message);
+        btn.innerText = "Save & Lock Code";
+        btn.disabled = false;
       } else {
         alert("Admin referral code locked in successfully!");
         loadAdminCode();
       }
+    }
+
+    function copyAdminCode() {
+      if (!savedCodeValue) return;
+      navigator.clipboard.writeText(savedCodeValue).then(() => {
+        alert("Referral code copied to clipboard!");
+      }).catch(err => {
+        alert("Failed to copy code.");
+      });
     }
 
     async function loadReferredUsers(code) {
