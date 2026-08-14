@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Edit Bank Transfer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+    }
+
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+    }
+
+    .container { width: 100%; max-width: 720px; margin: 0 auto; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 20px; }
+    .back-link:hover { text-decoration: underline; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 1.2rem; font-weight: 700; margin-top: 0; margin-bottom: 8px; }
+    .card-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    input, textarea { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; font-family: inherit; }
+    input:focus, textarea:focus { border-color: var(--primary); }
+
+    .file-input-wrapper { display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 10px; }
+    .file-input-wrapper input[type="file"] { border: none; padding: 0; background: transparent; color: var(--text-muted); font-size: 0.85rem; }
+
+    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
+    .submit-btn:hover { opacity: 0.9; }
+    .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
+
+    .preview-img { margin-top: 10px; max-width: 120px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="#" id="back-hub" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Payment Hub
+    </a>
+
+    <div class="card">
+      <h2 class="card-title">Bank Transfer</h2>
+      <p class="card-subtitle">Manage wire transfer routing details, bank logo/picture, and instructions.</p>
+
+      <form onsubmit="saveBankConfig(event)">
+        
+        <!-- 1. Bank Account Details -->
+        <div class="form-group">
+          <label>Bank Account / IBAN / SWIFT</label>
+          <input type="text" id="bank-wallet" placeholder="Enter bank account name, number, routing, etc..." autocomplete="off">
+        </div>
+
+        <!-- 2. Upload Picture / Bank Logo -->
+        <div class="form-group">
+          <label>Upload Bank Logo / QR Code</label>
+          <div class="file-input-wrapper">
+            <input type="file" id="bank-image-file" accept="image/*" onchange="previewImage(event)">
+          </div>
+          <img id="image-preview" class="preview-img" alt="Preview">
+          <input type="hidden" id="bank-image-url">
+        </div>
+
+        <!-- 3. Instructions -->
+        <div class="form-group">
+          <label>Instructions</label>
+          <textarea id="bank-instructions" rows="4" placeholder="Enter transfer processing notes here..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
+        <span id="form-status" class="status-msg"></span>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id');
+
+    if (targetUserId) {
+      document.getElementById('back-hub').setAttribute('href', `payment-methods.html?id=${targetUserId}`);
+    }
+
+    function previewImage(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const preview = document.getElementById('image-preview');
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          document.getElementById('bank-image-url').value = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function loadBankConfig() {
+      if (!targetUserId) return;
+      const { data } = await client
+        .from('payment_configs')
+        .select('bank')
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+
+      if (data && data.bank) {
+        try {
+          const parsed = typeof data.bank === 'string' ? JSON.parse(data.bank) : data.bank;
+          document.getElementById('bank-wallet').value = parsed.wallet || '';
+          document.getElementById('bank-instructions').value = parsed.instructions || '';
+          if (parsed.image) {
+            document.getElementById('bank-image-url').value = parsed.image;
+            const preview = document.getElementById('image-preview');
+            preview.src = parsed.image;
+            preview.style.display = 'block';
+          }
+        } catch (err) {
+          document.getElementById('bank-instructions').value = data.bank;
+        }
+      }
+    }
+
+    async function saveBankConfig(e) {
+      e.preventDefault();
+      const wallet = document.getElementById('bank-wallet').value.trim();
+      const image = document.getElementById('bank-image-url').value.trim();
+      const instructions = document.getElementById('bank-instructions').value.trim();
+      const statusEl = document.getElementById('form-status');
+      const btn = document.getElementById('save-btn');
+
+      if (!targetUserId) {
+        alert("User ID missing.");
+        return;
+      }
+
+      btn.innerText = "Saving...";
+      btn.disabled = true;
+
+      const payloadData = JSON.stringify({ wallet, image, instructions });
+
+      const { error } = await client
+        .from('payment_configs')
+        .upsert({ user_id: targetUserId, bank: payloadData }, { onConflict: 'user_id' });
+
+      btn.innerText = "Save Changes";
+      btn.disabled = false;
+
+      if (error) {
+        statusEl.style.color = "#f87171";
+        statusEl.innerText = "Error: " + error.message;
+      } else {
+        statusEl.style.color = "#34d399";
+        statusEl.innerText = "Bank details saved successfully!";
+        setTimeout(() => { statusEl.innerText = ""; }, 3000);
+      }
+    }
+
+    loadBankConfig();
+  </script>
+</body>
+</html>
