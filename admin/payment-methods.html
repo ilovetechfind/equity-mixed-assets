@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Payment Methods</title>
+  <title>Equity Mixed Assets - Payment Control</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -43,13 +43,15 @@
     .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
     .submit-btn:hover { opacity: 0.9; }
     .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
+    
+    .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 24px 0; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header class="header">
-      <h1 class="logo-text">Payment Methods</h1>
+      <h1 class="logo-text">Payment & Notification Control</h1>
     </header>
 
     <a href="#" id="back-to-user" class="back-link">
@@ -57,21 +59,46 @@
       Back to User Info
     </a>
 
+    <!-- 4 Payment Methods Configuration Card -->
     <div class="card">
-      <h2 class="card-title">Configure Deposit Instructions</h2>
-      <form onsubmit="savePaymentMethod(event)">
+      <h2 class="card-title">Configure 4 Payment Channels</h2>
+      <form onsubmit="saveAllPaymentMethods(event)">
+        
         <div class="form-group">
-          <label>Selected Asset / Network (e.g. Bitcoin, USDT TRC20)</label>
-          <input type="text" id="method-name" placeholder="e.g. Bitcoin (BTC)">
+          <label>1. Bitcoin Payment Details / Wallet Address</label>
+          <textarea id="pay-bitcoin" rows="3" placeholder="Enter Bitcoin address or deposit details..."></textarea>
         </div>
 
         <div class="form-group">
-          <label>Wallet Address / Deposit Account Details</label>
-          <textarea id="method-details" rows="4" placeholder="Enter wallet address or payment instructions..."></textarea>
+          <label>2. Gift Card Payment Instructions / Accepted Types</label>
+          <textarea id="pay-giftcard" rows="3" placeholder="Enter gift card instructions..."></textarea>
         </div>
 
-        <button type="submit" class="submit-btn" id="save-btn">Save Payment Configuration</button>
-        <span id="form-status" class="status-msg"></span>
+        <div class="form-group">
+          <label>3. Bank Transfer Details (IBAN, SWIFT, Account Number)</label>
+          <textarea id="pay-bank" rows="3" placeholder="Enter bank routing and account details..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>4. Custom Payment Instructions</label>
+          <textarea id="pay-custom" rows="3" placeholder="Enter alternate custom payment arrangements..."></textarea>
+        </div>
+
+        <button type="submit" class="submit-btn" id="save-payment-btn">Save All Payment Methods</button>
+        <span id="payment-status" class="status-msg"></span>
+      </form>
+    </div>
+
+    <!-- Notification Card Control -->
+    <div class="card">
+      <h2 class="card-title">Push Notification / Alert Card to User</h2>
+      <form onsubmit="sendNotification(event)">
+        <div class="form-group">
+          <label>Notification Message / Status Update</label>
+          <input type="text" id="notif-input" placeholder="e.g. Your deposit is pending verification..." autocomplete="off">
+        </div>
+        <button type="submit" class="submit-btn" id="save-notif-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Send Notification Card</button>
+        <span id="notif-status" class="status-msg"></span>
       </form>
     </div>
   </div>
@@ -86,12 +113,30 @@
       document.getElementById('back-to-user').setAttribute('href', `user-info.html?id=${targetUserId}`);
     }
 
-    async function savePaymentMethod(e) {
+    async function loadExistingPayments() {
+      if (!targetUserId) return;
+      const { data } = await client
+        .from('payment_configs')
+        .select('*')
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+
+      if (data) {
+        document.getElementById('pay-bitcoin').value = data.bitcoin || '';
+        document.getElementById('pay-giftcard').value = data.giftcard || '';
+        document.getElementById('pay-bank').value = data.bank || '';
+        document.getElementById('pay-custom').value = data.custom || '';
+      }
+    }
+
+    async function saveAllPaymentMethods(e) {
       e.preventDefault();
-      const name = document.getElementById('method-name').value.trim();
-      const details = document.getElementById('method-details').value.trim();
-      const statusEl = document.getElementById('form-status');
-      const btn = document.getElementById('save-btn');
+      const bitcoin = document.getElementById('pay-bitcoin').value.trim();
+      const giftcard = document.getElementById('pay-giftcard').value.trim();
+      const bank = document.getElementById('pay-bank').value.trim();
+      const custom = document.getElementById('pay-custom').value.trim();
+      const statusEl = document.getElementById('payment-status');
+      const btn = document.getElementById('save-payment-btn');
 
       if (!targetUserId) {
         alert("Target user ID missing.");
@@ -101,12 +146,17 @@
       btn.innerText = "Saving...";
       btn.disabled = true;
 
-      // Upsert or update configuration entry in Supabase database
       const { error } = await client
         .from('payment_configs')
-        .upsert({ user_id: targetUserId, asset_name: name, instructions: details });
+        .upsert({ 
+          user_id: targetUserId, 
+          bitcoin: bitcoin,
+          giftcard: giftcard,
+          bank: bank,
+          custom: custom
+        }, { onConflict: 'user_id' });
 
-      btn.innerText = "Save Payment Configuration";
+      btn.innerText = "Save All Payment Methods";
       btn.disabled = false;
 
       if (error) {
@@ -114,11 +164,41 @@
         statusEl.innerText = "Error: " + error.message;
       } else {
         statusEl.style.color = "#34d399";
-        statusEl.innerText = "Payment method updated successfully!";
+        statusEl.innerText = "All 4 payment methods saved successfully!";
         setTimeout(() => { statusEl.innerText = ""; }, 3000);
       }
     }
+
+    async function sendNotification(e) {
+      e.preventDefault();
+      const message = document.getElementById('notif-input').value.trim();
+      const statusEl = document.getElementById('notif-status');
+      const btn = document.getElementById('save-notif-btn');
+
+      if (!message || !targetUserId) return;
+
+      btn.innerText = "Sending...";
+      btn.disabled = true;
+
+      const { error } = await client
+        .from('notifications')
+        .insert({ user_id: targetUserId, message: message, created_at: new Date().toISOString() });
+
+      btn.innerText = "Send Notification Card";
+      btn.disabled = false;
+
+      if (error) {
+        statusEl.style.color = "#f87171";
+        statusEl.innerText = "Failed to send: " + error.message;
+      } else {
+        statusEl.style.color = "#34d399";
+        statusEl.innerText = "Notification card pushed to user successfully!";
+        document.getElementById('notif-input').value = '';
+        setTimeout(() => { statusEl.innerText = ""; }, 3000);
+      }
+    }
+
+    loadExistingPayments();
   </script>
 </body>
-  </html>
-  
+</html>
