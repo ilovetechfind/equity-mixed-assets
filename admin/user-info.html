@@ -33,7 +33,7 @@
     .card-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0; }
     
-    .edit-toggle-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+    .edit-toggle-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
     .edit-toggle-btn:hover { background: rgba(129, 140, 248, 0.3); }
 
     .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 16px; }
@@ -43,13 +43,13 @@
     label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
     input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; transition: border-color 0.2s; }
     input:focus { border-color: var(--primary); }
-    input:disabled { opacity: 0.6; cursor: not-allowed; background: rgba(0,0,0,0.15); }
+    input:disabled { opacity: 0.7; cursor: not-allowed; background: rgba(0,0,0,0.2); color: #cbd5e1; }
 
     .range-wrap { display: flex; align-items: center; gap: 12px; }
     .range-wrap input[type="range"] { flex: 1; accent-color: var(--primary); cursor: pointer; }
     .range-value { font-weight: 800; color: #34d399; font-size: 1rem; min-width: 50px; text-align: right; }
 
-    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
+    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; display: none; }
     .submit-btn:hover { opacity: 0.9; }
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
     
@@ -93,8 +93,8 @@
         </div>
 
         <div class="form-group">
-          <label>Email Address (Locked)</label>
-          <input type="email" id="user-email" disabled>
+          <label>Email Address (View Only / Locked)</label>
+          <input type="email" id="user-email" disabled placeholder="Loading email...">
         </div>
 
         <div class="form-group">
@@ -110,7 +110,7 @@
           </div>
         </div>
 
-        <button type="submit" class="submit-btn" id="save-btn" style="display: none;">Save Changes</button>
+        <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
         <span id="form-status" class="status-msg"></span>
       </form>
     </div>
@@ -149,6 +149,7 @@
       const saveBtn = document.getElementById('save-btn');
       const toggleBtn = document.getElementById('toggle-edit-btn');
 
+      // Email remains locked/disabled as per your rule: "can't change email address of user"
       usernameInput.disabled = !isEditing;
       balanceInput.disabled = !isEditing;
       volumeInput.disabled = !isEditing;
@@ -173,7 +174,7 @@
         return;
       }
 
-      // Fetch from profiles table directly
+      // Fetch profile data
       const { data, error } = await client
         .from('profiles')
         .select('*')
@@ -185,8 +186,8 @@
         return;
       }
 
-      document.getElementById('user-username').value = data.username || data.full_name || data.name || 'Unnamed User';
-      document.getElementById('user-email').value = data.email || '';
+      document.getElementById('user-username').value = data.username || data.full_name || data.name || '';
+      document.getElementById('user-email').value = data.email || data.user_email || 'Not available';
       document.getElementById('user-balance').value = data.balance || 0;
       
       const vol = data.volume_percentage || 0;
@@ -228,7 +229,7 @@
       } else {
         statusEl.style.color = "#34d399";
         statusEl.innerText = "Changes saved successfully!";
-        toggleEditMode(); // Locks fields automatically after successful save
+        toggleEditMode(); // Locks fields automatically after save
         setTimeout(() => { statusEl.innerText = ""; }, 3000);
       }
     }
