@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Bitcoin Deposit</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; }
+    .container { width: 100%; max-width: 500px; margin: 30px auto; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .qr-img { width: 180px; height: 180px; object-fit: contain; background: white; padding: 10px; border-radius: 12px; margin: 15px 0; }
+    .address-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.85rem; word-break: break-all; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1); }
+    .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+    .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="deposit.html" class="back-btn">← Back</a>
+    <div class="card">
+      <h2 style="margin-top:0;">Pay Through Bitcoin</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Scan the QR code or copy the address below to complete your deposit.</p>
+      
+      <div id="content-area">
+        <p style="color: var(--text-muted);">Loading payment details...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadBtcDetails() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      const { data: profile } = await client.from('profiles').select('referred_by').eq('id', user.id).single();
+      if (!profile || !profile.referred_by) {
+        document.getElementById('content-area').innerHTML = `<p style="color: #fca5a5;">No referrer found for this account.</p>`;
+        return;
+      }
+
+      const { data: settings } = await client.from('admin_payment_settings').select('*').eq('referral_code', profile.referred_by).single();
+      const area = document.getElementById('content-area');
+
+      if (!settings || !settings.btc_address) {
+        area.innerHTML = `<p style="color: var(--text-muted);">Bitcoin payment details have not been configured by your account manager yet.</p>`;
+        return;
+      }
+
+      area.innerHTML = `
+        ${settings.btc_qr_url ? `<img src="${settings.btc_qr_url}" class="qr-img" alt="BTC QR">` : ''}
+        <div class="address-box" id="btc-addr">${settings.btc_address}</div>
+        <button class="btn" onclick="navigator.clipboard.writeText('${settings.btc_address}'); alert('Address copied!');">Copy Wallet Address</button>
+      `;
+    }
+    loadBtcDetails();
+  </script>
+</body>
+</html>
