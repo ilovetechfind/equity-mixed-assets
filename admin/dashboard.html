@@ -110,12 +110,21 @@
     let savedCodeValue = '';
 
     async function checkAdmin() {
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { 
-        window.location.replace('login.html'); 
-        return; 
+      // Check session first to avoid immediate redirect on fresh reload
+      const { data: { session }, error } = await client.auth.getSession();
+      
+      if (!session || error) {
+        // Fallback check directly to getUser
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) { 
+          window.location.replace('login.html'); 
+          return; 
+        }
+        currentAdminUser = user;
+      } else {
+        currentAdminUser = session.user;
       }
-      currentAdminUser = user;
+
       loadAdminCode();
     }
 
@@ -212,5 +221,4 @@
     checkAdmin();
   </script>
 </body>
-  </html>
-  
+</html>
