@@ -50,7 +50,7 @@
     .volume-status { color: #38bdf8; font-weight: 700; font-size: 0.85rem; background: rgba(56, 189, 248, 0.1); padding: 4px 10px; border-radius: 20px; }
     
     .progress-bg { background-color: rgba(255, 255, 255, 0.05); height: 10px; border-radius: 6px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.03); }
-    .progress-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 15%; border-radius: 6px; }
+    .progress-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 15%; border-radius: 6px; transition: width 0.4s ease; }
     
     .warning-text { color: #facc15; font-size: 0.8rem; margin-bottom: 14px; line-height: 1.4; background: rgba(250, 204, 21, 0.08); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(250, 204, 21, 0.15); }
     .ticker-box { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.04); padding: 12px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: #e2e8f0; }
@@ -112,9 +112,9 @@
     <div class="card">
       <div class="volume-header">
         <span class="volume-title">VOLUME POSITION</span>
-        <span class="volume-status">15% Full</span>
+        <span class="volume-status" id="volume-status-text">15% Full</span>
       </div>
-      <div class="progress-bg"><div class="progress-fill"></div></div>
+      <div class="progress-bg"><div class="progress-fill" id="volume-progress-bar" style="width: 15%;"></div></div>
       <div class="warning-text">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
       
       <div class="ticker-box" id="live-ticker">💎 <span>Jessica T. deposited $5,000 via Bitcoin</span></div>
@@ -158,7 +158,7 @@
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'index.html'; return; }
       
-      const { data: profile } = await client.from('profiles').select('balance, username, avatar_url').eq('id', user.id).single();
+      const { data: profile } = await client.from('profiles').select('balance, username, avatar_url, volume_percentage').eq('id', user.id).single();
       if (profile) {
         document.getElementById('user-balance').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         
@@ -169,7 +169,30 @@
         if (profile.avatar_url) {
           document.getElementById('avatar-box').innerHTML = `<img src="${profile.avatar_url}" alt="Profile">`;
         }
+
+        const vol = profile.volume_percentage || 0;
+        document.getElementById('volume-status-text').innerText = `${vol}% Full`;
+        document.getElementById('volume-progress-bar').style.width = `${vol}%`;
       }
+
+      // Realtime listener so updates from admin panel show instantly on user dashboard
+      client
+        .channel('public:profiles:' + user.id)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${user.id}` }, payload => {
+          const newDat = payload.new;
+          if (newDat.balance !== undefined) {
+            document.getElementById('user-balance').innerText = `$${Number(newDat.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+          }
+          if (newDat.username) {
+            document.getElementById('user-greeting').innerText = `WELCOME, ${newDat.username.toUpperCase()}`;
+          }
+          if (newDat.volume_percentage !== undefined) {
+            const v = newDat.volume_percentage;
+            document.getElementById('volume-status-text').innerText = `${v}% Full`;
+            document.getElementById('volume-progress-bar').style.width = `${v}%`;
+          }
+        })
+        .subscribe();
     }
 
     async function logout() {
