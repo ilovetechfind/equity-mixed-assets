@@ -11,6 +11,8 @@
       --card-bg: rgba(30, 27, 75, 0.6);
       --card-border: rgba(255, 255, 255, 0.08);
       --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
     }
 
     body { 
@@ -20,6 +22,7 @@
       font-family: 'Plus Jakarta Sans', sans-serif; 
       margin: 0; 
       padding: 16px; 
+      padding-bottom: 90px; /* Space for bottom nav */
     }
 
     .container { width: 100%; max-width: 960px; margin: 0 auto; }
@@ -27,37 +30,48 @@
     .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
     
     .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    .card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 14px; display: block; }
-    
-    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
-    th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    th { color: var(--text-muted); font-weight: 600; }
+    .card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 14px; display: block; text-transform: uppercase; }
     
     .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
     .input-group { flex: 1; min-width: 200px; }
-    input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
-    input:focus { border-color: #6366f1; }
+    input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; transition: border-color 0.2s; }
+    input:focus { border-color: var(--primary); }
     
-    .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
-    .copy-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
+    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; transition: opacity 0.2s; }
+    .submit-btn:hover { opacity: 0.9; }
+    .copy-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 10px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; transition: background 0.2s; }
+    .copy-btn:hover { background: rgba(129, 140, 248, 0.25); }
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
     
     .code-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; }
-    .stats-box { font-size: 1.1rem; font-weight: 700; color: #34d399; margin-bottom: 14px; }
+    
+    /* Clickable Stat Card Styles */
+    .stat-card-link { text-decoration: none; display: block; }
+    .stat-card { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.05) 100%); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 16px; padding: 30px 20px; text-align: center; transition: all 0.3s ease; }
+    .stat-card:hover { transform: translateY(-3px); background: rgba(99, 102, 241, 0.25); border-color: rgba(99, 102, 241, 0.5); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2); }
+    .stat-value { font-size: 3.5rem; font-weight: 800; color: #34d399; display: block; line-height: 1; margin-bottom: 10px; }
+    .stat-label { font-size: 1.1rem; color: white; font-weight: 700; display: block; margin-bottom: 6px; }
+    .stat-subtext { font-size: 0.8rem; color: #818cf8; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(19, 17, 53, 0.85); backdrop-filter: blur(16px); border-top: 1px solid var(--card-border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; padding-bottom: calc(12px + env(safe-area-inset-bottom)); }
+    .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 600; gap: 6px; transition: color 0.2s; }
+    .nav-item:hover, .nav-item.active { color: #818cf8; }
+    .nav-item svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header class="header">
-      <h1 class="logo-text">Admin Control Panel</h1>
+      <h1 class="logo-text">Admin Panel</h1>
       <button class="logout-btn" onclick="logout()">Log Out</button>
     </header>
 
     <!-- Admin Referral Code Card -->
     <div class="card">
-      <span class="card-title">YOUR ADMIN REFERRAL CODE</span>
+      <span class="card-title">Your Admin Referral Code</span>
       
       <!-- View / Copy Mode -->
       <div id="code-view-section" style="display: none;">
@@ -71,34 +85,43 @@
       <div id="code-set-section" style="display: none;">
         <form onsubmit="saveAdminCode(event)" class="form-row">
           <div class="input-group" style="max-width: 300px;">
-            <input type="text" id="new-ref-code" placeholder="Enter referral code (e.g. ADMIN500)" required>
+            <input type="text" id="new-ref-code" placeholder="Enter referral code (e.g. Echo)" required>
           </div>
           <button type="submit" class="submit-btn" id="save-code-btn">Save & Lock Code</button>
         </form>
       </div>
     </div>
 
-    <!-- Users Joined Using Admin Code Section -->
+    <!-- Users Joined Clickable Card -->
     <div class="card">
-      <span class="card-title">USERS WHO JOINED WITH YOUR REFERRAL CODE</span>
-      <div class="stats-box" id="user-count-display">Total Users Joined: 0</div>
-      <div style="overflow-x: auto;">
-        <table>
-          <thead>
-            <tr>
-              <th>Username</th>
-              <th>Gmail</th>
-              <th>Balance</th>
-              <th>Joined Date</th>
-            </tr>
-          </thead>
-          <tbody id="referred-users-body">
-            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading referred users...</td></tr>
-          </tbody>
-        </table>
+      <span class="card-title">Network Statistics</span>
+      <a href="referred-users.html" class="stat-card-link">
+        <div class="stat-card">
+          <span class="stat-value" id="user-count-display">0</span>
+          <span class="stat-label">Total Users Joined</span>
+          <span class="stat-subtext">
+            View full list
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </span>
+        </div>
+      </a>
+      <div id="code-warning" style="display: none; text-align: center; color: var(--text-muted); font-size: 0.85rem; margin-top: 16px;">
+        Please set your referral code first.
       </div>
     </div>
   </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      Home
+    </a>
+    <a href="referred-users.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      Users
+    </a>
+  </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
@@ -110,11 +133,9 @@
     let savedCodeValue = '';
 
     async function checkAdmin() {
-      // Check session first to avoid immediate redirect on fresh reload
       const { data: { session }, error } = await client.auth.getSession();
       
       if (!session || error) {
-        // Fallback check directly to getUser
         const { data: { user } } = await client.auth.getUser();
         if (!user) { 
           window.location.replace('login.html'); 
@@ -141,12 +162,13 @@
         document.getElementById('displayed-admin-code').innerText = savedCodeValue;
         document.getElementById('code-view-section').style.display = 'block';
         document.getElementById('code-set-section').style.display = 'none';
-        loadReferredUsers(savedCodeValue);
+        document.getElementById('code-warning').style.display = 'none';
+        loadReferredUsersCount(savedCodeValue);
       } else {
         document.getElementById('code-view-section').style.display = 'none';
         document.getElementById('code-set-section').style.display = 'block';
-        document.getElementById('user-count-display').innerText = "Total Users Joined: 0";
-        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
+        document.getElementById('user-count-display').innerText = "0";
+        document.getElementById('code-warning').style.display = 'block';
       }
     }
 
@@ -185,32 +207,21 @@
       });
     }
 
-    async function loadReferredUsers(code) {
+    async function loadReferredUsersCount(code) {
+      // Just fetching the ID to count how many users joined, keeping it fast and lightweight
       const { data, error } = await client
         .from('user_profiles_view')
-        .select('*')
-        .eq('referred_by', code)
-        .order('created_at', { ascending: false });
+        .select('id')
+        .eq('referred_by', code);
 
-      const tbody = document.getElementById('referred-users-body');
       const countDisplay = document.getElementById('user-count-display');
 
-      if (error || !data || data.length === 0) {
-        countDisplay.innerText = "Total Users Joined: 0";
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No users joined with this code yet.</td></tr>`;
+      if (error || !data) {
+        countDisplay.innerText = "0";
         return;
       }
 
-      countDisplay.innerText = `Total Users Joined: ${data.length}`;
-
-      tbody.innerHTML = data.map(user => `
-        <tr>
-          <td><strong>${user.username || 'N/A'}</strong></td>
-          <td>${user.email || 'N/A'}</td>
-          <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td>${new Date(user.created_at).toLocaleDateString()}</td>
-        </tr>
-      `).join('');
+      countDisplay.innerText = data.length;
     }
 
     async function logout() {
