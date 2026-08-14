@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Edit User</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+    }
+
+    .container { width: 100%; max-width: 600px; margin: 40px auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 0.9rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; display: block; }
+    
+    .input-group { margin-bottom: 16px; }
+    .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
+    input, select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+    input:focus, select:focus { border-color: #6366f1; }
+    
+    .btn-row { display: flex; gap: 10px; margin-top: 24px; }
+    .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; flex: 1; height: 45px; }
+    .back-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; height: 45px; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <h1 class="logo-text">Edit User Account</h1>
+      <a href="dashboard.html" class="back-btn" style="height: auto; padding: 8px 16px; font-size: 0.85rem;">Back to Dashboard</a>
+    </header>
+
+    <div class="card">
+      <span class="card-title" id="user-email-header">LOADING USER...</span>
+      
+      <form onsubmit="saveUserEdits(event)">
+        <div class="input-group">
+          <label>Username</label>
+          <input type="text" id="edit-username" placeholder="Username">
+        </div>
+        <div class="input-group">
+          <label>Full Name</label>
+          <input type="text" id="edit-fullname" placeholder="Full Name">
+        </div>
+        <div class="input-group">
+          <label>Active Plan</label>
+          <input type="text" id="edit-plan" placeholder="e.g. Standard, Premium">
+        </div>
+        <div class="input-group">
+          <label>Wallet Balance ($)</label>
+          <input type="number" step="0.01" id="edit-balance" placeholder="0.00">
+        </div>
+        <div class="input-group">
+          <label>Referred By Code</label>
+          <input type="text" id="edit-referred" placeholder="Referral code">
+        </div>
+
+        <div class="btn-row">
+          <a href="dashboard.html" class="back-btn">Cancel</a>
+          <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get('id');
+
+    async function loadUserData() {
+      if (!userId) {
+        alert("No user specified.");
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      const { data, error } = await client
+        .from('user_profiles_view')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error || !data) {
+        alert("Could not load user data.");
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      document.getElementById('user-email-header').innerText = `EDITING: ${data.email}`;
+      document.getElementById('edit-username').value = data.username || '';
+      document.getElementById('edit-fullname').value = data.full_name || '';
+      document.getElementById('edit-plan').value = data.plan || 'Standard';
+      document.getElementById('edit-balance').value = data.balance || 0;
+      document.getElementById('edit-referred').value = data.referred_by || '';
+    }
+
+    async function saveUserEdits(e) {
+      e.preventDefault();
+      const btn = document.getElementById('save-btn');
+      btn.innerText = "Saving...";
+      btn.disabled = true;
+
+      const updatedData = {
+        username: document.getElementById('edit-username').value.trim(),
+        full_name: document.getElementById('edit-fullname').value.trim(),
+        plan: document.getElementById('edit-plan').value.trim(),
+        balance: parseFloat(document.getElementById('edit-balance').value) || 0,
+        referred_by: document.getElementById('edit-referred').value.trim()
+      };
+
+      const { error } = await client
+        .from('profiles')
+        .update(updatedData)
+        .eq('id', userId);
+
+      if (error) {
+        alert("Failed to update user: " + error.message);
+        btn.innerText = "Save Changes";
+        btn.disabled = false;
+      } else {
+        alert("User details updated successfully!");
+        window.location.href = 'dashboard.html';
+      }
+    }
+
+    loadUserData();
+  </script>
+</body>
+  </html>
+  
