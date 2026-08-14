@@ -42,6 +42,7 @@
     .action-btns { display: flex; gap: 6px; }
     .btn-approve { background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
     .btn-reject { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
+    .btn-view { background: rgba(129, 140, 248, 0.2); color: #818cf8; border: 1px solid rgba(129, 140, 248, 0.4); padding: 5px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
 
     .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
     .input-group { flex: 1; min-width: 200px; }
@@ -55,6 +56,16 @@
     
     .code-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; }
+
+    /* Modal Styling */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; padding: 16px; box-sizing: border-box; }
+    .modal-card { background: #131135; border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 20px; width: 100%; max-width: 450px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 1.1rem; font-weight: 700; color: white; margin: 0; }
+    .close-modal { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; }
+    .info-label { color: var(--text-muted); font-weight: 600; }
+    .info-value { color: white; font-weight: 700; text-align: right; }
   </style>
 </head>
 <body>
@@ -69,7 +80,6 @@
     <div class="card">
       <span class="card-title">YOUR ADMIN REFERRAL CODE</span>
       
-      <!-- View / Copy Mode (Shown when code exists) -->
       <div id="code-view-section" style="display: none;">
         <div class="code-container">
           <div class="code-display" id="displayed-admin-code"></div>
@@ -77,7 +87,6 @@
         </div>
       </div>
 
-      <!-- Set Mode (Shown only when code is not set yet) -->
       <div id="code-set-section" style="display: none;">
         <form onsubmit="saveAdminCode(event)" class="form-row">
           <div class="input-group" style="max-width: 300px;">
@@ -98,7 +107,7 @@
               <th>Username</th>
               <th>Gmail</th>
               <th>Balance</th>
-              <th>Joined Date</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody id="referred-users-body">
@@ -157,6 +166,19 @@
     </div>
   </div>
 
+  <!-- User Details Modal -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">User Profile Details</h3>
+        <button class="close-modal" onclick="closeUserModal()">&times;</button>
+      </div>
+      <div id="modal-content">
+        <!-- Dynamic User Info Goes Here -->
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
@@ -165,6 +187,7 @@
 
     let currentAdminUser = null;
     let savedCodeValue = '';
+    let fetchedUsersCache = [];
 
     async function checkAdmin() {
       const { data: { user } } = await client.auth.getUser();
@@ -233,7 +256,7 @@
     async function loadReferredUsers(code) {
       const { data, error } = await client
         .from('user_profiles_view')
-        .select('username, email, balance, created_at')
+        .select('*')
         .eq('referred_by', code)
         .order('created_at', { ascending: false });
 
@@ -244,14 +267,38 @@
         return;
       }
 
-      tbody.innerHTML = data.map(user => `
+      fetchedUsersCache = data;
+
+      tbody.innerHTML = data.map((user, index) => `
         <tr>
           <td><strong>${user.username || 'N/A'}</strong></td>
-          <td>${user.email || 'N/A'}</td>
+          <td><span style="color: #818cf8; cursor: pointer; text-decoration: underline;" onclick="openUserModal(${index})">${user.email || 'N/A'}</span></td>
           <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td>${new Date(user.created_at).toLocaleDateString()}</td>
+          <td><button class="btn-view" onclick="openUserModal(${index})">View Info</button></td>
         </tr>
       `).join('');
+    }
+
+    function openUserModal(index) {
+      const user = fetchedUsersCache[index];
+      if (!user) return;
+
+      const content = document.getElementById('modal-content');
+      content.innerHTML = `
+        <div class="info-row"><span class="info-label">Email:</span><span class="info-value">${user.email || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Username:</span><span class="info-value">${user.username || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Full Name:</span><span class="info-value">${user.full_name || 'N/A'}</span></div>
+        <div class="info-row"><span class="info-label">Active Plan:</span><span class="info-value" style="color: #34d399;">${user.plan || 'Standard'}</span></div>
+        <div class="info-row"><span class="info-label">Wallet Balance:</span><span class="info-value">$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</span></div>
+        <div class="info-row"><span class="info-label">Referred By Code:</span><span class="info-value">${user.referred_by || 'None'}</span></div>
+        <div class="info-row" style="border-bottom: none;"><span class="info-label">Joined Date:</span><span class="info-value">${new Date(user.created_at).toLocaleString()}</span></div>
+      `;
+
+      document.getElementById('userModal').style.display = 'flex';
+    }
+
+    function closeUserModal() {
+      document.getElementById('userModal').style.display = 'none';
     }
 
     async function loadVerifications() {
@@ -344,6 +391,7 @@
         alert(`Balance successfully updated to $${newBalance.toLocaleString(undefined, {minimumFractionDigits: 2})}`);
         document.getElementById('target-email').value = '';
         document.getElementById('target-amount').value = '';
+        if(savedCodeValue) loadReferredUsers(savedCodeValue);
       }
 
       btn.innerText = "Update Balance";
