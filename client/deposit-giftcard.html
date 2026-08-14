@@ -38,7 +38,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6InFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function loadGiftcard() {
@@ -66,7 +66,10 @@
         const parsed = typeof configData === 'string' ? JSON.parse(configData) : configData;
         area.innerHTML = `
           ${parsed.image ? `<img src="${parsed.image}" class="qr-img" alt="Gift Card Banner">` : ''}
-          ${parsed.wallet ? `<div class="address-box"><strong>Accepted Brands/Details:</strong><br>${parsed.wallet}</div>` : ''}
+          ${parsed.wallet ? `
+            <div class="address-box">${parsed.wallet}</div>
+            <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Details copied!');">Copy Details</button>
+          ` : ''}
           ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
         `;
       } catch (err) {
