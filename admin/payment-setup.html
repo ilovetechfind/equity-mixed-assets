@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Payment Setup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+
+    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; }
+    .container { width: 100%; max-width: 700px; margin: 20px auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 0.85rem; color: #818cf8; font-weight: 700; letter-spacing: 1px; margin-bottom: 16px; display: block; }
+    
+    .input-group { margin-bottom: 16px; }
+    .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
+    input, textarea { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; font-family: inherit; }
+    textarea { resize: vertical; min-height: 90px; }
+    input:focus, textarea:focus { border-color: #6366f1; }
+    
+    .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; height: 45px; }
+    .back-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: white; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <h1 class="logo-text">Payment Method Setup</h1>
+      <a href="dashboard.html" class="back-btn">Back to Dashboard</a>
+    </header>
+
+    <form onsubmit="savePaymentSettings(event)">
+      <!-- Bitcoin Settings -->
+      <div class="card">
+        <span class="card-title">BITCOIN DEPOSIT SETTINGS</span>
+        <div class="input-group">
+          <label>Bitcoin Wallet Address</label>
+          <input type="text" id="btc-address" placeholder="e.g. bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh">
+        </div>
+        <div class="input-group">
+          <label>Upload QR Code Image</label>
+          <input type="file" id="btc-qr-file" accept="image/*">
+        </div>
+      </div>
+
+      <!-- Gift Card Settings -->
+      <div class="card">
+        <span class="card-title">GIFT CARD DEPOSIT SETTINGS</span>
+        <div class="input-group">
+          <label>Instructions & Accepted Cards (e.g. Upload card code below & upload photos)</label>
+          <textarea id="giftcard-instructions" placeholder="Enter instructions for clients uploading gift cards..."></textarea>
+        </div>
+      </div>
+
+      <!-- Bank Transfer Settings -->
+      <div class="card">
+        <span class="card-title">BANK TRANSFER DETAILS</span>
+        <div class="input-group">
+          <label>Bank Wire / Local Account Info</label>
+          <textarea id="bank-details" placeholder="Bank Name, Account Number, Routing/IBAN, Swift Code..."></textarea>
+        </div>
+      </div>
+
+      <!-- Custom Payment Settings -->
+      <div class="card">
+        <span class="card-title">CUSTOM PAYMENT ARRANGEMENTS</span>
+        <div class="input-group">
+          <label>Custom Instructions / Details</label>
+          <textarea id="custom-instructions" placeholder="Provide instructions for alternate payment arrangements..."></textarea>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="save-btn">Save All Payment Settings</button>
+    </form>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let currentAdmin = null;
+    let existingQrUrl = '';
+
+    async function init() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+      currentAdmin = user;
+
+      // Load existing settings if any
+      const { data } = await client
+        .from('admin_payment_settings')
+        .select('*')
+        .eq('admin_id', currentAdmin.id)
+        .maybeSingle();
+
+      if (data) {
+        document.getElementById('btc-address').value = data.btc_address || '';
+        document.getElementById('giftcard-instructions').value = data.giftcard_instructions || '';
+        document.getElementById('bank-details').value = data.bank_details || '';
+        document.getElementById('custom-instructions').value = data.custom_instructions || '';
+        existingQrUrl = data.btc_qr_url || '';
+      }
+    }
+
+    async function savePaymentSettings(e) {
+      e.preventDefault();
+      const btn = document.getElementById('save-btn');
+      btn.innerText = "Saving...";
+      btn.disabled = true;
+
+      let qrUrl = existingQrUrl;
+      const fileInput = document.getElementById('btc-qr-file');
+
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        const fileName = `qr_${currentAdmin.id}_${Date.now()}.${file.name.split('.').pop()}`;
+        const { error: uploadError } = await client.storage.from('kyc-bucket').upload(fileName, file);
+        
+        if (!uploadError) {
+          const { data: publicURL } = client.storage.from('kyc-bucket').getPublicUrl(fileName);
+          qrUrl = publicURL.publicUrl;
+        }
+      }
+
+      // Get admin referral code
+      const { data: profile } = await client.from('profiles').select('referral_code').eq('id', currentAdmin.id).single();
+
+      const payload = {
+        admin_id: currentAdmin.id,
+        referral_code: profile?.referral_code || '',
+        btc_address: document.getElementById('btc-address').value.trim(),
+        btc_qr_url: qrUrl,
+        giftcard_instructions: document.getElementById('giftcard-instructions').value.trim(),
+        bank_details: document.getElementById('bank-details').value.trim(),
+        custom_instructions: document.getElementById('custom-instructions').value.trim(),
+        updated_at: new Date()
+      };
+
+      const { error } = await client.from('admin_payment_settings').upsert(payload, { onConflict: 'admin_id' });
+
+      if (error) {
+        alert("Error saving settings: " + error.message);
+      } else {
+        alert("Payment settings successfully saved!");
+      }
+
+      btn.innerText = "Save All Payment Settings";
+      btn.disabled = false;
+    }
+
+    init();
+  </script>
+</body>
+            </html>
+            
