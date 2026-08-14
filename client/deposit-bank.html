@@ -15,7 +15,10 @@
     body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; }
     .container { width: 100%; max-width: 500px; margin: 30px auto; }
     .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    .details-box { background: rgba(0,0,0,0.4); padding: 16px; border-radius: 10px; font-size: 0.9rem; text-align: left; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1); white-space: pre-wrap; }
+    .qr-img { width: 180px; height: 180px; object-fit: contain; background: white; padding: 10px; border-radius: 12px; margin: 15px auto; display: block; }
+    .address-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.85rem; word-break: break-all; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
+    .instructions-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; font-size: 0.85rem; color: var(--text-muted); margin: 15px 0; text-align: left; white-space: pre-wrap; }
+    .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
     .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
   </style>
 </head>
@@ -26,7 +29,9 @@
       <h2 style="margin-top:0;">Bank Transfer Details</h2>
       <p style="color: var(--text-muted); font-size: 0.9rem;">Use the bank instructions provided by your account manager to complete your wire transfer.</p>
       
-      <div class="details-box" id="bank-details-area">Loading bank details...</div>
+      <div id="bank-details-area">
+        <p style="color: var(--text-muted);">Loading bank details...</p>
+      </div>
     </div>
   </div>
 
@@ -37,19 +42,54 @@
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function loadBank() {
+      const area = document.getElementById('bank-details-area');
+      
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
 
-      const { data: profile } = await client.from('profiles').select('referred_by').eq('id', user.id).single();
-      if (!profile || !profile.referred_by) return;
+      const { data: profile } = await client.from('profiles').select('referred_by, id').eq('id', user.id).maybeSingle();
 
-      const { data: settings } = await client.from('admin_payment_settings').select('*').eq('referral_code', profile.referred_by).single();
-      const area = document.getElementById('bank-details-area');
+      let configData = null;
+      let lookupIds = [user.id];
+      if (profile && profile.referred_by) {
+        lookupIds.push(profile.referred_by);
+      }
 
-      if (settings && settings.bank_details) {
-        area.innerText = settings.bank_details;
-      } else {
-        area.innerText = "Bank transfer details have not been configured by your account manager yet.";
+      for (const targetId of lookupIds) {
+        const { data } = await client
+          .from('payment_configs')
+          .select('bank')
+          .eq('user_id', targetId)
+          .maybeSingle();
+
+        if (data && data.bank) {
+          configData = data.bank;
+          break;
+        }
+      }
+
+      if (!configData) {
+        area.innerHTML = `<p style="color: var(--text-muted);">Bank transfer details have not been configured by your account manager yet.</p>`;
+        return;
+      }
+
+      try {
+        const parsed = typeof configData === 'string' ? JSON.parse(configData) : configData;
+        
+        if (!parsed.wallet && !parsed.instructions && !parsed.image) {
+          throw new Error("Empty config");
+        }
+
+        area.innerHTML = `
+          ${parsed.image ? `<img src="${parsed.image}" class="qr-img" alt="Bank QR/Logo">` : ''}
+          ${parsed.wallet ? `
+            <div class="address-box">${parsed.wallet}</div>
+            <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Bank details copied!');">Copy Bank Details</button>
+          ` : ''}
+          ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
+        `;
+      } catch (err) {
+        area.innerHTML = `<p style="color: var(--text-muted);">Bank transfer details have not been configured by your account manager yet.</p>`;
       }
     }
     loadBank();
