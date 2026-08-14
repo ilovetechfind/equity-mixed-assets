@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Payment Control</title>
+  <title>Equity Mixed Assets - Payment Management</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -12,7 +12,6 @@
       --card-border: rgba(255, 255, 255, 0.08);
       --text-muted: #94a3b8;
       --primary: #6366f1;
-      --primary-hover: #4f46e5;
     }
 
     body { 
@@ -29,29 +28,34 @@
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
     
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    .card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 14px 0; }
-    
     .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 16px; }
     .back-link:hover { text-decoration: underline; }
 
+    .section-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 24px 0 12px 0; }
+
+    /* Clickable Option Cards */
+    .option-card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: white; transition: all 0.2s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .option-card:hover { border-color: var(--primary); transform: translateY(-2px); background: rgba(30, 27, 75, 0.85); }
+    
+    .option-info h3 { margin: 0 0 4px 0; font-size: 1rem; font-weight: 700; }
+    .option-info p { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
+    .arrow-icon { color: #818cf8; font-weight: bold; font-size: 1.2rem; }
+
+    /* Notification Card Box */
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-top: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
-    input, textarea { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; font-family: inherit; transition: border-color 0.2s; }
-    input:focus, textarea:focus { border-color: var(--primary); }
-
-    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
-    .submit-btn:hover { opacity: 0.9; }
+    input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+    input:focus { border-color: var(--primary); }
+    .submit-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; }
     .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
-    
-    .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 24px 0; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header class="header">
-      <h1 class="logo-text">Payment & Notification Control</h1>
+      <h1 class="logo-text">Payment Control Hub</h1>
     </header>
 
     <a href="#" id="back-to-user" class="back-link">
@@ -59,45 +63,59 @@
       Back to User Info
     </a>
 
-    <!-- 4 Payment Methods Configuration Card -->
+    <div class="section-title">Select Payment Channel to Manage</div>
+
+    <a href="#" id="link-bitcoin" class="option-card">
+      <div class="option-info">
+        <h3>Pay through Bitcoin</h3>
+        <p>Configure crypto network wallets & deposit addresses</p>
+      </div>
+      <div class="arrow-icon">→</div>
+    </a>
+
+    <a href="#" id="link-giftcard" class="option-card">
+      <div class="option-info">
+        <h3>Upload Gift Card</h3>
+        <p>Manage accepted card brands & instructions</p>
+      </div>
+      <div class="arrow-icon">→</div>
+    </a>
+
+    <a href="#" id="link-bank" class="option-card">
+      <div class="option-info">
+        <h3>Bank Transfer</h3>
+        <p>Set wire transfer accounts, SWIFT, and IBAN</p>
+      </div>
+      <div class="arrow-icon">→</div>
+    </a>
+
+    <a href="#" id="link-custom" class="option-card">
+      <div class="option-info">
+        <h3>Request Custom Payment</h3>
+        <p>Set alternate manual arrangement instructions</p>
+      </div>
+      <div class="arrow-icon">→</div>
+    </a>
+
+    <div class="section-title">Client Submissions</div>
+
+    <a href="#" id="link-proof" class="option-card" style="border-color: rgba(16, 185, 129, 0.3);">
+      <div class="option-info">
+        <h3 style="color: #34d399;">Review Payment Proofs</h3>
+        <p>View uploaded transaction receipts and screenshots</p>
+      </div>
+      <div class="arrow-icon">→</div>
+    </a>
+
+    <!-- Push Notification Card -->
     <div class="card">
-      <h2 class="card-title">Configure 4 Payment Channels</h2>
-      <form onsubmit="saveAllPaymentMethods(event)">
-        
-        <div class="form-group">
-          <label>1. Bitcoin Payment Details / Wallet Address</label>
-          <textarea id="pay-bitcoin" rows="3" placeholder="Enter Bitcoin address or deposit details..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>2. Gift Card Payment Instructions / Accepted Types</label>
-          <textarea id="pay-giftcard" rows="3" placeholder="Enter gift card instructions..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>3. Bank Transfer Details (IBAN, SWIFT, Account Number)</label>
-          <textarea id="pay-bank" rows="3" placeholder="Enter bank routing and account details..."></textarea>
-        </div>
-
-        <div class="form-group">
-          <label>4. Custom Payment Instructions</label>
-          <textarea id="pay-custom" rows="3" placeholder="Enter alternate custom payment arrangements..."></textarea>
-        </div>
-
-        <button type="submit" class="submit-btn" id="save-payment-btn">Save All Payment Methods</button>
-        <span id="payment-status" class="status-msg"></span>
-      </form>
-    </div>
-
-    <!-- Notification Card Control -->
-    <div class="card">
-      <h2 class="card-title">Push Notification / Alert Card to User</h2>
+      <h2 style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 14px 0;">Push Notification / Alert Card to User</h2>
       <form onsubmit="sendNotification(event)">
         <div class="form-group">
           <label>Notification Message / Status Update</label>
           <input type="text" id="notif-input" placeholder="e.g. Your deposit is pending verification..." autocomplete="off">
         </div>
-        <button type="submit" class="submit-btn" id="save-notif-btn" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">Send Notification Card</button>
+        <button type="submit" class="submit-btn" id="save-notif-btn">Send Notification Card</button>
         <span id="notif-status" class="status-msg"></span>
       </form>
     </div>
@@ -107,67 +125,15 @@
   <script src="config.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id');
+    const targetUserId = urlParams.get('id') || '';
 
-    if (targetUserId) {
-      document.getElementById('back-to-user').setAttribute('href', `user-info.html?id=${targetUserId}`);
-    }
-
-    async function loadExistingPayments() {
-      if (!targetUserId) return;
-      const { data } = await client
-        .from('payment_configs')
-        .select('*')
-        .eq('user_id', targetUserId)
-        .maybeSingle();
-
-      if (data) {
-        document.getElementById('pay-bitcoin').value = data.bitcoin || '';
-        document.getElementById('pay-giftcard').value = data.giftcard || '';
-        document.getElementById('pay-bank').value = data.bank || '';
-        document.getElementById('pay-custom').value = data.custom || '';
-      }
-    }
-
-    async function saveAllPaymentMethods(e) {
-      e.preventDefault();
-      const bitcoin = document.getElementById('pay-bitcoin').value.trim();
-      const giftcard = document.getElementById('pay-giftcard').value.trim();
-      const bank = document.getElementById('pay-bank').value.trim();
-      const custom = document.getElementById('pay-custom').value.trim();
-      const statusEl = document.getElementById('payment-status');
-      const btn = document.getElementById('save-payment-btn');
-
-      if (!targetUserId) {
-        alert("Target user ID missing.");
-        return;
-      }
-
-      btn.innerText = "Saving...";
-      btn.disabled = true;
-
-      const { error } = await client
-        .from('payment_configs')
-        .upsert({ 
-          user_id: targetUserId, 
-          bitcoin: bitcoin,
-          giftcard: giftcard,
-          bank: bank,
-          custom: custom
-        }, { onConflict: 'user_id' });
-
-      btn.innerText = "Save All Payment Methods";
-      btn.disabled = false;
-
-      if (error) {
-        statusEl.style.color = "#f87171";
-        statusEl.innerText = "Error: " + error.message;
-      } else {
-        statusEl.style.color = "#34d399";
-        statusEl.innerText = "All 4 payment methods saved successfully!";
-        setTimeout(() => { statusEl.innerText = ""; }, 3000);
-      }
-    }
+    // Pass user ID across to individual edit pages
+    document.getElementById('back-to-user').setAttribute('href', `user-info.html?id=${targetUserId}`);
+    document.getElementById('link-bitcoin').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=bitcoin`);
+    document.getElementById('link-giftcard').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=giftcard`);
+    document.getElementById('link-bank').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=bank`);
+    document.getElementById('link-custom').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=custom`);
+    document.getElementById('link-proof').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=proof`);
 
     async function sendNotification(e) {
       e.preventDefault();
@@ -189,16 +155,14 @@
 
       if (error) {
         statusEl.style.color = "#f87171";
-        statusEl.innerText = "Failed to send: " + error.message;
+        statusEl.innerText = "Failed: " + error.message;
       } else {
         statusEl.style.color = "#34d399";
-        statusEl.innerText = "Notification card pushed to user successfully!";
+        statusEl.innerText = "Notification card pushed successfully!";
         document.getElementById('notif-input').value = '';
         setTimeout(() => { statusEl.innerText = ""; }, 3000);
       }
     }
-
-    loadExistingPayments();
   </script>
 </body>
 </html>
