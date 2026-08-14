@@ -33,7 +33,6 @@
 
     .section-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 24px 0 12px 0; }
 
-    /* Clickable Option Cards */
     .option-card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 16px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; text-decoration: none; color: white; transition: all 0.2s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
     .option-card:hover { border-color: var(--primary); transform: translateY(-2px); background: rgba(30, 27, 75, 0.85); }
     
@@ -41,7 +40,6 @@
     .option-info p { margin: 0; font-size: 0.8rem; color: var(--text-muted); }
     .arrow-icon { color: #818cf8; font-weight: bold; font-size: 1.2rem; }
 
-    /* Notification Card Box */
     .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-top: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
@@ -65,6 +63,7 @@
 
     <div class="section-title">Select Payment Channel to Manage</div>
 
+    <!-- Connected to dedicated edit-bitcoin.html file -->
     <a href="#" id="link-bitcoin" class="option-card">
       <div class="option-info">
         <h3>Pay through Bitcoin</h3>
@@ -107,7 +106,6 @@
       <div class="arrow-icon">→</div>
     </a>
 
-    <!-- Push Notification Card -->
     <div class="card">
       <h2 style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 14px 0;">Push Notification / Alert Card to User</h2>
       <form onsubmit="sendNotification(event)">
@@ -127,13 +125,13 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || '';
 
-    // Pass user ID across to individual edit pages
     document.getElementById('back-to-user').setAttribute('href', `user-info.html?id=${targetUserId}`);
-    document.getElementById('link-bitcoin').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=bitcoin`);
-    document.getElementById('link-giftcard').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=giftcard`);
-    document.getElementById('link-bank').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=bank`);
-    document.getElementById('link-custom').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=custom`);
-    document.getElementById('link-proof').setAttribute('href', `edit-payment.html?id=${targetUserId}&type=proof`);
+    // Points directly to the new dedicated bitcoin file
+    document.getElementById('link-bitcoin').setAttribute('href', `edit-bitcoin.html?id=${targetUserId}`);
+    document.getElementById('link-giftcard').setAttribute('href', `edit-giftcard.html?id=${targetUserId}`);
+    document.getElementById('link-bank').setAttribute('href', `edit-bank.html?id=${targetUserId}`);
+    document.getElementById('link-custom').setAttribute('href', `edit-custom.html?id=${targetUserId}`);
+    document.getElementById('link-proof').setAttribute('href', `edit-proof.html?id=${targetUserId}`);
 
     async function sendNotification(e) {
       e.preventDefault();
