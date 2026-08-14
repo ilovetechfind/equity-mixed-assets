@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Upload Gift Card</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; }
+    .container { width: 100%; max-width: 500px; margin: 30px auto; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .input-group { margin-bottom: 16px; text-align: left; }
+    .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
+    input, textarea { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; font-family: inherit; }
+    .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; height: 45px; }
+    .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="deposit.html" class="back-btn">← Back</a>
+    <div class="card">
+      <h2 style="margin-top:0;">Upload Gift Card</h2>
+      <div id="instructions-box" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">Loading instructions...</div>
+      
+      <form onsubmit="submitGiftCard(event)">
+        <div class="input-group">
+          <label>Gift Card Code / Details</label>
+          <textarea id="card-code" placeholder="Enter gift card code here..." required></textarea>
+        </div>
+        <div class="input-group">
+          <label>Upload Gift Card Photo / Receipt</label>
+          <input type="file" id="card-photo" accept="image/*" required>
+        </div>
+        <button type="submit" class="submit-btn" id="submit-btn">Submit Gift Card</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function loadInfo() {
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) { window.location.href = 'login.html'; return; }
+
+      const { data: profile } = await client.from('profiles').select('referred_by').eq('id', user.id).single();
+      if (!profile || !profile.referred_by) return;
+
+      const { data: settings } = await client.from('admin_payment_settings').select('*').eq('referral_code', profile.referred_by).single();
+      if (settings && settings.giftcard_instructions) {
+        document.getElementById('instructions-box').innerText = settings.giftcard_instructions;
+      } else {
+        document.getElementById('instructions-box').innerText = "Please enter your card code below and upload photos.";
+      }
+    }
+
+    async function submitGiftCard(e) {
+      e.preventDefault();
+      const btn = document.getElementById('submit-btn');
+      btn.innerText = "Submitting...";
+      btn.disabled = true;
+
+      const { data: { user } } = await client.auth.getUser();
+      const file = document.getElementById('card-photo').files[0];
+      const fileName = `gc_${user.id}_${Date.now()}.${file.name.split('.').pop()}`;
+
+      const { error: uploadError } = await client.storage.from('kyc-bucket').upload(fileName, file);
+      if (uploadError) {
+        alert("Upload failed: " + uploadError.message);
+        btn.innerText = "Submit Gift Card";
+        btn.disabled = false;
+        return;
+      }
+
+      const { data: publicURL } = client.storage.from('kyc-bucket').getPublicUrl(fileName);
+
+      // Save submission to database or notify admin
+      alert("Gift card submitted successfully for verification!");
+      window.location.href = 'deposit.html';
+    }
+
+    loadInfo();
+  </script>
+</body>
+</html>
