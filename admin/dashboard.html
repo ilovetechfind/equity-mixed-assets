@@ -163,13 +163,13 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    let currentAdminId = null;
+    let currentAdminUser = null;
     let savedCodeValue = '';
 
     async function checkAdmin() {
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
-      currentAdminId = user.id;
+      currentAdminUser = user;
       loadAdminCode();
       loadVerifications();
     }
@@ -178,19 +178,17 @@
       const { data: profile, error } = await client
         .from('profiles')
         .select('referral_code')
-        .eq('id', currentAdminId)
+        .eq('id', currentAdminUser.id)
         .maybeSingle();
 
       savedCodeValue = profile?.referral_code;
 
       if (savedCodeValue && savedCodeValue.trim() !== '') {
-        // Code is locked in! Show view/copy section, hide input section
         document.getElementById('displayed-admin-code').innerText = savedCodeValue;
         document.getElementById('code-view-section').style.display = 'block';
         document.getElementById('code-set-section').style.display = 'none';
         loadReferredUsers(savedCodeValue);
       } else {
-        // No code set yet. Show input form to create and lock it.
         document.getElementById('code-view-section').style.display = 'none';
         document.getElementById('code-set-section').style.display = 'block';
         document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
@@ -206,10 +204,14 @@
       btn.innerText = "Saving...";
       btn.disabled = true;
 
+      // Upsert ensures that if the profile row doesn't exist yet, it gets created with the admin ID and email
       const { error } = await client
         .from('profiles')
-        .update({ referral_code: newCode })
-        .eq('id', currentAdminId);
+        .upsert({ 
+          id: currentAdminUser.id, 
+          email: currentAdminUser.email,
+          referral_code: newCode 
+        });
 
       if (error) {
         alert("Failed to save code: " + error.message);
