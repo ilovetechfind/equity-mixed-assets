@@ -45,6 +45,7 @@
     
     .code-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; }
+    .locked-notice { color: #34d399; font-size: 0.8rem; font-weight: 600; margin-top: 10px; display: block; }
     
     .stat-card-link { text-decoration: none; display: block; }
     .stat-card { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.05) 100%); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 16px; padding: 30px 20px; text-align: center; transition: all 0.3s ease; }
@@ -70,17 +71,20 @@
     <div class="card">
       <span class="card-title">Your Admin Referral Code</span>
       
+      <!-- View / Copy Mode (Locked) -->
       <div id="code-view-section" style="display: none;">
         <div class="code-container">
           <div class="code-display" id="displayed-admin-code"></div>
           <button class="copy-btn" onclick="copyAdminCode()">Copy Code</button>
         </div>
+        <span class="locked-notice">✔ Code is permanently locked in. You cannot change this code.</span>
       </div>
 
+      <!-- Set / Generate Mode -->
       <div id="code-set-section" style="display: none;">
         <form onsubmit="saveAdminCode(event)" class="form-row">
           <div class="input-group" style="max-width: 300px;">
-            <input type="text" id="new-ref-code" placeholder="Enter referral code (e.g. Echo)" required>
+            <input type="text" id="new-ref-code" placeholder="Enter referral code" required>
           </div>
           <button type="submit" class="submit-btn" id="save-code-btn">Save & Lock Code</button>
         </form>
@@ -117,11 +121,9 @@
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Load shared admin config -->
+  <script src="config.js"></script>
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24ildpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let currentAdminUser = null;
     let savedCodeValue = '';
 
@@ -152,12 +154,14 @@
       savedCodeValue = profile?.referral_code;
 
       if (savedCodeValue && savedCodeValue.trim() !== '') {
+        // Code already exists: Hide form completely, show locked view
         document.getElementById('displayed-admin-code').innerText = savedCodeValue;
         document.getElementById('code-view-section').style.display = 'block';
         document.getElementById('code-set-section').style.display = 'none';
         document.getElementById('code-warning').style.display = 'none';
         loadReferredUsersCount(savedCodeValue);
       } else {
+        // No code set yet: Show code creation form
         document.getElementById('code-view-section').style.display = 'none';
         document.getElementById('code-set-section').style.display = 'block';
         document.getElementById('user-count-display').innerText = "0";
@@ -171,10 +175,10 @@
       if (!newCode) return;
 
       const btn = document.getElementById('save-code-btn');
-      btn.innerText = "Checking Code...";
+      btn.innerText = "Checking availability...";
       btn.disabled = true;
 
-      // FIRST: Check if the code is already taken by someone else
+      // Check if someone else already took this code
       const { data: existingCodeCheck } = await client
         .from('profiles')
         .select('id')
@@ -182,14 +186,13 @@
         .maybeSingle();
 
       if (existingCodeCheck && existingCodeCheck.id !== currentAdminUser.id) {
-        alert("Sorry, this code is already taken. Please choose another one.");
+        alert("Someone else has taken this code! Please pick another one.");
         btn.innerText = "Save & Lock Code";
         btn.disabled = false;
         return;
       }
 
-      // If it is free, proceed to save
-      btn.innerText = "Saving...";
+      btn.innerText = "Locking in...";
 
       const { error } = await client
         .from('profiles')
@@ -199,16 +202,15 @@
         });
 
       if (error) {
-        // This catches the SQL constraint error if two people try at the exact same second
         if (error.code === '23505') { 
-          alert("Sorry, this code was just taken! Please choose another.");
+          alert("Someone else has taken this code! Please pick another one.");
         } else {
           alert("Failed to save code: " + error.message);
         }
         btn.innerText = "Save & Lock Code";
         btn.disabled = false;
       } else {
-        alert("Admin referral code locked in successfully!");
+        alert("Success! Your code is permanently locked in.");
         loadAdminCode();
       }
     }
@@ -246,5 +248,4 @@
     checkAdmin();
   </script>
 </body>
-    </html>
-    
+</html>
