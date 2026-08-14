@@ -22,20 +22,34 @@
       padding: 16px; 
     }
 
-    .container { width: 100%; max-width: 900px; margin: 0 auto; }
+    .container { width: 100%; max-width: 960px; margin: 0 auto; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
     .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
     
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
     .card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 14px; display: block; }
     
     table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
     th, td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
     th { color: var(--text-muted); font-weight: 600; }
     
-    .id-img { width: 50px; height: 35px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
-    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; background: rgba(250, 204, 21, 0.15); color: #facc15; }
+    .id-img { width: 45px; height: 32px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid rgba(255,255,255,0.2); }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; }
+    .badge.pending { background: rgba(250, 204, 21, 0.15); color: #facc15; }
+    .badge.approved { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .badge.rejected { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+
+    .action-btns { display: flex; gap: 6px; }
+    .btn-approve { background: #059669; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
+    .btn-reject { background: #dc2626; color: white; border: none; padding: 6px 10px; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 0.75rem; }
+
+    .form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+    .input-group { flex: 1; min-width: 200px; }
+    .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
+    input, select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+    input:focus, select:focus { border-color: #6366f1; }
     
+    .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
   </style>
 </head>
@@ -43,10 +57,35 @@
 
   <div class="container">
     <header class="header">
-      <h1 class="logo-text">Admin Panel — Verifications</h1>
+      <h1 class="logo-text">Admin Control Panel</h1>
       <button class="logout-btn" onclick="logout()">Log Out</button>
     </header>
 
+    <!-- Balance Management Card -->
+    <div class="card">
+      <span class="card-title">MANAGE USER BALANCES</span>
+      <form onsubmit="updateBalance(event)" class="form-row">
+        <div class="input-group">
+          <label>User Gmail</label>
+          <input type="email" id="target-email" placeholder="user@gmail.com" required>
+        </div>
+        <div class="input-group">
+          <label>Amount ($)</label>
+          <input type="number" step="0.01" id="target-amount" placeholder="5000.00" required>
+        </div>
+        <div class="input-group" style="max-width: 150px;">
+          <label>Action</label>
+          <select id="balance-action">
+            <option value="add">Add (+)</option>
+            <option value="subtract">Subtract (-)</option>
+            <option value="set">Set Exact</option>
+          </select>
+        </div>
+        <button type="submit" class="submit-btn" id="balance-btn">Update Balance</button>
+      </form>
+    </div>
+
+    <!-- Verifications Card -->
     <div class="card">
       <span class="card-title">USER SUBMITTED KYC VERIFICATIONS</span>
       <div style="overflow-x: auto;">
@@ -60,10 +99,11 @@
               <th>ID Front</th>
               <th>ID Back</th>
               <th>Status</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody id="verification-table-body">
-            <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">Loading records...</td></tr>
+            <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">Loading records...</td></tr>
           </tbody>
         </table>
       </div>
@@ -91,7 +131,7 @@
       const tbody = document.getElementById('verification-table-body');
       
       if (error || !data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No verification records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No verification records found.</td></tr>`;
         return;
       }
 
@@ -103,9 +143,80 @@
           <td><code>${item.ssn || 'N/A'}</code></td>
           <td><a href="${item.id_front_url}" target="_blank"><img src="${item.id_front_url}" class="id-img" alt="Front"></a></td>
           <td><a href="${item.id_back_url}" target="_blank"><img src="${item.id_back_url}" class="id-img" alt="Back"></a></td>
-          <td><span class="badge">${item.status}</span></td>
+          <td><span class="badge ${item.status}">${item.status}</span></td>
+          <td>
+            <div class="action-btns">
+              <button class="btn-approve" onclick="updateStatus('${item.id}', 'approved')">Approve</button>
+              <button class="btn-reject" onclick="updateStatus('${item.id}', 'rejected')">Reject</button>
+            </div>
+          </td>
         </tr>
       `).join('');
+    }
+
+    async function updateStatus(id, newStatus) {
+      const { error } = await client
+        .from('user_verifications')
+        .update({ status: newStatus })
+        .eq('id', id);
+
+      if (error) {
+        alert("Failed to update status: " + error.message);
+      } else {
+        loadVerifications();
+      }
+    }
+
+    async function updateBalance(e) {
+      e.preventDefault();
+      const email = document.getElementById('target-email').value;
+      const amount = parseFloat(document.getElementById('target-amount').value);
+      const action = document.getElementById('balance-action').value;
+      const btn = document.getElementById('balance-btn');
+
+      btn.innerText = "Updating...";
+      btn.disabled = true;
+
+      // Find user profile by email
+      const { data: profile, error: profileError } = await client
+        .from('profiles')
+        .select('id, balance')
+        .eq('email', email)
+        .single();
+
+      if (profileError || !profile) {
+        alert("User profile not found with that email.");
+        btn.innerText = "Update Balance";
+        btn.disabled = false;
+        return;
+      }
+
+      let currentBalance = Number(profile.balance || 0);
+      let newBalance = currentBalance;
+
+      if (action === 'add') {
+        newBalance += amount;
+      } else if (action === 'subtract') {
+        newBalance -= amount;
+      } else if (action === 'set') {
+        newBalance = amount;
+      }
+
+      const { error: updateError } = await client
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', profile.id);
+
+      if (updateError) {
+        alert("Failed to update balance: " + updateError.message);
+      } else {
+        alert(`Balance successfully updated to $${newBalance.toLocaleString(undefined, {minimumFractionDigits: 2})}`);
+        document.getElementById('target-email').value = '';
+        document.getElementById('target-amount').value = '';
+      }
+
+      btn.innerText = "Update Balance";
+      btn.disabled = false;
     }
 
     async function logout() {
@@ -115,6 +226,5 @@
 
     checkAdmin();
   </script>
-</bod
-  y>
+</body>
 </html>
