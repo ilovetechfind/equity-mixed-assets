@@ -28,19 +28,26 @@
     .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 20px; }
     .back-link:hover { text-decoration: underline; }
 
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    .card-title { font-size: 1.2rem; font-weight: 700; margin-top: 0; margin-bottom: 8px; }
-    .card-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); position: relative; }
+    
+    .card-header-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .card-title { font-size: 1.2rem; font-weight: 700; margin: 0 0 4px 0; }
+    .card-subtitle { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+    .edit-btn { background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: #818cf8; padding: 6px 14px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    .edit-btn:hover { background: var(--primary); color: white; }
 
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
     input, textarea { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; font-family: inherit; }
-    input:focus, textarea:focus { border-color: var(--primary); }
+    input:disabled, textarea:disabled { opacity: 0.7; cursor: not-allowed; background: rgba(0,0,0,0.1); }
+    input:focus:not(:disabled), textarea:focus:not(:disabled) { border-color: var(--primary); }
 
     .file-input-wrapper { display: flex; align-items: center; gap: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 10px; }
     .file-input-wrapper input[type="file"] { border: none; padding: 0; background: transparent; color: var(--text-muted); font-size: 0.85rem; }
 
-    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
+    .action-container { display: none; margin-top: 10px; }
+    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; }
     .submit-btn:hover { opacity: 0.9; }
     .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
 
@@ -56,22 +63,27 @@
     </a>
 
     <div class="card">
-      <h2 class="card-title">Pay Through Bitcoin</h2>
-      <p class="card-subtitle">Manage active crypto wallet address, QR code, and network instructions.</p>
+      <div class="card-header-flex">
+        <div>
+          <h2 class="card-title">Pay Through Bitcoin</h2>
+          <p class="card-subtitle" id="lock-status-text">Locked (Read-Only)</p>
+        </div>
+        <button type="button" class="edit-btn" id="unlock-btn" onclick="enableEditing()">Edit Details</button>
+      </div>
 
       <form onsubmit="saveBitcoinConfig(event)">
         
         <!-- 1. Wallet Address -->
         <div class="form-group">
           <label>Bitcoin Wallet Address</label>
-          <input type="text" id="btc-wallet" placeholder="Paste Bitcoin wallet address here..." autocomplete="off">
+          <input type="text" id="btc-wallet" placeholder="Paste Bitcoin wallet address here..." autocomplete="off" disabled>
         </div>
 
         <!-- 2. Upload Picture / QR Code -->
         <div class="form-group">
           <label>Upload QR Code / Picture</label>
-          <div class="file-input-wrapper">
-            <input type="file" id="btc-image-file" accept="image/*" onchange="previewImage(event)">
+          <div class="file-input-wrapper" id="file-box" style="opacity: 0.6; pointer-events: none;">
+            <input type="file" id="btc-image-file" accept="image/*" onchange="previewImage(event)" disabled>
           </div>
           <img id="image-preview" class="preview-img" alt="QR Preview">
           <input type="hidden" id="btc-image-url">
@@ -80,10 +92,12 @@
         <!-- 3. Instructions -->
         <div class="form-group">
           <label>Instructions</label>
-          <textarea id="btc-instructions" rows="4" placeholder="Enter network notes or transfer instructions here..."></textarea>
+          <textarea id="btc-instructions" rows="4" placeholder="Enter network notes or transfer instructions here..." disabled></textarea>
         </div>
 
-        <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
+        <div class="action-container" id="action-buttons">
+          <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
+        </div>
         <span id="form-status" class="status-msg"></span>
       </form>
     </div>
@@ -97,6 +111,30 @@
 
     if (targetUserId) {
       document.getElementById('back-hub').setAttribute('href', `payment-methods.html?id=${targetUserId}`);
+    }
+
+    function enableEditing() {
+      document.getElementById('btc-wallet').disabled = false;
+      document.getElementById('btc-instructions').disabled = false;
+      document.getElementById('btc-image-file').disabled = false;
+      document.getElementById('file-box').style.opacity = "1";
+      document.getElementById('file-box').style.pointerEvents = "auto";
+      document.getElementById('action-buttons').style.display = "block";
+      document.getElementById('unlock-btn').style.display = "none";
+      document.getElementById('lock-status-text').innerText = "Unlocked for Editing";
+      document.getElementById('lock-status-text').style.color = "#34d399";
+    }
+
+    function lockEditing() {
+      document.getElementById('btc-wallet').disabled = true;
+      document.getElementById('btc-instructions').disabled = true;
+      document.getElementById('btc-image-file').disabled = true;
+      document.getElementById('file-box').style.opacity = "0.6";
+      document.getElementById('file-box').style.pointerEvents = "none";
+      document.getElementById('action-buttons').style.display = "none";
+      document.getElementById('unlock-btn').style.display = "block";
+      document.getElementById('lock-status-text').innerText = "Locked (Read-Only)";
+      document.getElementById('lock-status-text').style.color = "var(--text-muted)";
     }
 
     function previewImage(event) {
@@ -136,6 +174,7 @@
           document.getElementById('btc-instructions').value = data.bitcoin;
         }
       }
+      lockEditing(); // Ensure it starts locked after loading
     }
 
     async function saveBitcoinConfig(e) {
@@ -168,13 +207,15 @@
         statusEl.innerText = "Error: " + error.message;
       } else {
         statusEl.style.color = "#34d399";
-        statusEl.innerText = "Bitcoin details saved successfully!";
-        setTimeout(() => { statusEl.innerText = ""; }, 3000);
+        statusEl.innerText = "Bitcoin details saved and locked!";
+        setTimeout(() => { 
+          statusEl.innerText = ""; 
+          lockEditing(); // Relocks automatically upon successful save
+        }, 1500);
       }
     }
 
     loadBitcoinConfig();
   </script>
 </body>
-  </html>
-  
+</html>
