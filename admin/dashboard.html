@@ -204,7 +204,6 @@
       btn.innerText = "Saving...";
       btn.disabled = true;
 
-      // Fixed: Removed 'email' column reference so it matches schema cache correctly
       const { error } = await client
         .from('profiles')
         .upsert({ 
@@ -233,7 +232,7 @@
 
     async function loadReferredUsers(code) {
       const { data, error } = await client
-        .from('profiles')
+        .from('user_profiles_view')
         .select('username, email, balance, created_at')
         .eq('referred_by', code)
         .order('created_at', { ascending: false });
