@@ -46,6 +46,7 @@
     .code-container { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .code-display { font-size: 1.4rem; font-weight: 800; color: #818cf8; background: rgba(0, 0, 0, 0.2); padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); display: inline-block; }
     .locked-notice { color: #34d399; font-size: 0.8rem; font-weight: 600; margin-top: 10px; display: block; }
+    .error-text { color: #f87171; font-size: 0.8rem; font-weight: 600; margin-top: 8px; display: block; }
     
     .stat-card-link { text-decoration: none; display: block; }
     .stat-card { background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.05) 100%); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 16px; padding: 30px 20px; text-align: center; transition: all 0.3s ease; }
@@ -84,10 +85,11 @@
       <div id="code-set-section" style="display: none;">
         <form onsubmit="saveAdminCode(event)" class="form-row">
           <div class="input-group" style="max-width: 300px;">
-            <input type="text" id="new-ref-code" placeholder="Enter referral code" required>
+            <input type="text" id="new-ref-code" placeholder="Enter referral code" required oninput="clearError()">
           </div>
           <button type="submit" class="submit-btn" id="save-code-btn">Save & Lock Code</button>
         </form>
+        <span id="code-error-msg" class="error-text" style="display: none;">Someone else has taken this code! Please pick another one.</span>
       </div>
     </div>
 
@@ -121,7 +123,6 @@
   </nav>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Load shared admin config -->
   <script src="config.js"></script>
   <script>
     let currentAdminUser = null;
@@ -154,19 +155,21 @@
       savedCodeValue = profile?.referral_code;
 
       if (savedCodeValue && savedCodeValue.trim() !== '') {
-        // Code already exists: Hide form completely, show locked view
         document.getElementById('displayed-admin-code').innerText = savedCodeValue;
         document.getElementById('code-view-section').style.display = 'block';
         document.getElementById('code-set-section').style.display = 'none';
         document.getElementById('code-warning').style.display = 'none';
         loadReferredUsersCount(savedCodeValue);
       } else {
-        // No code set yet: Show code creation form
         document.getElementById('code-view-section').style.display = 'none';
         document.getElementById('code-set-section').style.display = 'block';
         document.getElementById('user-count-display').innerText = "0";
         document.getElementById('code-warning').style.display = 'block';
       }
+    }
+
+    function clearError() {
+      document.getElementById('code-error-msg').style.display = 'none';
     }
 
     async function saveAdminCode(e) {
@@ -175,10 +178,11 @@
       if (!newCode) return;
 
       const btn = document.getElementById('save-code-btn');
-      btn.innerText = "Checking availability...";
+      btn.innerText = "Checking...";
       btn.disabled = true;
+      clearError();
 
-      // Check if someone else already took this code
+      // Check if code is already taken
       const { data: existingCodeCheck } = await client
         .from('profiles')
         .select('id')
@@ -186,13 +190,13 @@
         .maybeSingle();
 
       if (existingCodeCheck && existingCodeCheck.id !== currentAdminUser.id) {
-        alert("Someone else has taken this code! Please pick another one.");
+        document.getElementById('code-error-msg').style.display = 'block';
         btn.innerText = "Save & Lock Code";
         btn.disabled = false;
         return;
       }
 
-      btn.innerText = "Locking in...";
+      btn.innerText = "Locking...";
 
       const { error } = await client
         .from('profiles')
@@ -203,14 +207,13 @@
 
       if (error) {
         if (error.code === '23505') { 
-          alert("Someone else has taken this code! Please pick another one.");
+          document.getElementById('code-error-msg').style.display = 'block';
         } else {
           alert("Failed to save code: " + error.message);
         }
         btn.innerText = "Save & Lock Code";
         btn.disabled = false;
       } else {
-        alert("Success! Your code is permanently locked in.");
         loadAdminCode();
       }
     }
@@ -248,4 +251,5 @@
     checkAdmin();
   </script>
 </body>
-</html>
+  </html>
+  
