@@ -204,12 +204,11 @@
       btn.innerText = "Saving...";
       btn.disabled = true;
 
-      // Upsert ensures that if the profile row doesn't exist yet, it gets created with the admin ID and email
+      // Fixed: Removed 'email' column reference so it matches schema cache correctly
       const { error } = await client
         .from('profiles')
         .upsert({ 
           id: currentAdminUser.id, 
-          email: currentAdminUser.email,
           referral_code: newCode 
         });
 
