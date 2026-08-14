@@ -48,6 +48,7 @@
     .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
     input, select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
     input:focus, select:focus { border-color: #6366f1; }
+    input:disabled { opacity: 0.7; cursor: not-allowed; }
     
     .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; height: 45px; }
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
@@ -68,11 +69,11 @@
       <div>
         <div class="code-display" id="admin-ref-code">Loading...</div>
       </div>
-      <div class="form-row" style="margin-top: 10px;">
+      <div class="form-row" id="code-input-container" style="margin-top: 10px; display: none;">
         <div class="input-group" style="max-width: 300px;">
           <input type="text" id="new-ref-code" placeholder="Set custom code">
         </div>
-        <button class="submit-btn" onclick="saveAdminCode()">Save Code</button>
+        <button class="submit-btn" id="save-code-btn" onclick="saveAdminCode()">Save Code</button>
       </div>
     </div>
 
@@ -162,23 +163,33 @@
     }
 
     async function loadAdminCode() {
-      // Check if admin has a referral code stored in profiles or a separate table
       const { data: profile } = await client
         .from('profiles')
-        .select('referral_code, username')
+        .select('referral_code')
         .eq('id', currentAdminId)
         .single();
 
-      let code = profile?.referral_code || 'ADMIN123';
-      document.getElementById('admin-ref-code').innerText = code;
-      document.getElementById('new-ref-code').value = code;
+      const existingCode = profile?.referral_code;
 
-      loadReferredUsers(code);
+      if (existingCode && existingCode.trim() !== '') {
+        // Code is already set and locked in
+        document.getElementById('admin-ref-code').innerText = existingCode;
+        document.getElementById('code-input-container').style.display = 'none';
+        loadReferredUsers(existingCode);
+      } else {
+        // No code set yet, show input and save button
+        document.getElementById('admin-ref-code').innerText = 'Not Set Yet';
+        document.getElementById('code-input-container').style.display = 'flex';
+        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Please set your referral code first.</td></tr>`;
+      }
     }
 
     async function saveAdminCode() {
       const newCode = document.getElementById('new-ref-code').value.trim();
-      if (!newCode) return;
+      if (!newCode) {
+        alert("Please enter a valid referral code.");
+        return;
+      }
 
       const { error } = await client
         .from('profiles')
@@ -188,7 +199,7 @@
       if (error) {
         alert("Failed to save code: " + error.message);
       } else {
-        alert("Admin referral code updated successfully!");
+        alert("Admin referral code locked in successfully!");
         loadAdminCode();
       }
     }
