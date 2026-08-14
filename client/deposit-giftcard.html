@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Upload Gift Card</title>
+  <title>Equity Mixed Assets - Gift Card Deposit</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -14,11 +14,11 @@
     }
     body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; }
     .container { width: 100%; max-width: 500px; margin: 30px auto; }
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    .input-group { margin-bottom: 16px; text-align: left; }
-    .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
-    input, textarea { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; font-family: inherit; }
-    .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; height: 45px; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .qr-img { width: 180px; height: 180px; object-fit: contain; background: white; padding: 10px; border-radius: 12px; margin: 15px auto; display: block; }
+    .address-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.85rem; word-break: break-all; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
+    .instructions-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; font-size: 0.85rem; color: var(--text-muted); margin: 15px 0; text-align: left; white-space: pre-wrap; }
+    .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
     .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
   </style>
 </head>
@@ -26,88 +26,55 @@
   <div class="container">
     <a href="deposit.html" class="back-btn">← Back</a>
     <div class="card">
-      <h2 style="margin-top:0;">Upload Gift Card</h2>
-      <div id="instructions-box" style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px;">Loading instructions...</div>
+      <h2 style="margin-top:0;">Gift Card Deposit</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">Review accepted gift cards and follow instructions to deposit.</p>
       
-      <form onsubmit="submitGiftCard(event)">
-        <div class="input-group">
-          <label>Gift Card Code / Details</label>
-          <textarea id="card-code" placeholder="Enter gift card code here..." required></textarea>
-        </div>
-        <div class="input-group">
-          <label>Upload Gift Card Photo / Receipt</label>
-          <input type="file" id="card-photo" accept="image/*" required>
-        </div>
-        <button type="submit" class="btn" id="submit-btn">Submit Gift Card</button>
-      </form>
+      <div id="content-area">
+        <p style="color: var(--text-muted);">Loading gift card details...</p>
+      </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6InFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function loadInfo() {
+    async function loadGiftcard() {
+      const area = document.getElementById('content-area');
       const { data: { user } } = await client.auth.getUser();
       if (!user) { window.location.href = 'login.html'; return; }
 
-      const { data: profile } = await client.from('profiles').select('referred_by').eq('id', user.id).single();
-      if (!profile || !profile.referred_by) return;
+      const { data: profile } = await client.from('profiles').select('referred_by, id').eq('id', user.id).maybeSingle();
 
-      const { data: settings } = await client.from('admin_payment_settings').select('*').eq('referral_code', profile.referred_by).single();
-      if (settings && settings.giftcard_instructions) {
-        document.getElementById('instructions-box').innerText = settings.giftcard_instructions;
-      } else {
-        document.getElementById('instructions-box').innerText = "Please enter your card code below and upload photos.";
+      let configData = null;
+      let lookupIds = [user.id];
+      if (profile && profile.referred_by) { lookupIds.push(profile.referred_by); }
+
+      for (const targetId of lookupIds) {
+        const { data } = await client.from('payment_configs').select('giftcard').eq('user_id', targetId).maybeSingle();
+        if (data && data.giftcard) { configData = data.giftcard; break; }
       }
-    }
 
-    async function submitGiftCard(e) {
-      e.preventDefault();
-      const btn = document.getElementById('submit-btn');
-      btn.innerText = "Submitting...";
-      btn.disabled = true;
-
-      const { data: { user } } = await client.auth.getUser();
-      const { data: profile } = await client.from('profiles').select('referred_by').eq('id', user.id).single();
-
-      const file = document.getElementById('card-photo').files[0];
-      const fileName = `gc_${user.id}_${Date.now()}.${file.name.split('.').pop()}`;
-
-      const { error: uploadError } = await client.storage.from('kyc-bucket').upload(fileName, file);
-      if (uploadError) {
-        alert("Upload failed: " + uploadError.message);
-        btn.innerText = "Submit Gift Card";
-        btn.disabled = false;
+      if (!configData) {
+        area.innerHTML = `<p style="color: var(--text-muted);">Gift card deposit details have not been configured by your account manager yet.</p>`;
         return;
       }
 
-      const { data: publicURL } = client.storage.from('kyc-bucket').getPublicUrl(fileName);
-
-      const { error: insertError } = await client.from('client_deposits').insert({
-        user_id: user.id,
-        admin_referral_code: profile?.referred_by || '',
-        payment_type: 'gift_card',
-        details: document.getElementById('card-code').value.trim(),
-        receipt_url: publicURL.publicUrl,
-        status: 'pending'
-      });
-
-      if (insertError) {
-        alert("Submission failed: " + insertError.message);
-      } else {
-        alert("Gift card submitted successfully for review!");
-        window.location.href = 'deposit.html';
+      try {
+        const parsed = typeof configData === 'string' ? JSON.parse(configData) : configData;
+        area.innerHTML = `
+          ${parsed.image ? `<img src="${parsed.image}" class="qr-img" alt="Gift Card Banner">` : ''}
+          ${parsed.wallet ? `<div class="address-box"><strong>Accepted Brands/Details:</strong><br>${parsed.wallet}</div>` : ''}
+          ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
+        `;
+      } catch (err) {
+        area.innerHTML = `<p style="color: var(--text-muted);">Gift card deposit details have not been configured by your account manager yet.</p>`;
       }
-
-      btn.innerText = "Submit Gift Card";
-      btn.disabled = false;
     }
-
-    loadInfo();
+    loadGiftcard();
   </script>
-</b
-  ody>
-</html>
+</body>
+<
+  /html>
