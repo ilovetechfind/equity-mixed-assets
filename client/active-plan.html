@@ -118,7 +118,7 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id') || 'default_user';
+    const targetUserId = urlParams.get('id');
 
     const plansDictionary = {
       'starter': { name: 'Starter Plan', icon: '🌱' },
@@ -132,11 +132,41 @@
 
     function renderActivePlans() {
       const container = document.getElementById('active-plans-container');
-      const savedList = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
       
       let activeIds = [];
-      if (savedList) {
-        try { activeIds = JSON.parse(savedList); } catch(e) {}
+      
+      // Check specific user key first, then check general fallback keys if empty
+      const keysToCheck = targetUserId ? [`user_active_plans_list_${targetUserId}`] : [];
+      keysToCheck.push('user_active_plans_list_default_user');
+
+      // Also check if any individual keys were set globally
+      for (let key of keysToCheck) {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              activeIds = parsed;
+              break;
+            }
+          } catch(e) {}
+        }
+      }
+
+      // Fallback check: scan all localstorage keys for any active lists if still empty
+      if (activeIds.length === 0) {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.startsWith('user_active_plans_list_')) {
+            try {
+              const val = JSON.parse(localStorage.getItem(k));
+              if (Array.isArray(val) && val.length > 0) {
+                activeIds = val;
+                break;
+              }
+            } catch(e) {}
+          }
+        }
       }
 
       if (activeIds.length === 0) {
@@ -179,5 +209,4 @@
     document.addEventListener("DOMContentLoaded", renderActivePlans);
   </script>
 </body>
-    </html>
-    
+</html>
