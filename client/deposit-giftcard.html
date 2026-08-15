@@ -67,12 +67,12 @@
       try {
         const parsed = typeof configData === 'string' ? JSON.parse(configData) : configData;
         area.innerHTML = `
-          ${parsed.image ? `<img src="${parsed.image}" class="qr-img" alt="Gift Card Banner">` : ''}
+          ${parsed.image ? '<img src="' + parsed.image + '" class="qr-img" alt="Gift Card Banner">' : ''}
           ${parsed.wallet ? `
             <div class="address-box">${parsed.wallet}</div>
             <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Details copied!');">Copy Details</button>
           ` : ''}
-          ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
+          ${parsed.instructions ? '<div class="instructions-box"><strong>Instructions:</strong><br>' + parsed.instructions + '</div>' : ''}
           
           <a href="deposit-proof.html" class="proof-btn">I made the payment proof of payment</a>
         `;
