@@ -133,12 +133,41 @@
     function renderActivePlans() {
       const container = document.getElementById('active-plans-container');
       
-      // Match the exact same storage key pattern used in the admin control panel
-      const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
-      
       let activeIds = [];
-      if (saved) {
-        try { activeIds = JSON.parse(saved); } catch(e) {}
+
+      // Check both the URL-specific key and the default user key simultaneously
+      const keysToCheck = [
+        `user_active_plans_list_${targetUserId}`,
+        'user_active_plans_list_default_user'
+      ];
+
+      for (const key of keysToCheck) {
+        const saved = localStorage.getItem(key);
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              activeIds = parsed;
+              break;
+            }
+          } catch(e) {}
+        }
+      }
+
+      // If still empty, scan localStorage keys for any active lists as a fail-safe
+      if (activeIds.length === 0) {
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (k && k.includes('active_plans_list')) {
+            try {
+              const val = JSON.parse(localStorage.getItem(k));
+              if (Array.isArray(val) && val.length > 0) {
+                activeIds = val;
+                break;
+              }
+            } catch(e) {}
+          }
+        }
       }
 
       if (activeIds.length === 0) {
