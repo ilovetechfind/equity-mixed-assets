@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Edit Bronze Tier Payment Wall</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+    }
+
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+      padding-bottom: 90px; 
+    }
+
+    .container { width: 100%; max-width: 960px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 14px 0; }
+    
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 16px; }
+    .back-link:hover { text-decoration: underline; }
+
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+    input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; transition: border-color 0.2s; }
+    input:focus { border-color: var(--primary); }
+
+    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
+    .submit-btn:hover { opacity: 0.9; }
+    .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <h1 class="logo-text">Bronze Tier Payment Wall</h1>
+    </header>
+
+    <a href="#" id="back-link" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to Plans Control
+    </a>
+
+    <div class="card">
+      <h2 class="card-title">Configure Payment Wall Parameters</h2>
+      <form onsubmit="savePlanConfig(event)">
+        <div class="form-group">
+          <label>Total Investment ($)</label>
+          <input type="number" id="plan-total" value="4000">
+        </div>
+
+        <div class="form-group">
+          <label>Initial First Payment ($)</label>
+          <input type="number" id="plan-initial" value="800">
+        </div>
+
+        <div class="form-group">
+          <label>Weekly Payment ($)</label>
+          <input type="number" id="plan-weekly" value="800">
+        </div>
+
+        <div class="form-group">
+          <label>Daily Payment ($)</label>
+          <input type="number" step="0.01" id="plan-daily" value="114.28">
+        </div>
+
+        <div class="form-group">
+          <label>30-Day Payout Return ($)</label>
+          <input type="number" id="plan-payout" value="20000">
+        </div>
+
+        <button type="submit" class="submit-btn" id="save-btn">Save Payment Wall Settings</button>
+        <span id="form-status" class="status-msg"></span>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id');
+
+    const backLink = document.getElementById('back-link');
+    backLink.setAttribute('href', `investment-plans-admin.html${targetUserId ? '?id=' + targetUserId : ''}`);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const saved = localStorage.getItem('config_bronze');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          document.getElementById('plan-total').value = data.total || 4000;
+          document.getElementById('plan-initial').value = data.initial || 800;
+          document.getElementById('plan-weekly').value = data.weekly || 800;
+          document.getElementById('plan-daily').value = data.daily || 114.28;
+          document.getElementById('plan-payout').value = data.payout || 20000;
+        } catch (e) {}
+      }
+    });
+
+    function savePlanConfig(e) {
+      e.preventDefault();
+      const total = document.getElementById('plan-total').value;
+      const initial = document.getElementById('plan-initial').value;
+      const weekly = document.getElementById('plan-weekly').value;
+      const daily = document.getElementById('plan-daily').value;
+      const payout = document.getElementById('plan-payout').value;
+      const statusEl = document.getElementById('form-status');
+
+      localStorage.setItem('config_bronze', JSON.stringify({ total, initial, weekly, daily, payout }));
+
+      statusEl.style.color = "#34d399";
+      statusEl.innerText = "Bronze tier payment wall updated successfully!";
+      setTimeout(() => { statusEl.innerText = ""; }, 3000);
+    }
+  </script>
+</body>
+</html>
