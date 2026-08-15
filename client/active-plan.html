@@ -1,59 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Active Plan</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #070b14;
+      --card-bg: rgba(18, 24, 38, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #8b9bb4;
+    }
+    * { box-sizing: border-box; }
+    body { 
+      background-color: var(--bg-main); color: white; font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh;
+    }
+    .container { width: 100%; max-width: 480px; }
+    .nav-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; margin-top: 10px; }
+    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-weight: 600; }
+    .view-title { font-size: 1.4rem; font-weight: 800; margin: 0; }
+    .empty-state { background: var(--card-bg); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 40px 24px; text-align: center; }
+    .plans-list { display: flex; flex-direction: column; gap: 16px; }
+    .plan-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .plan-card-header { display: flex; justify-content: space-between; align-items: center; }
+    .plan-title-wrapper { display: flex; align-items: center; gap: 12px; }
+    .plan-name { font-size: 1.1rem; font-weight: 700; margin: 0; }
+    .plan-status { background: rgba(52, 211, 153, 0.15); color: #34d399; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="nav-bar">
+      <a href="investment-plan.html" class="back-btn">Back</a>
+      <h2 class="view-title">Active Investment</h2>
+    </div>
+    <div id="active-plans-container">
+      <div class="empty-state"><h3>Loading...</h3></div>
+    </div>
+  </div>
+
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id') || localStorage.getItem('current_viewing_user') || 'default_user';
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const targetUserId = urlParams.get('id') || 'default_user';
 
-    const plansDictionary = {
-      'starter': { name: 'Starter Plan', icon: '🌱' },
-      'bronze': { name: 'Bronze Tier', icon: '🥉' },
-      'silver': { name: 'Silver Tier', icon: '🥈' },
-      'gold': { name: 'Gold Tier', icon: '🥇' },
-      'platinum': { name: 'Platinum Tier', icon: '💎' },
-      'diamond': { name: 'Diamond Tier', icon: '🔮' },
-      'crown': { name: 'Crown Elite', icon: '👑' }
-    };
+      const plansDictionary = {
+        'starter': { name: 'Starter Plan', icon: '🌱' },
+        'bronze': { name: 'Bronze Tier', icon: '🥉' },
+        'silver': { name: 'Silver Tier', icon: '🥈' },
+        'gold': { name: 'Gold Tier', icon: '🥇' },
+        'platinum': { name: 'Platinum Tier', icon: '💎' },
+        'diamond': { name: 'Diamond Tier', icon: '🔮' },
+        'crown': { name: 'Crown Elite', icon: '👑' }
+      };
 
-    const container = document.getElementById('active-plans-container');
-    
-    // Check both specific user storage and default storage to ensure it syncs
-    let saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
-    if (!saved && targetUserId !== 'default_user') {
-      saved = localStorage.getItem(`user_active_plans_list_default_user`);
-    }
+      const container = document.getElementById('active-plans-container');
+      
+      let saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
+      if (!saved && targetUserId !== 'default_user') {
+        saved = localStorage.getItem(`user_active_plans_list_default_user`);
+      }
 
-    let activeIds = [];
-    if (saved) {
-      try { activeIds = JSON.parse(saved); } catch(e) {}
-    }
+      let activeIds = [];
+      if (saved) {
+        try { activeIds = JSON.parse(saved); } catch(e) {}
+      }
 
-    if (activeIds.length === 0) {
-      container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">📭</div>
-          <h3 class="empty-title">No Active Plans</h3>
-          <p class="empty-desc">You currently do not have any active investments running.</p>
-          <a href="investment-plan.html${urlParams.get('id') ? '?id=' + targetUserId : ''}" class="action-btn">Browse Plans</a>
-        </div>
-      `;
-    } else {
-      let html = '<div class="plans-list">';
-      activeIds.forEach(id => {
-        const plan = plansDictionary[id];
-        if (plan) {
-          html += `
-            <div class="plan-card">
-              <div class="plan-card-header">
-                <div class="plan-title-wrapper">
-                  <span style="font-size: 1.8rem;">${plan.icon}</span>
-                  <h3 class="plan-name">${plan.name}</h3>
+      if (!activeIds || activeIds.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3 style="margin-top:0;">No Active Plans</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem;">You currently do not have any active investments running.</p>
+            <a href="investment-plan.html${urlParams.get('id') ? '?id=' + targetUserId : ''}" style="color: #34d399; font-weight: bold; text-decoration: none;">Browse Plans</a>
+          </div>
+        `;
+      } else {
+        let html = '<div class="plans-list">';
+        activeIds.forEach(id => {
+          const plan = plansDictionary[id];
+          if (plan) {
+            html += `
+              <div class="plan-card">
+                <div class="plan-card-header">
+                  <div class="plan-title-wrapper">
+                    <span style="font-size: 1.8rem;">${plan.icon}</span>
+                    <h3 class="plan-name">${plan.name}</h3>
+                  </div>
+                  <span class="plan-status">Active</span>
                 </div>
-                <span class="plan-status">Active</span>
               </div>
-            </div>
-          `;
-        }
-      });
-      html += '</div>';
-      container.innerHTML = html;
+            `;
+          }
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('active-plans-container').innerHTML = '<div class="empty-state"><h3>Error loading plans</h3></div>';
     }
-       
   </script>
+</body>
+</h
+  tml>
