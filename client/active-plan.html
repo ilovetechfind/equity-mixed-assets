@@ -117,6 +117,9 @@
   </div>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id') || 'default_user';
+
     const plansDictionary = {
       'starter': { name: 'Starter Plan', icon: '🌱' },
       'bronze': { name: 'Bronze Tier', icon: '🥉' },
@@ -129,26 +132,13 @@
 
     function renderActivePlans() {
       const container = document.getElementById('active-plans-container');
+      
+      // Match the exact same storage key pattern used in the admin control panel
+      const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
+      
       let activeIds = [];
-
-      // Scan all localStorage keys to find any active plan lists
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.includes('active_plans_list') || key.includes('active_plan'))) {
-          const val = localStorage.getItem(key);
-          try {
-            const parsed = JSON.parse(val);
-            if (Array.isArray(parsed)) {
-              parsed.forEach(id => { if (!activeIds.includes(id)) activeIds.push(id); });
-            } else if (typeof parsed === 'string' && plansDictionary[parsed]) {
-              if (!activeIds.includes(parsed)) activeIds.push(parsed);
-            }
-          } catch(e) {
-            if (typeof val === 'string' && plansDictionary[val]) {
-              if (!activeIds.includes(val)) activeIds.push(val);
-            }
-          }
-        }
+      if (saved) {
+        try { activeIds = JSON.parse(saved); } catch(e) {}
       }
 
       if (activeIds.length === 0) {
@@ -189,7 +179,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", renderActivePlans);
-    window.addEventListener("storage", renderActivePlans);
   </script>
 </body>
 </html>
