@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Payment Proof</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+    }
+    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; }
+    .container { width: 100%; max-width: 500px; margin: 30px auto; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .file-input-wrapper { background: rgba(0,0,0,0.3); border: 2px dashed rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; margin: 20px 0; cursor: pointer; text-align: center; }
+    .file-input-wrapper input { display: none; }
+    .file-label { font-size: 0.9rem; color: var(--text-muted); cursor: pointer; display: block; word-break: break-all; }
+    .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 14px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; font-size: 1rem; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
+    
+    /* Loading / Success screen overlay style */
+    .status-screen { display: none; padding: 20px 0; }
+    .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top: color 4px solid #6366f1; border-top-color: #6366f1; border-radius: 50%; animation: spin 1s linear infinite; margin: 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="giftcard.html" class="back-btn">← Back</a>
+    <div class="card">
+      
+      <!-- Upload Form View -->
+      <div id="form-view">
+        <h2 style="margin-top:0;">Upload Payment Proof</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem;">Please upload a screenshot or image of your payment receipt or gift card code to complete your request.</p>
+        
+        <form id="proof-form" onsubmit="submitProof(event)">
+          <div class="file-input-wrapper" onclick="document.getElementById('proof-file').click()">
+            <span class="file-label" id="file-name-display">Click here to select payment image</span>
+            <input type="file" id="proof-file" accept="image/*" required onchange="updateFileName(this)">
+          </div>
+          
+          <button type="submit" class="btn" id="submit-btn">Submit Proof</button>
+        </form>
+      </div>
+
+      <!-- Loading / Confirmation View -->
+      <div id="loading-view" class="status-screen">
+        <div class="spinner"></div>
+        <h3 style="margin-bottom: 10px;">Processing Your Proof</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">Please wait while we submit your receipt and verify your transaction details. Do not close or refresh this page...</p>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6InFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    function updateFileName(input) {
+      const display = document.getElementById('file-name-display');
+      if (input.files && input.files[0]) {
+        display.textContent = input.files[0].name;
+        display.style.color = "#ffffff";
+      }
+    }
+
+    async function submitProof(event) {
+      event.preventDefault();
+      const fileInput = document.getElementById('proof-file');
+      const submitBtn = document.getElementById('submit-btn');
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Please select an image file first.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+
+      const { data: { user } } = await client.auth.getUser();
+      if (!user) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}_${Date.now()}.${fileExt}`;
+      const filePath = `proofs/${fileName}`;
+
+      // 1. Upload image to Supabase storage bucket (Make sure you have a bucket named 'deposits' or 'proofs')
+      const { error: uploadError } = await client.storage
+        .from('deposits')
+        .upload(filePath, file);
+
+      if (uploadError) {
+        alert('Error uploading file: ' + uploadError.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Proof';
+        return;
+      }
+
+      // Get public URL of the uploaded image
+      const { data: { publicUrl } } = client.storage
+        .from('deposits')
+        .getPublicUrl(filePath);
+
+      // 2. Save transaction record to your database (e.g., a 'deposits' or 'transactions' table)
+      // Adjust table and column names to fit your existing database schema if needed
+      const { error: dbError } = await client.from('deposits').insert([
+        {
+          user_id: user.id,
+          proof_url: publicUrl,
+          status: 'pending',
+          created_at: new Date()
+        }
+      ]);
+
+      // Switch view to the "wait for confirmation" screen
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('loading-view').style.display = 'block';
+
+      // Optional: Redirect to dashboard or history page after a few seconds of showing the message
+      setTimeout(() => {
+        window.location.href = 'dashboard.html'; // Change to wherever you want them sent afterwards
+      }, 5000);
+    }
+  </script>
+</body>
+</html>
