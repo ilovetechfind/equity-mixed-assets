@@ -7,109 +7,311 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
-      --card-bg: rgba(19, 27, 54, 0.7);
-      --card-border: rgba(255, 255, 255, 0.07);
+      --bg-gradient: radial-gradient(circle at top right, #1e293b 0%, #020617 100%);
+      --card-bg: rgba(15, 23, 42, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
       --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --success: #10b981;
+      --accent: #8b5cf6;
     }
 
-    body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; padding-bottom: 100px; display: flex; justify-content: center; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed; 
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+      padding-bottom: 100px; 
+      display: flex; 
+      justify-content: center; 
+      min-height: 100vh;
+    }
+    
     .container { width: 100%; max-width: 480px; }
     
+    /* Header Styles */
     .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 4px; }
     .logo-text { background: linear-gradient(90deg, #4ade80, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
-    .menu-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .menu-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+    .menu-btn:hover { background: rgba(255,255,255,0.1); }
     
-    .nav-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .back-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; transition: 0.2s; }
-    .back-btn:hover { border-color: rgba(255,255,255,0.2); }
-    .view-title { font-size: 1.2rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
+    /* Navigation */
+    .nav-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+    .back-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; transition: 0.2s; display: flex; align-items: center; gap: 6px;}
+    .back-btn:hover { background: rgba(255,255,255,0.1); }
+    .view-title { font-size: 1.4rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
 
-    .active-banner { background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(19, 27, 54, 0.8) 100%); border: 1px solid rgba(16, 185, 129, 0.3); backdrop-filter: blur(12px); border-radius: 18px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-    .banner-subtitle { font-size: 0.7rem; color: #34d399; font-weight: 700; letter-spacing: 1px; display: block; margin-bottom: 6px; }
-    .banner-title { font-size: 1.3rem; font-weight: 800; margin: 0; color: white; letter-spacing: -0.5px; }
+    /* Active Banner */
+    .active-banner { 
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(15, 23, 42, 0.8) 100%); 
+      border: 1px solid rgba(16, 185, 129, 0.2); 
+      backdrop-filter: blur(12px); 
+      border-radius: 20px; 
+      padding: 24px; 
+      margin-bottom: 24px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .active-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--success), transparent);
+    }
+    .banner-subtitle { font-size: 0.75rem; color: #34d399; font-weight: 700; letter-spacing: 1.5px; display: block; margin-bottom: 8px; text-transform: uppercase; }
+    .banner-title { font-size: 1.8rem; font-weight: 800; margin: 0 0 4px 0; color: white; letter-spacing: -0.5px; }
+    .banner-status { display: inline-flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    .status-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); animation: pulse 2s infinite; }
 
-    .tier-card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 18px; padding: 18px 20px; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.2s; }
-    .tier-card.active-tier { border-color: #10b981; background: linear-gradient(135deg, rgba(19, 27, 54, 0.9) 0%, rgba(16, 185, 129, 0.05) 100%); }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+
+    /* Tier Cards */
+    .tier-list { display: flex; flex-direction: column; gap: 14px; }
     
-    .tier-info h4 { font-size: 1rem; font-weight: 700; margin: 0 0 4px 0; color: #f8fafc; }
-    .tier-info p { font-size: 0.78rem; color: var(--text-muted); margin: 0; font-weight: 500; }
+    .tier-card { 
+      background: var(--card-bg); 
+      border: 1px solid var(--card-border); 
+      backdrop-filter: blur(12px); 
+      border-radius: 20px; 
+      padding: 20px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    .tier-card:hover {
+      transform: translateY(-2px);
+      background: rgba(30, 41, 59, 0.7);
+      border-color: rgba(255, 255, 255, 0.15);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+
+    .tier-card.active-tier { 
+      border-color: rgba(16, 185, 129, 0.4); 
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(16, 185, 129, 0.05) 100%); 
+    }
     
-    .status-btn { padding: 8px 16px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; transition: 0.2s; }
-    .status-btn.active { background-color: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
-    .status-btn.select { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .tier-content { display: flex; align-items: center; gap: 16px; }
+    
+    .tier-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .tier-info h4 { font-size: 1.1rem; font-weight: 700; margin: 0 0 6px 0; color: #f8fafc; }
+    .tier-details { display: flex; gap: 12px; }
+    .detail-item { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; display: flex; flex-direction: column; }
+    .detail-value { color: white; font-weight: 700; font-size: 0.9rem; margin-top: 2px;}
+    .detail-value.highlight { color: #38bdf8; }
+    
+    .status-btn { padding: 10px 20px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; }
+    
+    .status-btn.active { 
+      background-color: rgba(16, 185, 129, 0.15); 
+      color: #34d399; 
+      border: 1px solid rgba(16, 185, 129, 0.3); 
+    }
+    
+    .status-btn.select { 
+      background: var(--primary); 
+      color: white; 
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25); 
+    }
+    .status-btn.select:hover { background: var(--primary-hover); transform: scale(1.02); }
     .status-btn.select:active { transform: scale(0.96); }
 
-    .bottom-nav { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-around; padding: 10px 0; border-radius: 20px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-    .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
+    /* Special Badge for Gold/Popular */
+    .badge-popular {
+      position: absolute;
+      top: -10px;
+      left: 20px;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      color: #78350f;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(245, 158, 11, 0.3);
+    }
+
+    /* Bottom Navigation */
+    .bottom-nav { 
+      position: fixed; 
+      bottom: 16px; 
+      left: 16px; 
+      right: 16px; 
+      max-width: 448px; 
+      margin: 0 auto; 
+      background: rgba(15, 23, 42, 0.85); 
+      backdrop-filter: blur(20px); 
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1); 
+      display: flex; 
+      justify-content: space-around; 
+      padding: 12px 0; 
+      border-radius: 24px; 
+      z-index: 100; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); 
+    }
+    .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.75rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: 0.3s; }
+    .nav-item:hover { color: white; }
     .nav-item.active { color: #4ade80; }
-    .nav-icon { font-size: 18px; }
+    .nav-icon { font-size: 20px; transition: transform 0.2s; }
+    .nav-item.active .nav-icon { transform: translateY(-2px); }
   </style>
 </head>
 <body>
   <div class="container">
     <header class="app-header">
       <h1 class="logo-text">Equity Mixed Assets</h1>
-      <button class="menu-btn">☰</button>
+      <button class="menu-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
     </header>
 
     <div class="nav-bar">
-      <a href="dashboard.html" class="back-btn">← Back</a>
+      <a href="dashboard.html" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+      </a>
       <h2 class="view-title">Investment Plans</h2>
     </div>
 
     <div class="active-banner">
-      <span class="banner-subtitle">CURRENT ACTIVE TIER</span>
+      <span class="banner-subtitle">Current Active Tier</span>
       <h3 class="banner-title">Brass Tier</h3>
+      <div class="banner-status">
+        <span class="status-dot"></span> Generating Returns
+      </div>
     </div>
 
-    <div class="tier-card active-tier">
-      <div class="tier-info">
-        <h4>1. Brass Tier</h4>
-        <p>Min: $100 | ROI: 5% Daily</p>
+    <div class="tier-list">
+      
+      <!-- Tier 1 -->
+      <div class="tier-card active-tier">
+        <div class="tier-content">
+          <div class="tier-icon" style="color: #cd7f32; background: rgba(205, 127, 50, 0.1); border-color: rgba(205, 127, 50, 0.2);">
+            🥉
+          </div>
+          <div class="tier-info">
+            <h4>Brass Tier</h4>
+            <div class="tier-details">
+              <span class="detail-item">Min Deposit<span class="detail-value">$100</span></span>
+              <span class="detail-item">Daily ROI<span class="detail-value highlight">5%</span></span>
+            </div>
+          </div>
+        </div>
+        <button class="status-btn active">Active</button>
       </div>
-      <button class="status-btn active">Active</button>
-    </div>
 
-    <div class="tier-card">
-      <div class="tier-info">
-        <h4>2. Bronze Tier</h4>
-        <p>Min: $500 | ROI: 8% Daily</p>
+      <!-- Tier 2 -->
+      <div class="tier-card">
+        <div class="tier-content">
+          <div class="tier-icon" style="color: #a46628; background: rgba(164, 102, 40, 0.1); border-color: rgba(164, 102, 40, 0.2);">
+            🟫
+          </div>
+          <div class="tier-info">
+            <h4>Bronze Tier</h4>
+            <div class="tier-details">
+              <span class="detail-item">Min Deposit<span class="detail-value">$500</span></span>
+              <span class="detail-item">Daily ROI<span class="detail-value highlight">8%</span></span>
+            </div>
+          </div>
+        </div>
+        <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
       </div>
-      <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
-    </div>
 
-    <div class="tier-card">
-      <div class="tier-info">
-        <h4>3. Silver Tier</h4>
-        <p>Min: $1,500 | ROI: 12% Daily</p>
+      <!-- Tier 3 -->
+      <div class="tier-card">
+        <div class="tier-content">
+          <div class="tier-icon" style="color: #c0c0c0; background: rgba(192, 192, 192, 0.1); border-color: rgba(192, 192, 192, 0.2);">
+            🥈
+          </div>
+          <div class="tier-info">
+            <h4>Silver Tier</h4>
+            <div class="tier-details">
+              <span class="detail-item">Min Deposit<span class="detail-value">$1,500</span></span>
+              <span class="detail-item">Daily ROI<span class="detail-value highlight">12%</span></span>
+            </div>
+          </div>
+        </div>
+        <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
       </div>
-      <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
-    </div>
 
-    <div class="tier-card">
-      <div class="tier-info">
-        <h4>4. Gold Tier</h4>
-        <p>Min: $5,000 | ROI: 18% Daily</p>
+      <!-- Tier 4 -->
+      <div class="tier-card">
+        <div class="badge-popular">Most Popular</div>
+        <div class="tier-content">
+          <div class="tier-icon" style="color: #ffd700; background: rgba(255, 215, 0, 0.1); border-color: rgba(255, 215, 0, 0.2);">
+            🥇
+          </div>
+          <div class="tier-info">
+            <h4>Gold Tier</h4>
+            <div class="tier-details">
+              <span class="detail-item">Min Deposit<span class="detail-value">$5,000</span></span>
+              <span class="detail-item">Daily ROI<span class="detail-value highlight">18%</span></span>
+            </div>
+          </div>
+        </div>
+        <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
       </div>
-      <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
-    </div>
 
-    <div class="tier-card">
-      <div class="tier-info">
-        <h4>5. Platinum Tier</h4>
-        <p>Min: $10,000 | ROI: 25% Daily</p>
+      <!-- Tier 5 -->
+      <div class="tier-card">
+        <div class="tier-content">
+          <div class="tier-icon" style="color: #e5e4e2; background: rgba(229, 228, 226, 0.1); border-color: rgba(229, 228, 226, 0.2);">
+            💎
+          </div>
+          <div class="tier-info">
+            <h4>Platinum Tier</h4>
+            <div class="tier-details">
+              <span class="detail-item">Min Deposit<span class="detail-value">$10,000</span></span>
+              <span class="detail-item">Daily ROI<span class="detail-value highlight">25%</span></span>
+            </div>
+          </div>
+        </div>
+        <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
       </div>
-      <button class="status-btn select" onclick="alert('Tier selected')">Select</button>
+
     </div>
   </div>
 
   <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
-    <a href="investment-plan.html" class="nav-item active"><span class="nav-icon">📈</span>Plans</a>
-    <a href="deposit.html" class="nav-item"><span class="nav-icon">💳</span>Deposit</a>
-    <a href="dashboard.html" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">🏠</span>Home
+    </a>
+    <a href="investment-plan.html" class="nav-item active">
+      <span class="nav-icon">📈</span>Plans
+    </a>
+    <a href="deposit.html" class="nav-item">
+      <span class="nav-icon">💳</span>Deposit
+    </a>
+    <a href="dashboard.html" class="nav-item">
+      <span class="nav-icon">⚙️</span>Settings
+    </a>
   </nav>
-</bo
-  dy>
+</body>
 </html>
