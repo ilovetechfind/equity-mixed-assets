@@ -117,9 +117,6 @@
   </div>
 
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id');
-
     const plansDictionary = {
       'starter': { name: 'Starter Plan', icon: '🌱' },
       'bronze': { name: 'Bronze Tier', icon: '🥉' },
@@ -132,39 +129,24 @@
 
     function renderActivePlans() {
       const container = document.getElementById('active-plans-container');
-      
       let activeIds = [];
-      
-      // Check specific user key first, then check general fallback keys if empty
-      const keysToCheck = targetUserId ? [`user_active_plans_list_${targetUserId}`] : [];
-      keysToCheck.push('user_active_plans_list_default_user');
 
-      // Also check if any individual keys were set globally
-      for (let key of keysToCheck) {
-        const saved = localStorage.getItem(key);
-        if (saved) {
+      // Scan all localStorage keys to find any active plan lists
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key && (key.includes('active_plans_list') || key.includes('active_plan'))) {
+          const val = localStorage.getItem(key);
           try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              activeIds = parsed;
-              break;
+            const parsed = JSON.parse(val);
+            if (Array.isArray(parsed)) {
+              parsed.forEach(id => { if (!activeIds.includes(id)) activeIds.push(id); });
+            } else if (typeof parsed === 'string' && plansDictionary[parsed]) {
+              if (!activeIds.includes(parsed)) activeIds.push(parsed);
             }
-          } catch(e) {}
-        }
-      }
-
-      // Fallback check: scan all localstorage keys for any active lists if still empty
-      if (activeIds.length === 0) {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.startsWith('user_active_plans_list_')) {
-            try {
-              const val = JSON.parse(localStorage.getItem(k));
-              if (Array.isArray(val) && val.length > 0) {
-                activeIds = val;
-                break;
-              }
-            } catch(e) {}
+          } catch(e) {
+            if (typeof val === 'string' && plansDictionary[val]) {
+              if (!activeIds.includes(val)) activeIds.push(val);
+            }
           }
         }
       }
@@ -207,6 +189,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", renderActivePlans);
+    window.addEventListener("storage", renderActivePlans);
   </script>
 </body>
 </html>
