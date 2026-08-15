@@ -20,6 +20,8 @@
     .instructions-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; font-size: 0.85rem; color: var(--text-muted); margin: 15px 0; text-align: left; white-space: pre-wrap; }
     .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
     .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
+    .proof-btn { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; display: block; width: 100%; box-sizing: border-box; margin-top: 10px; font-size: 0.9rem; text-align: center; transition: all 0.2s; }
+    .proof-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
   </style>
 </head>
 <body>
@@ -87,6 +89,7 @@
             <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Bank details copied!');">Copy Bank Details</button>
           ` : ''}
           ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
+          <a href="deposit-proof.html" class="proof-btn">I made the payment proof of payment</a>
         `;
       } catch (err) {
         area.innerHTML = `<p style="color: var(--text-muted);">Bank transfer details have not been configured by your account manager yet.</p>`;
