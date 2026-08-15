@@ -112,10 +112,14 @@
     </div>
 
     <div id="active-plans-container">
-      <!-- Dynamic Content Rendered Here -->
+      <div class="empty-state">
+        <h3 class="empty-title">Loading...</h3>
+      </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || 'default_user';
@@ -130,43 +134,30 @@
       'crown': { name: 'Crown Elite', icon: '👑' }
     };
 
-    function renderActivePlans() {
+    async function renderActivePlans() {
       const container = document.getElementById('active-plans-container');
-      
       let activeIds = [];
 
-      // Check both the URL-specific key and the default user key simultaneously
-      const keysToCheck = [
-        `user_active_plans_list_${targetUserId}`,
-        'user_active_plans_list_default_user'
-      ];
-
-      for (const key of keysToCheck) {
-        const saved = localStorage.getItem(key);
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-              activeIds = parsed;
-              break;
-            }
-          } catch(e) {}
-        }
+      // 1. Try fetching from Supabase if supabase client is available
+      if (window.supabase && typeof supabaseClient !== 'undefined') {
+        try {
+          const { data, error } = await supabaseClient
+            .from('users') // or your specific table name
+            .select('*')
+            .eq('id', targetUserId)
+            .single();
+          
+          if (data && data.active_plans) {
+            activeIds = data.active_plans;
+          }
+        } catch (err) {}
       }
 
-      // If still empty, scan localStorage keys for any active lists as a fail-safe
+      // 2. Fallback to LocalStorage synchronized with admin key pattern
       if (activeIds.length === 0) {
-        for (let i = 0; i < localStorage.length; i++) {
-          const k = localStorage.key(i);
-          if (k && k.includes('active_plans_list')) {
-            try {
-              const val = JSON.parse(localStorage.getItem(k));
-              if (Array.isArray(val) && val.length > 0) {
-                activeIds = val;
-                break;
-              }
-            } catch(e) {}
-          }
+        const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`) || localStorage.getItem('user_active_plans_list_default_user');
+        if (saved) {
+          try { activeIds = JSON.parse(saved); } catch(e) {}
         }
       }
 
