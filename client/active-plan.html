@@ -11,115 +11,34 @@
       --card-bg: rgba(18, 24, 38, 0.6);
       --card-border: rgba(255, 255, 255, 0.08);
       --text-muted: #8b9bb4;
-      --primary: #6366f1;
     }
-
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+    * { box-sizing: border-box; }
     body { 
-      background-color: var(--bg-main);
-      background-image: radial-gradient(circle at top, rgba(29, 39, 61, 0.4) 0%, transparent 60%);
-      background-attachment: fixed; 
-      color: white; 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      margin: 0; 
-      padding: 16px; 
-      display: flex; 
-      justify-content: center; 
-      min-height: 100vh;
-      padding-bottom: 50px;
+      background-color: var(--bg-main); color: white; font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh;
     }
-    
     .container { width: 100%; max-width: 480px; }
-    
     .nav-bar { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; margin-top: 10px; }
-    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px;}
-    .view-title { font-size: 1.4rem; font-weight: 800; margin: 0; letter-spacing: -0.5px; }
-
-    .empty-state {
-      background: var(--card-bg); 
-      border: 1px dashed rgba(255, 255, 255, 0.15); 
-      backdrop-filter: blur(12px); 
-      border-radius: 20px; 
-      padding: 40px 24px; 
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .empty-icon {
-      font-size: 3rem;
-      background: rgba(255,255,255,0.03);
-      width: 80px;
-      height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      margin-bottom: 10px;
-    }
-
-    .empty-title { font-size: 1.3rem; font-weight: 800; margin: 0; }
-    .empty-desc { color: var(--text-muted); font-size: 0.95rem; line-height: 1.5; margin: 0; }
-
-    .action-btn {
-      margin-top: 10px;
-      padding: 14px 24px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      font-size: 1rem;
-      font-weight: 700;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      box-shadow: 0 8px 20px rgba(16, 185, 129, 0.25);
-      transition: 0.2s;
-    }
-    .action-btn:hover { transform: translateY(-2px); }
-
+    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-weight: 600; }
+    .view-title { font-size: 1.4rem; font-weight: 800; margin: 0; }
+    .empty-state { background: var(--card-bg); border: 1px dashed rgba(255,255,255,0.15); border-radius: 20px; padding: 40px 24px; text-align: center; }
     .plans-list { display: flex; flex-direction: column; gap: 16px; }
-    .plan-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(12px);
-      border-radius: 20px;
-      padding: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .plan-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
     .plan-card-header { display: flex; justify-content: space-between; align-items: center; }
     .plan-title-wrapper { display: flex; align-items: center; gap: 12px; }
-    .plan-icon { font-size: 1.8rem; }
     .plan-name { font-size: 1.1rem; font-weight: 700; margin: 0; }
     .plan-status { background: rgba(52, 211, 153, 0.15); color: #34d399; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; text-transform: uppercase; }
-    .plan-details { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px; }
-    .plan-details span strong { color: white; }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="nav-bar">
-      <a href="investment-plan.html" class="back-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Back
-      </a>
+      <a href="investment-plan.html" class="back-btn">Back</a>
       <h2 class="view-title">Active Investment</h2>
     </div>
-
-    <div id="active-plans-container">
-      <div class="empty-state">
-        <h3 class="empty-title">Loading...</h3>
-      </div>
-    </div>
+    <div id="active-plans-container"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || 'default_user';
@@ -134,45 +53,23 @@
       'crown': { name: 'Crown Elite', icon: '👑' }
     };
 
-    async function renderActivePlans() {
-      const container = document.getElementById('active-plans-container');
-      let activeIds = [];
+    const container = document.getElementById('active-plans-container');
+    const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
+    let activeIds = [];
+    
+    if (saved) {
+      try { activeIds = JSON.parse(saved); } catch(e) {}
+    }
 
-      // 1. Try fetching from Supabase if supabase client is available
-      if (window.supabase && typeof supabaseClient !== 'undefined') {
-        try {
-          const { data, error } = await supabaseClient
-            .from('users') // or your specific table name
-            .select('*')
-            .eq('id', targetUserId)
-            .single();
-          
-          if (data && data.active_plans) {
-            activeIds = data.active_plans;
-          }
-        } catch (err) {}
-      }
-
-      // 2. Fallback to LocalStorage synchronized with admin key pattern
-      if (activeIds.length === 0) {
-        const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`) || localStorage.getItem('user_active_plans_list_default_user');
-        if (saved) {
-          try { activeIds = JSON.parse(saved); } catch(e) {}
-        }
-      }
-
-      if (activeIds.length === 0) {
-        container.innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon">📭</div>
-            <h3 class="empty-title">No Active Plans</h3>
-            <p class="empty-desc">You currently do not have any active investments running. Choose a plan to start generating daily returns.</p>
-            <a href="investment-plan.html" class="action-btn">Browse Plans</a>
-          </div>
-        `;
-        return;
-      }
-
+    if (activeIds.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <h3>No Active Plans</h3>
+          <p style="color: var(--text-muted);">You currently do not have any active investments running.</p>
+          <a href="investment-plan.html" style="color: #34d399; font-weight: bold; text-decoration: none;">Browse Plans</a>
+        </div>
+      `;
+    } else {
       let html = '<div class="plans-list">';
       activeIds.forEach(id => {
         const plan = plansDictionary[id];
@@ -181,14 +78,10 @@
             <div class="plan-card">
               <div class="plan-card-header">
                 <div class="plan-title-wrapper">
-                  <span class="plan-icon">${plan.icon}</span>
+                  <span style="font-size: 1.8rem;">${plan.icon}</span>
                   <h3 class="plan-name">${plan.name}</h3>
                 </div>
                 <span class="plan-status">Active</span>
-              </div>
-              <div class="plan-details">
-                <span>Status: <strong>Running</strong></span>
-                <span>Returns: <strong>Daily Accrual</strong></span>
               </div>
             </div>
           `;
@@ -197,8 +90,7 @@
       html += '</div>';
       container.innerHTML = html;
     }
-
-    document.addEventListener("DOMContentLoaded", renderActivePlans);
   </script>
 </body>
-</html>
+</h
+  tml>
