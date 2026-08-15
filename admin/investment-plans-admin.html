@@ -35,26 +35,12 @@
     .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 16px; }
     .back-link:hover { text-decoration: underline; }
 
-    .plan-item { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 12px; }
-    .plan-info { display: flex; justify-content: space-between; align-items: center; }
+    .plan-item { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 14px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
     .plan-name { font-weight: 700; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; }
 
-    .edit-section { display: none; margin-top: 10px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08); flex-direction: column; gap: 12px; }
-    .edit-section.active { display: flex; }
-
-    .form-group { display: flex; flex-direction: column; gap: 4px; }
-    label { font-size: 0.75rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; }
-    input { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 10px; border-radius: 8px; font-size: 0.9rem; outline: none; }
-    input:focus { border-color: var(--primary); }
-
-    .action-row { display: flex; gap: 10px; align-items: center; }
-    .edit-btn { background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: #818cf8; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: 0.2s; }
+    .action-row { display: flex; gap: 12px; align-items: center; }
+    .edit-btn { background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: #818cf8; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; text-decoration: none; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .edit-btn:hover { background: var(--primary); color: white; }
-
-    .save-plan-btn { background: var(--primary); color: white; border: none; padding: 10px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.85rem; }
-    .save-plan-btn:hover { background: var(--primary-hover); }
-
-    .status-msg { font-size: 0.8rem; color: #34d399; font-weight: 600; text-align: center; display: none; }
   </style>
 </head>
 <body>
@@ -89,13 +75,13 @@
     }
 
     const plansList = [
-      { id: 'starter', name: 'Starter Plan', icon: '🌱', total: 1000, initial: 200, weekly: 200, daily: 28.57, payout: 5000 },
-      { id: 'bronze', name: 'Bronze Tier', icon: '🥉', total: 4000, initial: 800, weekly: 800, daily: 114.28, payout: 20000 },
-      { id: 'silver', name: 'Silver Tier', icon: '🥈', total: 8000, initial: 1600, weekly: 1600, daily: 228.57, payout: 40000 },
-      { id: 'gold', name: 'Gold Tier', icon: '🥇', total: 16000, initial: 3200, weekly: 3200, daily: 457.14, payout: 80000 },
-      { id: 'platinum', name: 'Platinum Tier', icon: '💎', total: 32000, initial: 6400, weekly: 6400, daily: 914.29, payout: 160000 },
-      { id: 'diamond', name: 'Diamond Tier', icon: '🔮', total: 64000, initial: 12800, weekly: 12800, daily: 1828.57, payout: 320000 },
-      { id: 'crown', name: 'Crown Elite', icon: '👑', total: 128000, initial: 25600, weekly: 25600, daily: 3657.14, payout: 640000 }
+      { id: 'starter', name: 'Starter Plan', icon: '🌱', file: 'starter-plan-edit.html' },
+      { id: 'bronze', name: 'Bronze Tier', icon: '🥉', file: 'bronze-plan-edit.html' },
+      { id: 'silver', name: 'Silver Tier', icon: '🥈', file: 'silver-plan-edit.html' },
+      { id: 'gold', name: 'Gold Tier', icon: '🥇', file: 'gold-plan-edit.html' },
+      { id: 'platinum', name: 'Platinum Tier', icon: '💎', file: 'platinum-plan-edit.html' },
+      { id: 'diamond', name: 'Diamond Tier', icon: '🔮', file: 'diamond-plan-edit.html' },
+      { id: 'crown', name: 'Crown Elite', icon: '👑', file: 'crown-plan-edit.html' }
     ];
 
     function renderPlans() {
@@ -106,64 +92,29 @@
         const item = document.createElement('div');
         item.className = 'plan-item';
         item.innerHTML = `
-          <div class="plan-info">
-            <span class="plan-name">${plan.icon} ${plan.name}</span>
-            <div class="action-row">
-              <button class="edit-btn" onclick="toggleEditSection('${plan.id}')">Edit Plan Payment Wall</button>
-              <!-- On/Off Toggle -->
-              <label style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; margin: 0;">
-                <input type="checkbox" id="toggle_${plan.id}" onchange="updatePlanStatus('${plan.name}', this.checked)" style="opacity: 0; width: 0; height: 0;">
-                <span id="slider_${plan.id}" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e293b; transition: .3s; border-radius: 24px; border: 1px solid var(--card-border);"></span>
-                <span id="circle_${plan.id}" style="position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%;"></span>
-              </label>
-            </div>
-          </div>
-
-          <div class="edit-section" id="edit_${plan.id}">
-            <div class="form-group">
-              <label>Total Investment ($)</label>
-              <input type="number" id="total_${plan.id}" value="${plan.total}">
-            </div>
-            <div class="form-group">
-              <label>Initial First Payment ($)</label>
-              <input type="number" id="initial_${plan.id}" value="${plan.initial}">
-            </div>
-            <div class="form-group">
-              <label>Weekly Payment ($)</label>
-              <input type="number" id="weekly_${plan.id}" value="${plan.weekly}">
-            </div>
-            <div class="form-group">
-              <label>Daily Payment ($)</label>
-              <input type="number" id="daily_${plan.id}" value="${plan.daily}">
-            </div>
-            <div class="form-group">
-              <label>30-Day Payout Return ($)</label>
-              <input type="number" id="payout_${plan.id}" value="${plan.payout}">
-            </div>
-            <button class="save-plan-btn" onclick="savePlanPaymentWall('${plan.id}', '${plan.name}')">Save Payment Wall Settings</button>
-            <span class="status-msg" id="status_${plan.id}">Settings saved successfully!</span>
+          <span class="plan-name">${plan.icon} ${plan.name}</span>
+          <div class="action-row">
+            <a href="${plan.file}${targetUserId ? '?id=' + targetUserId : ''}" class="edit-btn">Edit Plan Payment Wall</a>
+            <!-- On/Off Toggle -->
+            <label style="position: relative; display: inline-block; width: 44px; height: 24px; cursor: pointer; margin: 0;">
+              <input type="checkbox" id="toggle_${plan.id}" onchange="updatePlanStatus('${plan.id}', this.checked)" style="opacity: 0; width: 0; height: 0;">
+              <span id="slider_${plan.id}" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #1e293b; transition: .3s; border-radius: 24px; border: 1px solid var(--card-border);"></span>
+              <span id="circle_${plan.id}" style="position: absolute; content: ''; height: 18px; width: 18px; left: 3px; bottom: 2px; background-color: white; transition: .3s; border-radius: 50%;"></span>
+            </label>
           </div>
         `;
         container.appendChild(item);
         
-        // Initialize toggle appearance state from storage/defaults
+        // Initialize toggle appearance state from storage
         const savedState = localStorage.getItem(`plan_active_${plan.id}`) === 'true';
         document.getElementById(`toggle_${plan.id}`).checked = savedState;
         updateToggleVisuals(plan.id, savedState);
       });
     }
 
-    function toggleEditSection(id) {
-      const section = document.getElementById(`edit_${id}`);
-      section.classList.toggle('active');
-    }
-
-    function updatePlanStatus(planName, isActive) {
-      const planId = plansList.find(p => p.name === planName)?.id;
-      if (planId) {
-        localStorage.setItem(`plan_active_${planId}`, isActive);
-        updateToggleVisuals(planId, isActive);
-      }
+    function updatePlanStatus(planId, isActive) {
+      localStorage.setItem(`plan_active_${planId}`, isActive);
+      updateToggleVisuals(planId, isActive);
     }
 
     function updateToggleVisuals(id, isActive) {
@@ -178,23 +129,6 @@
         slider.style.backgroundColor = '#1e293b';
         circle.style.transform = 'translateX(0)';
       }
-    }
-
-    function savePlanPaymentWall(id, planName) {
-      const total = document.getElementById(`total_${id}`).value;
-      const initial = document.getElementById(`initial_${id}`).value;
-      const weekly = document.getElementById(`weekly_${id}`).value;
-      const daily = document.getElementById(`daily_${id}`).value;
-      const payout = document.getElementById(`payout_${id}`).value;
-
-      // Save custom configuration locally or sync to database as needed
-      localStorage.setItem(`config_${id}`, JSON.stringify({ total, initial, weekly, daily, payout }));
-
-      const statusMsg = document.getElementById(`status_${id}`);
-      statusMsg.style.display = 'block';
-      setTimeout(() => {
-        statusMsg.style.display = 'none';
-      }, 3000);
     }
 
     document.addEventListener("DOMContentLoaded", renderPlans);
