@@ -19,9 +19,9 @@
     .address-box { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 10px; font-family: monospace; font-size: 0.85rem; word-break: break-all; margin: 15px 0; border: 1px solid rgba(255,255,255,0.1); text-align: left; }
     .instructions-box { background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px; font-size: 0.85rem; color: var(--text-muted); margin: 15px 0; text-align: left; white-space: pre-wrap; }
     .btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; margin-top: 10px; }
+    .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
     .proof-btn { background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 20px; border-radius: 10px; font-weight: 600; text-decoration: none; display: block; width: 100%; box-sizing: border-box; margin-top: 10px; font-size: 0.9rem; text-align: center; transition: all 0.2s; }
     .proof-btn:hover { background: rgba(255, 255, 255, 0.1); color: white; }
-    .back-btn { background: rgba(255,255,255,0.1); color: white; border: none; padding: 8px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; display: inline-block; margin-bottom: 20px; font-size: 0.85rem; }
   </style>
 </head>
 <body>
@@ -40,7 +40,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6InFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function loadGiftcard() {
@@ -67,13 +67,12 @@
       try {
         const parsed = typeof configData === 'string' ? JSON.parse(configData) : configData;
         area.innerHTML = `
-          ${parsed.image ? '<img src="' + parsed.image + '" class="qr-img" alt="Gift Card Banner">' : ''}
+          ${parsed.image ? `<img src="${parsed.image}" class="qr-img" alt="Gift Card Banner">` : ''}
           ${parsed.wallet ? `
             <div class="address-box">${parsed.wallet}</div>
             <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Details copied!');">Copy Details</button>
           ` : ''}
-          ${parsed.instructions ? '<div class="instructions-box"><strong>Instructions:</strong><br>' + parsed.instructions + '</div>' : ''}
-          
+          ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
           <a href="deposit-proof.html" class="proof-btn">I made the payment proof of payment</a>
         `;
       } catch (err) {
@@ -83,4 +82,5 @@
     loadGiftcard();
   </script>
 </body>
-</html>
+<
+  /html>
