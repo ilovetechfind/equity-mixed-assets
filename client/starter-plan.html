@@ -264,7 +264,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || 'default_user';
 
-    // Keep the back button passing the user ID too
     const backBtn = document.getElementById('client-back-btn');
     backBtn.setAttribute('href', `investment-plan.html?id=${targetUserId}`);
 
@@ -279,7 +278,7 @@
           if(data.dayText) document.getElementById('client-day').innerText = data.dayText;
           if(data.currentValue) document.getElementById('client-current').innerText = data.currentValue;
           if(data.paidVolumeText) document.getElementById('client-paid-volume-header').innerText = data.paidVolumeText;
-          if(data.timeRemaining) document.getElementById('client-time-remaininginnerHTML') = `⏳ ${data.timeRemaining}`;
+          if(data.timeRemaining) document.getElementById('client-time-remaining').innerHTML = `⏳ ${data.timeRemaining}`;
           if(data.totalGoal) document.getElementById('client-total-goal').innerText = data.totalGoal;
           if(data.remainingBalance) document.getElementById('client-remaining').innerText = data.remainingBalance;
           if(data.guaranteedPayout) document.getElementById('client-payout').innerText = data.guaranteedPayout;
