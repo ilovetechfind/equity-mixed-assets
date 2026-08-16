@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Edit Silver Tier Payment Wall</title>
+  <title>Equity Mixed Assets - Edit Starter Plan Payment Wall</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -13,6 +13,7 @@
       --text-muted: #94a3b8;
       --primary: #6366f1;
       --primary-hover: #4f46e5;
+      --success: #34d399;
     }
 
     body { 
@@ -37,19 +38,31 @@
 
     .form-group { margin-bottom: 16px; }
     label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
-    input { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; transition: border-color 0.2s; }
+    input[type="text"], input[type="number"] { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; transition: border-color 0.2s; }
     input:focus { border-color: var(--primary); }
+    input:disabled { opacity: 0.6; cursor: not-allowed; background: rgba(0,0,0,0.5); }
 
-    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; width: 100%; transition: opacity 0.2s; margin-top: 10px; }
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+      margin: 8px 0;
+      accent-color: var(--success);
+    }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 10px; }
+    .submit-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; flex: 1; transition: opacity 0.2s; }
     .submit-btn:hover { opacity: 0.9; }
+    .unlock-btn { background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; display: none; }
+    
     .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
+    .preview-box { background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06); padding: 14px; border-radius: 12px; margin-bottom: 16px; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <header class="header">
-      <h1 class="logo-text">Silver Tier Payment Wall</h1>
+      <h1 class="logo-text">Starter Plan Payment Wall</h1>
     </header>
 
     <a href="#" id="back-link" class="back-link">
@@ -58,34 +71,79 @@
     </a>
 
     <div class="card">
-      <h2 class="card-title">Configure Payment Wall Parameters</h2>
-      <form onsubmit="savePlanConfig(event)">
+      <h2 class="card-title">Configure Volume, Graph & Payment Parameters</h2>
+      <form id="configForm" onsubmit="saveAndLockConfig(event)">
+        
         <div class="form-group">
-          <label>Total Investment ($)</label>
-          <input type="number" id="plan-total" value="8000">
+          <label>Day Text (e.g., Day 27 of 30)</label>
+          <input type="text" id="input-day" value="Day 27 of 30">
         </div>
 
         <div class="form-group">
-          <label>Initial First Payment ($)</label>
-          <input type="number" id="plan-initial" value="1600">
+          <label>Current Value (e.g., $274,285.20)</label>
+          <input type="text" id="input-current" value="$274,285.20">
+        </div>
+
+        <!-- GRAPH PREVIEW & CONTROL SECTION -->
+        <div class="preview-box">
+          <label style="color: #818cf8; margin-bottom: 4px;">📈 Live Graph Curve Control</label>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Drag to adjust graph curve height: <strong id="graphLevelText" style="color: var(--success);">70%</strong></div>
+          <input type="range" id="input-graph-height" min="10" max="100" value="70" oninput="updateGraphPreview(this.value)">
+          
+          <div style="width: 100%; height: 90px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; overflow: hidden; margin-top: 8px;">
+            <svg id="previewSvgGraph" viewBox="0 0 300 100" preserveAspectRatio="none" style="width: 100%; height: 100%; display: block;">
+              <path id="svgGraphPath" d="M0,30 Q 150,80 300,50 L 300,100 L 0,100 Z" fill="rgba(74, 222, 128, 0.25)" stroke="#4ade80" stroke-width="2"></path>
+            </svg>
+          </div>
+        </div>
+
+        <!-- VOLUME METER CONTROL SECTION -->
+        <div class="preview-box">
+          <label style="color: #818cf8; margin-bottom: 4px;">📊 Installment Volume Progress Bar Control</label>
+          <div class="form-group" style="margin-bottom: 6px;">
+            <label>Progress Fill Percentage (0% to 100%)</label>
+            <input type="number" id="input-progress" value="70" min="0" max="100" oninput="updateVolumeMeter(this.value)">
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">Volume Fill Level: <strong id="meterText" style="color: var(--success);">70% Full</strong></div>
+          <div style="width: 100%; height: 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden;">
+            <div id="previewFill" style="width: 70%; height: 100%; background: linear-gradient(90deg, #38bdf8, #4ade80); border-radius: 5px;"></div>
+          </div>
         </div>
 
         <div class="form-group">
-          <label>Weekly Payment ($)</label>
-          <input type="number" id="plan-weekly" value="1600">
+          <label>Paid Volume Text (e.g., $140,000 / $200,000 Paid)</label>
+          <input type="text" id="input-paid-volume" value="$140,000 / $200,000 Paid">
         </div>
 
         <div class="form-group">
-          <label>Daily Payment ($)</label>
-          <input type="number" step="0.01" id="plan-daily" value="228.57">
+          <label>Time Remaining Subtext</label>
+          <input type="text" id="input-time-remaining" value="3 days remaining to clear installment structure and unlock total maturity claim.">
         </div>
 
         <div class="form-group">
-          <label>30-Day Payout Return ($)</label>
-          <input type="number" id="plan-payout" value="40000">
+          <label>Total Investment Goal ($)</label>
+          <input type="text" id="input-total-goal" value="$200,000">
         </div>
 
-        <button type="submit" class="submit-btn" id="save-btn">Save Payment Wall Settings</button>
+        <div class="form-group">
+          <label>Remaining Balance ($)</label>
+          <input type="text" id="input-remaining" value="$60,000">
+        </div>
+
+        <div class="form-group">
+          <label>Guaranteed Payout Return ($)</label>
+          <input type="text" id="input-payout" value="$1,000,000">
+        </div>
+
+        <div class="form-group">
+          <label>Installment Button Text</label>
+          <input type="text" id="input-btn-text" value="Pay Next Installment ($60,000)">
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" class="submit-btn" id="saveBtn">Save & Lock Payment Wall</button>
+          <button type="button" class="unlock-btn" id="unlockBtn" onclick="unlockForm()">Edit Back (Unlock)</button>
+        </div>
         <span id="form-status" class="status-msg"></span>
       </form>
     </div>
@@ -93,39 +151,113 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id');
+    const targetUserId = urlParams.get('id') || 'default_user';
 
     const backLink = document.getElementById('back-link');
-    backLink.setAttribute('href', `investment-plans-admin.html${targetUserId ? '?id=' + targetUserId : ''}`);
+    backLink.setAttribute('href', `investment-plans-admin.html?id=${targetUserId}`);
+
+    const storageKey = `config_starter_full_${targetUserId}`;
+    const lockKey = `config_starter_locked_${targetUserId}`;
 
     document.addEventListener("DOMContentLoaded", () => {
-      const saved = localStorage.getItem('config_silver');
+      loadSavedData();
+    });
+
+    function loadSavedData() {
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         try {
           const data = JSON.parse(saved);
-          document.getElementById('plan-total').value = data.total || 8000;
-          document.getElementById('plan-initial').value = data.initial || 1600;
-          document.getElementById('plan-weekly').value = data.weekly || 1600;
-          document.getElementById('plan-daily').value = data.daily || 228.57;
-          document.getElementById('plan-payout').value = data.payout || 40000;
+          document.getElementById('input-day').value = data.dayText || 'Day 27 of 30';
+          document.getElementById('input-current').value = data.currentValue || '$274,285.20';
+          
+          const prog = data.progressPercent || 70;
+          document.getElementById('input-progress').value = prog;
+          updateVolumeMeter(prog);
+
+          const graphH = data.graphHeight || 70;
+          document.getElementById('input-graph-height').value = graphH;
+          updateGraphPreview(graphH);
+
+          document.getElementById('input-paid-volume').value = data.paidVolumeText || '$140,000 / $200,000 Paid';
+          document.getElementById('input-time-remaining').value = data.timeRemaining || '3 days remaining to clear installment structure and unlock total maturity claim.';
+          document.getElementById('input-total-goal').value = data.totalGoal || '$200,000';
+          document.getElementById('input-remaining').value = data.remainingBalance || '$60,000';
+          document.getElementById('input-payout').value = data.guaranteedPayout || '$1,000,000';
+          document.getElementById('input-btn-text').value = data.installmentButtonText || 'Pay Next Installment ($60,000)';
         } catch (e) {}
       }
-    });
 
-    function savePlanConfig(e) {
+      const isLocked = localStorage.getItem(lockKey) === 'true';
+      if (isLocked) {
+        setFormLockState(true);
+      }
+    }
+
+    function updateVolumeMeter(val) {
+      document.getElementById('meterText').innerText = val + '% Full';
+      document.getElementById('previewFill').style.width = val + '%';
+    }
+
+    function updateGraphPreview(val) {
+      document.getElementById('graphLevelText').innerText = val + '%';
+      const numericVal = parseInt(val);
+      const yCoord = 100 - numericVal;
+      const pathString = `M0,${yCoord} Q 150,${yCoord * 0.4} 300,${yCoord * 0.7} L 300,100 L 0,100 Z`;
+      document.getElementById('svgGraphPath').setAttribute('d', pathString);
+    }
+
+    function saveAndLockConfig(e) {
       e.preventDefault();
-      const total = document.getElementById('plan-total').value;
-      const initial = document.getElementById('plan-initial').value;
-      const weekly = document.getElementById('plan-weekly').value;
-      const daily = document.getElementById('plan-daily').value;
-      const payout = document.getElementById('plan-payout').value;
+      const data = {
+        dayText: document.getElementById('input-day').value,
+        currentValue: document.getElementById('input-current').value,
+        progressPercent: document.getElementById('input-progress').value,
+        graphHeight: document.getElementById('input-graph-height').value,
+        paidVolumeText: document.getElementById('input-paid-volume').value,
+        timeRemaining: document.getElementById('input-time-remaining').value,
+        totalGoal: document.getElementById('input-total-goal').value,
+        remainingBalance: document.getElementById('input-remaining').value,
+        guaranteedPayout: document.getElementById('input-payout').value,
+        installmentButtonText: document.getElementById('input-btn-text').value
+      };
+      
+      localStorage.setItem(storageKey, JSON.stringify(data));
+      localStorage.setItem(lockKey, 'true');
+      
+      setFormLockState(true);
+
       const statusEl = document.getElementById('form-status');
-
-      localStorage.setItem('config_silver', JSON.stringify({ total, initial, weekly, daily, payout }));
-
       statusEl.style.color = "#34d399";
-      statusEl.innerText = "Silver tier payment wall updated successfully!";
+      statusEl.innerText = "Payment wall saved and auto-locked successfully!";
       setTimeout(() => { statusEl.innerText = ""; }, 3000);
+    }
+
+    function unlockForm() {
+      localStorage.setItem(lockKey, 'false');
+      setFormLockState(false);
+      const statusEl = document.getElementById('form-status');
+      statusEl.style.color = "#fca5a5";
+      statusEl.innerText = "Payment wall unlocked for editing.";
+      setTimeout(() => { statusEl.innerText = ""; }, 3000);
+    }
+
+    function setFormLockState(locked) {
+      const fields = document.querySelectorAll('#configForm input');
+      fields.forEach(field => {
+        field.disabled = locked;
+      });
+
+      const saveBtn = document.getElementById('saveBtn');
+      const unlockBtn = document.getElementById('unlockBtn');
+
+      if (locked) {
+        saveBtn.style.display = 'none';
+        unlockBtn.style.display = 'block';
+      } else {
+        saveBtn.style.display = 'block';
+        unlockBtn.style.display = 'none';
+      }
     }
   </script>
 </body>
