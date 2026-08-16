@@ -98,7 +98,7 @@
     <div class="card">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <span class="card-title" id="user-greeting">TOTAL ACCOUNT BALANCE</span>
-        <span style="cursor: pointer; opacity: 0.7;">👁</span>
+        <span id="toggle-balance-visibility" style="cursor: pointer; opacity: 0.7; font-size: 1.1rem;" onclick="toggleBalanceVisibility()">👁️</span>
       </div>
       <div class="balance-row">
         <div class="user-avatar-icon" id="avatar-box">👤</div>
@@ -150,9 +150,26 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    let isBalanceHidden = false;
+    let currentRawBalance = 0;
+
     function toggleMenu() {
       const menu = document.getElementById('side-menu');
       menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function toggleBalanceVisibility() {
+      isBalanceHidden = !isBalanceHidden;
+      const eyeIcon = document.getElementById('toggle-balance-visibility');
+      const balanceElem = document.getElementById('user-balance');
+
+      if (isBalanceHidden) {
+        eyeIcon.innerText = '🙈'; // Hidden/Closed eye state
+        balanceElem.innerText = '********';
+      } else {
+        eyeIcon.innerText = '👁️'; // Open eye state
+        balanceElem.innerText = `$${Number(currentRawBalance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      }
     }
 
     async function checkUser() {
@@ -177,7 +194,10 @@
       
       const { data: profile } = await client.from('profiles').select('balance, username, avatar_url, volume_percentage').eq('id', targetUserId).single();
       if (profile) {
-        document.getElementById('user-balance').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        currentRawBalance = profile.balance || 0;
+        if (!isBalanceHidden) {
+          document.getElementById('user-balance').innerText = `$${Number(currentRawBalance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        }
         
         if (profile.username) {
           document.getElementById('user-greeting').innerText = `WELCOME, ${profile.username.toUpperCase()}`;
@@ -198,7 +218,10 @@
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${targetUserId}` }, payload => {
           const newDat = payload.new;
           if (newDat.balance !== undefined) {
-            document.getElementById('user-balance').innerText = `$${Number(newDat.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            currentRawBalance = newDat.balance || 0;
+            if (!isBalanceHidden) {
+              document.getElementById('user-balance').innerText = `$${Number(currentRawBalance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            }
           }
           if (newDat.username) {
             document.getElementById('user-greeting').innerText = `WELCOME, ${newDat.username.toUpperCase()}`;
