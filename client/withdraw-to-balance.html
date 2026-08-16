@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Withdraw to Main Balance</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
+      --card-bg: rgba(19, 27, 54, 0.7);
+      --card-border: rgba(255, 255, 255, 0.07);
+      --primary-glow: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      --accent-green: #10b981;
+      --text-muted: #94a3b8;
+    }
+
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+      padding-bottom: 100px; 
+      display: flex; 
+      justify-content: center; 
+    }
+
+    .container { width: 100%; max-width: 480px; }
+    
+    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 4px; }
+    .logo-text { background: linear-gradient(90deg, #4ade80, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+    .back-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; text-decoration: none; font-size: 1.1rem; transition: 0.2s; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
+
+    .input-group { margin-top: 14px; margin-bottom: 16px; }
+    .input-label { display: block; font-size: 0.8rem; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+    
+    input[type="number"] { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 16px; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; font-size: 1.1rem; font-weight: 700; }
+    input:focus { border-color: #3b82f6; }
+
+    .submit-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; text-align: center; font-size: 1rem; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: 0.2s; }
+    .submit-btn:hover { opacity: 0.9; }
+
+    /* Success Modal Styling */
+    #success-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
+    .modal-card { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 380px; border-radius: 24px; padding: 30px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+    .success-icon { width: 64px; height: 64px; background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto; color: #10b981; }
+    .modal-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; color: white; }
+    .modal-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+    .modal-btn { background: var(--primary-glow); color: white; border: none; padding: 14px; width: 100%; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="app-header">
+      <h1 class="logo-text">Equity Mixed Assets</h1>
+      <a href="#" id="back-link" class="back-btn">✕</a>
+    </header>
+
+    <div class="card">
+      <span class="card-title">AVAILABLE PORTFOLIO VALUE</span>
+      <h2 style="font-size: 2rem; font-weight: 800; margin: 10px 0 0 0;" id="current-value">$274,285.20</h2>
+    </div>
+
+    <div class="card">
+      <span class="card-title">WITHDRAW TO MAIN BALANCE</span>
+      <div class="input-group">
+        <label class="input-label" for="withdraw-amount">Enter Amount ($)</label>
+        <input type="number" id="withdraw-amount" placeholder="0.00">
+      </div>
+      <button class="submit-btn" onclick="handleWithdraw()">Withdraw Funds</button>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div id="success-modal">
+    <div class="modal-card">
+      <div class="success-icon">✓</div>
+      <div class="modal-title">Withdraw Successfully</div>
+      <div class="modal-desc">The money will reflect in your account very soon.</div>
+      <button class="modal-btn" onclick="closeModal()">Got It</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Carry over user ID query parameter if present (for admin previews)
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id');
+    if (targetUserId) {
+      document.getElementById('back-link').setAttribute('href', `dashboard.html?id=${targetUserId}`);
+    } else {
+      document.getElementById('back-link').setAttribute('href', 'dashboard.html');
+    }
+
+    async function loadPortfolioData() {
+      if (!targetUserId) return;
+      const { data: profile } = await client.from('profiles').select('balance').eq('id', targetUserId).single();
+      if (profile && profile.balance !== undefined) {
+        document.getElementById('current-value').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+      }
+    }
+
+    loadPortfolioData();
+
+    function handleWithdraw() {
+      const amountInput = document.getElementById('withdraw-amount');
+      const val = parseFloat(amountInput.value);
+
+      if (!val || val <= 0) {
+        alert('Please enter a valid withdrawal amount.');
+        return;
+      }
+
+      // Show success modal as requested
+      document.getElementById('success-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('success-modal').style.display = 'none';
+      window.location.href = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
+    }
+  </script>
+</body>
+  </html>
