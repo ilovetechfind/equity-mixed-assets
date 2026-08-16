@@ -14,77 +14,237 @@
       --accent: #fb923c;
       --success: #4ade80;
     }
+
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { background-color: var(--bg-main); background-image: radial-gradient(circle at 10% 20%, rgba(251, 146, 60, 0.08) 0%, transparent 40%); color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; padding-bottom: 50px; display: flex; justify-content: center; min-height: 100vh; }
+
+    body { 
+      background-color: var(--bg-main); 
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(251, 146, 60, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(74, 222, 128, 0.06) 0%, transparent 40%);
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+      padding-bottom: 50px; 
+      display: flex; 
+      justify-content: center; 
+      min-height: 100vh; 
+    }
+    
     .container { width: 100%; max-width: 480px; }
+    
     .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; }
-    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); color: white; padding: 10px 16px; border-radius: 12px; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-    .view-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--text-muted); }
-    .plan-hero { background: linear-gradient(135deg, rgba(35, 25, 15, 0.6) 0%, rgba(15, 22, 36, 0.8) 100%); border: 1px solid var(--card-border); border-radius: 24px; padding: 24px; text-align: center; margin-bottom: 20px; }
+    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); backdrop-filter: blur(12px); color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .back-btn:hover { background: rgba(255,255,255,0.08); }
+    .view-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--text-muted); letter-spacing: -0.5px; }
+
+    .plan-hero { 
+      background: linear-gradient(135deg, rgba(35, 25, 15, 0.6) 0%, rgba(15, 22, 36, 0.8) 100%); 
+      border: 1px solid var(--card-border); 
+      backdrop-filter: blur(16px);
+      border-radius: 24px; 
+      padding: 24px; 
+      text-align: center; 
+      margin-bottom: 20px; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    
     .plan-icon-wrapper { width: 64px; height: 64px; margin: 0 auto 12px auto; background: rgba(251, 146, 60, 0.15); border: 1px solid rgba(251, 146, 60, 0.25); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 2rem; }
-    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; color: white; }
-    .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); }
-    .chart-card, .volume-card, .details-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
+    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; color: white; letter-spacing: -0.5px; }
+    .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    
+    .chart-card, .volume-card, .details-card { 
+      background: var(--card-bg); 
+      border: 1px solid var(--card-border); 
+      backdrop-filter: blur(16px);
+      border-radius: 24px; 
+      padding: 20px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    
     .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .chart-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 6px; }
-    .live-badge { font-size: 0.7rem; background: rgba(74, 222, 128, 0.15); color: var(--success); padding: 3px 8px; border-radius: 20px; font-weight: 700; }
-    .svg-graph { width: 100%; height: 90px; }
+    .live-badge { font-size: 0.7rem; background: rgba(74, 222, 128, 0.15); color: var(--success); padding: 3px 8px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(74, 222, 128, 0.3); }
+    
+    .svg-graph { width: 100%; height: 90px; overflow: visible; display: block; }
     .chart-stats-row { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); }
     .chart-stats-row strong { color: white; }
+    
     .progress-top { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+    .progress-top span:last-child { color: var(--accent); }
     .progress-track { width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
-    .progress-fill { width: 25%; height: 100%; background: linear-gradient(90deg, #fb923c, #4ade80); border-radius: 6px; }
+    .progress-fill { width: 25%; height: 100%; background: linear-gradient(90deg, #fb923c, #4ade80); border-radius: 6px; transition: width 0.4s ease; }
     .volume-meta { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+    
+    .details-card { padding: 4px 20px; margin-bottom: 24px; }
     .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
     .detail-row:last-child { border-bottom: none; }
+    .detail-info { display: flex; flex-direction: column; gap: 2px; }
     .detail-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; }
+    .detail-subtext { font-size: 0.7rem; color: rgba(139, 155, 180, 0.6); }
     .detail-value { font-size: 1.05rem; font-weight: 700; text-align: right; }
+    
     .highlight-primary { color: var(--accent); }
-    .highlight-success { color: var(--success); font-size: 1.15rem; }
+    .highlight-success { color: var(--success); font-size: 1.15rem; text-shadow: 0 0 15px rgba(74, 222, 128, 0.2); }
+    
     .btn-group { display: flex; flex-direction: column; gap: 12px; }
-    .action-btn { width: 100%; padding: 16px; border-radius: 16px; font-size: 1rem; font-weight: 700; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-invest { background: linear-gradient(135deg, #fb923c 0%, #c2410c 100%); color: white; }
-    .btn-withdraw { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); color: white; }
+    .action-btn { 
+      width: 100%; 
+      padding: 16px; 
+      border-radius: 16px; 
+      font-size: 1rem; 
+      font-weight: 700; 
+      border: none; 
+      cursor: pointer; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      gap: 8px; 
+      transition: 0.2s;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+    .btn-invest { background: linear-gradient(135deg, #fb923c 0%, #c2410c 100%); color: white; box-shadow: 0 10px 25px rgba(251, 146, 60, 0.35); }
+    .btn-withdraw { background: linear-gradient(135deg, #22c55e 0%, #15803d 100%); color: white; box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3); }
+    .action-btn:active { transform: scale(0.98); }
   </style>
 </head>
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <a href="investment-plan.html" class="back-btn">Back</a>
+      <a href="investment-plan.html" id="client-back-btn" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+      </a>
       <h2 class="view-title">Active Portfolio</h2>
-      <div style="width: 60px;"></div>
+      <div style="width: 70px;"></div>
     </nav>
+    
     <div class="plan-hero">
       <div class="plan-icon-wrapper">🥉</div>
       <h1 class="plan-name">Bronze Plan</h1>
       <div class="plan-subtitle">Equity Mixed Assets Portfolio</div>
     </div>
+    
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-title">Daily Growth Accrual</div>
         <div class="live-badge">+$142.85 / day</div>
       </div>
       <svg class="svg-graph" viewBox="0 0 400 100" preserveAspectRatio="none">
-        <path d="M0,80 Q100,55 200,30 T400,10 L400,100 L0,100 Z" fill="rgba(74,222,128,0.15)"/>
-        <path d="M0,80 Q100,55 200,30 T400,10" fill="none" stroke="#4ade80" stroke-width="3"/>
+        <defs>
+          <linearGradient id="bronzeChartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4ade80" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#4ade80" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+        <path id="clientSvgArea" d="M0,80 Q100,55 200,30 T400,10 L400,100 L0,100 Z" fill="url(#bronzeChartGrad)"/>
+        <path id="clientSvgLine" d="M0,80 Q100,55 200,30 T400,10" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
         <circle cx="150" cy="42" r="5" fill="#fb923c" stroke="#fff" stroke-width="2"/>
       </svg>
-      <div class="chart-stats-row"><span>Day 10 of 30</span><span>Current Value: <strong>$6,428.50</strong></span></div>
+      <div class="chart-stats-row">
+        <span id="client-day">Day 10 of 30</span>
+        <span>Current Value: <strong id="client-current">$6,428.50</strong></span>
+      </div>
     </div>
+    
     <div class="volume-card">
-      <div class="progress-top"><span>Installment Volume Progress</span><span>$1,250 / $5,000 Paid</span></div>
-      <div class="progress-track"><div class="progress-fill"></div></div>
-      <div class="volume-meta">⏳ <strong>3 weeks remaining</strong> to clear installment structure and unlock total maturity claim.</div>
+      <div class="progress-top">
+        <span>Installment Volume Progress</span>
+        <span id="client-paid-volume-header">$1,250 / $5,000 Paid</span>
+      </div>
+      <div class="progress-track">
+        <div id="client-progress-fill" class="progress-fill"></div>
+      </div>
+      <div id="client-time-remaining" class="volume-meta">
+        ⏳ <strong>3 weeks remaining</strong> to clear installment structure and unlock total maturity claim.
+      </div>
     </div>
+    
     <div class="details-card">
-      <div class="detail-row"><span class="detail-label">Total Investment Goal</span><span class="detail-value highlight-primary">$5,000</span></div>
-      <div class="detail-row"><span class="detail-label">Remaining Balance</span><span class="detail-value">$3,750</span></div>
-      <div class="detail-row"><span class="detail-label">Guaranteed Payout Return</span><span class="detail-value highlight-success">$25,000</span></div>
+      <div class="detail-row">
+        <div class="detail-info">
+          <span class="detail-label">Total Investment Goal</span>
+          <span class="detail-subtext">Portfolio cap</span>
+        </div>
+        <span id="client-total-goal" class="detail-value highlight-primary">$5,000</span>
+      </div>
+      <div class="detail-row">
+        <div class="detail-info">
+          <span class="detail-label">Remaining Balance</span>
+          <span class="detail-subtext">Installment balance</span>
+        </div>
+        <span id="client-remaining" class="detail-value">$3,750</span>
+      </div>
+      <div class="detail-row">
+        <div class="detail-info">
+          <span class="detail-label">Guaranteed Payout Return</span>
+          <span class="detail-subtext">Maturity target (Day 30)</span>
+        </div>
+        <span id="client-payout" class="detail-value highlight-success">$25,000</span>
+      </div>
     </div>
+    
     <div class="btn-group">
-      <button class="action-btn btn-invest" onclick="alert('Proceeding to payment...')">Pay Next Installment ($1,250)</button>
-      <button class="action-btn btn-withdraw" onclick="alert('Withdrawal requested!')">Withdraw to Main Balance</button>
+      <a href="deposit.html" id="client-btn-invest" class="action-btn btn-invest">
+        <span id="client-btn-text">Pay Next Installment ($1,250)</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="withdraw-to-balance.html" id="client-btn-withdraw" class="action-btn btn-withdraw">
+        <span>Withdraw to Main Balance</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12M2 7h20v5H2zM12 2v10"/></svg>
+      </a>
     </div>
   </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id') || '';
+
+    // Bind correct query parameters across internal links
+    document.getElementById('client-back-btn').setAttribute('href', targetUserId ? `investment-plan.html?id=${targetUserId}` : 'investment-plan.html');
+    document.getElementById('client-btn-invest').setAttribute('href', targetUserId ? `deposit.html?id=${targetUserId}` : 'deposit.html');
+    document.getElementById('client-btn-withdraw').setAttribute('href', targetUserId ? `withdraw-to-balance.html?id=${targetUserId}` : 'withdraw-to-balance.html');
+
+    const storageKey = `config_bronze_full_${targetUserId}`;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const saved = localStorage.getItem(storageKey);
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          
+          if(data.dayText) document.getElementById('client-day').innerText = data.dayText;
+          if(data.currentValue) document.getElementById('client-current').innerText = data.currentValue;
+          if(data.paidVolumeText) document.getElementById('client-paid-volume-header').innerText = data.paidVolumeText;
+          if(data.timeRemaining) document.getElementById('client-time-remaining').innerHTML = `⏳ ${data.timeRemaining}`;
+          if(data.totalGoal) document.getElementById('client-total-goal').innerText = data.totalGoal;
+          if(data.remainingBalance) document.getElementById('client-remaining').innerText = data.remainingBalance;
+          if(data.guaranteedPayout) document.getElementById('client-payout').innerText = data.guaranteedPayout;
+          
+          if(data.installmentButtonText) {
+            document.getElementById('client-btn-text').innerText = data.installmentButtonText;
+          }
+
+          if(data.progressPercent) {
+            document.getElementById('client-progress-fill').style.width = data.progressPercent + '%';
+          }
+
+          if(data.graphPathLine) {
+            const pathLine = data.graphPathLine;
+            const pathArea = `${pathLine} L400,100 L0,100 Z`;
+            document.getElementById('clientSvgLine').setAttribute('d', pathLine);
+            document.getElementById('clientSvgArea').setAttribute('d', pathArea);
+          }
+
+        } catch (e) {
+          console.error("Error loading saved bronze plan config data", e);
+        }
+      }
+    });
+  </script>
 </body>
 </html>
