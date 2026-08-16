@@ -4,106 +4,259 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Equity Mixed Assets - Starter Plan Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
-      --card-bg: rgba(30, 27, 75, 0.6);
+      --bg-main: #050811;
+      --card-bg: rgba(15, 22, 36, 0.75);
       --card-border: rgba(255, 255, 255, 0.08);
-      --text-muted: #94a3b8;
-      --primary: #6366f1;
-      --primary-hover: #4f46e5;
-      --success: #34d399;
+      --text-muted: #8b9bb4;
+      --accent: #38bdf8;
+      --success: #4ade80;
     }
 
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
     body { 
-      background: var(--bg-gradient); 
-      background-attachment: fixed;
+      background-color: var(--bg-main);
+      background-image: 
+        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(74, 222, 128, 0.06) 0%, transparent 40%);
+      background-attachment: fixed; 
       color: white; 
       font-family: 'Plus Jakarta Sans', sans-serif; 
       margin: 0; 
       padding: 16px; 
-      padding-bottom: 90px; 
+      padding-bottom: 50px;
+      display: flex; 
+      justify-content: center; 
+      min-height: 100vh;
+    }
+    
+    .container { width: 100%; max-width: 480px; }
+    
+    /* Navigation Bar */
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; }
+    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); backdrop-filter: blur(12px); color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .back-btn:hover { background: rgba(255,255,255,0.08); }
+    .view-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--text-muted); letter-spacing: -0.5px; }
+
+    /* Plan Header Banner */
+    .plan-hero {
+      background: linear-gradient(135deg, rgba(25, 35, 55, 0.6) 0%, rgba(15, 22, 36, 0.8) 100%);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+    
+    .plan-icon-wrapper {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px auto;
+      background: linear-gradient(135deg, rgba(74, 222, 128, 0.15), rgba(56, 189, 248, 0.05));
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
     }
 
-    .container { width: 100%; max-width: 960px; margin: 0 auto; }
-    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 24px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
-    
-    .day-badge { display: inline-block; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: #818cf8; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 0.8rem; margin-bottom: 16px; }
-    
-    .value-display { font-size: 2rem; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; }
-    
-    /* Graph Container */
-    .graph-container { width: 100%; height: 110px; background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.06); }
-    
-    /* Progress Bar */
-    .progress-info { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 8px; color: var(--text-muted); }
-    .progress-track { width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 5px; overflow: hidden; margin-bottom: 16px; }
-    .progress-fill { width: 0%; height: 100%; background: linear-gradient(90deg, #38bdf8, #4ade80); border-radius: 5px; transition: width 0.4s ease; }
+    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; color: white; letter-spacing: -0.5px; }
+    .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
-    .time-subtext { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; }
-
-    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.04); }
-    .stat-item label { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
-    .stat-item span { font-size: 0.95rem; font-weight: 700; color: white; }
-
-    .action-btn { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); color: white; border: none; padding: 16px; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; width: 100%; text-align: center; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); transition: opacity 0.2s; text-decoration: none; display: block; box-sizing: border-box; }
-    .action-btn:hover { opacity: 0.9; }
-
-    @media (max-width: 600px) {
-      .stats-grid { grid-template-columns: 1fr; gap: 10px; }
+    /* Growth Chart Graphic Card */
+    .chart-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .chart-title { font-size: 0.95rem; font-weight: 700; color: white; display: flex; align-items: center; gap: 6px; }
+    .live-badge { font-size: 0.7rem; background: rgba(74, 222, 128, 0.15); color: var(--success); padding: 3px 8px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(74, 222, 128, 0.3); }
+    
+    .svg-graph { width: 100%; height: 90px; overflow: visible; display: block; }
+    .chart-stats-row { display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8rem; color: var(--text-muted); }
+    .chart-stats-row strong { color: white; }
+
+    /* Volume / Installment Milestone Card */
+    .volume-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .progress-top { display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 600; margin-bottom: 10px; }
+    .progress-top span:last-child { color: var(--accent); }
+    .progress-track { width: 100%; height: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; overflow: hidden; margin-bottom: 14px; }
+    .progress-fill { width: 70%; height: 100%; background: linear-gradient(90deg, #38bdf8, #4ade80); border-radius: 6px; transition: width 0.4s ease; }
+    .volume-meta { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
+
+    /* Details Breakdown Card */
+    .details-card {
+      background: var(--card-bg); 
+      border: 1px solid var(--card-border); 
+      backdrop-filter: blur(16px); 
+      border-radius: 24px; 
+      padding: 4px 20px; 
+      margin-bottom: 24px;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-info { display: flex; flex-direction: column; gap: 2px; }
+    .detail-label { color: var(--text-muted); font-size: 0.85rem; font-weight: 600; }
+    .detail-subtext { font-size: 0.7rem; color: rgba(139, 155, 180, 0.6); }
+    .detail-value { font-size: 1.05rem; font-weight: 700; color: white; text-align: right; }
+    .highlight-primary { color: var(--accent); }
+    .highlight-success { color: var(--success); font-size: 1.15rem; text-shadow: 0 0 15px rgba(74, 222, 128, 0.2); }
+
+    /* Action Buttons */
+    .btn-group { display: flex; flex-direction: column; gap: 12px; }
+    .action-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: 0.2s;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+    .btn-invest {
+      background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
+      color: white;
+      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+    }
+    .btn-withdraw {
+      background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+      color: white;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
+    }
+    .action-btn:active { transform: scale(0.98); }
   </style>
 </head>
 <body>
-
   <div class="container">
-    <div class="card">
-      <!-- Day Text -->
-      <div id="client-day" class="day-badge">Day 27 of 30</div>
-      
-      <!-- Current Value -->
-      <div id="client-current" class="value-display">$274,285.20</div>
+    <nav class="nav-bar">
+      <a href="investment-plan.html" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back
+      </a>
+      <h2 class="view-title">Active Portfolio</h2>
+      <div style="width: 70px;"></div>
+    </nav>
 
-      <!-- Live Graph Rendering -->
-      <div class="graph-container">
-        <svg id="clientSvgGraph" viewBox="0 0 300 100" preserveAspectRatio="none" style="width: 100%; height: 100%; display: block;">
-          <path id="clientSvgPath" d="M0,30 Q 150,80 300,50 L 300,100 L 0,100 Z" fill="rgba(74, 222, 128, 0.25)" stroke="#4ade80" stroke-width="2"></path>
-        </svg>
+    <!-- Hero Header -->
+    <div class="plan-hero">
+      <div class="plan-icon-wrapper">🌱</div>
+      <h1 class="plan-name">Starter Plan</h1>
+      <div class="plan-subtitle">Equity Mixed Assets Portfolio</div>
+    </div>
+
+    <!-- Daily Growth Graphic Card -->
+    <div class="chart-card">
+      <div class="chart-header">
+        <div class="chart-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+          Daily Growth Accrual
+        </div>
+        <div class="live-badge">+$57.14 / day</div>
       </div>
+      
+      <!-- Dynamic SVG Chart Graphic -->
+      <svg class="svg-graph" viewBox="0 0 400 100" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4ade80" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="#4ade80" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+        <!-- Area fill & Curve path handled dynamically via script -->
+        <path id="clientSvgArea" d="M0,80 Q200,30 400,50 L400,100 L0,100 Z" fill="url(#chartGrad)"/>
+        <path id="clientSvgLine" d="M0,80 Q200,30 400,50" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+      </svg>
 
-      <!-- Volume Progress Bar -->
-      <div class="progress-info">
-        <span id="client-paid-volume-label">Paid Volume</span>
-        <span id="client-paid-volume-text" style="color: white; font-weight: 700;">$140,000 / $200,000 Paid</span>
+      <div class="chart-stats-row">
+        <span id="client-day">Day 27 of 30</span>
+        <span>Current Value: <strong id="client-current">$274,285.20</strong></span>
+      </div>
+    </div>
+
+    <!-- Volume / Installment Milestone Tracker -->
+    <div class="volume-card">
+      <div class="progress-top">
+        <span>Installment Volume Progress</span>
+        <span id="client-paid-volume-header">$140,000 / $200,000 Paid</span>
       </div>
       <div class="progress-track">
-        <div id="client-progress-fill" class="progress-fill" style="width: 70%;"></div>
+        <div id="client-progress-fill" class="progress-fill"></div>
+      </div>
+      <div id="client-time-remaining" class="volume-meta">
+        ⏳ 3 days remaining to clear installment structure and unlock total maturity claim.
+      </div>
+    </div>
+
+    <!-- Financial Breakdown Data Card -->
+    <div class="details-card">
+      <div class="detail-row">
+        <div class="detail-info">
+          <span class="detail-label">Total Investment Goal</span>
+          <span class="detail-subtext">Portfolio cap</span>
+        </div>
+        <span id="client-total-goal" class="detail-value highlight-primary">$200,000</span>
       </div>
 
-      <!-- Time Remaining Subtext -->
-      <div id="client-time-remaining" class="time-subtext">
-        3 days remaining to clear installment structure and unlock total maturity claim.
+      <div class="detail-row">
+        <div class="detail-info">
+          <span class="detail-label">Remaining Balance</span>
+          <span class="detail-subtext">Installment balance</span>
+        </div>
+        <span id="client-remaining" class="detail-value">$60,000</span>
       </div>
 
-      <!-- Stats Grid -->
-      <div class="stats-grid">
-        <div class="stat-item">
-          <label>Total Goal</label>
-          <span id="client-total-goal">$200,000</span>
+      <div class="detail-row">
+        <div class="detail-info">
+          <span class="detail-label">Guaranteed Payout Return</span>
+          <span class="detail-subtext">Maturity target (Day 30)</span>
         </div>
-        <div class="stat-item">
-          <label>Remaining Balance</label>
-          <span id="client-remaining" style="color: #fca5a5;">$60,000</span>
-        </div>
-        <div class="stat-item">
-          <label>Guaranteed Return</label>
-          <span id="client-payout" style="color: #34d399;">$1,000,000</span>
-        </div>
+        <span id="client-payout" class="detail-value highlight-success">$1,000,000</span>
       </div>
+    </div>
 
-      <!-- Installment Action Button -->
-      <a href="#" id="client-btn-text" class="action-btn">Pay Next Installment ($60,000)</a>
+    <!-- Actions -->
+    <div class="btn-group">
+      <button id="client-btn-text" class="action-btn btn-invest" onclick="alert('Redirecting to secure installment payment gateway...')">
+        <span>Pay Next Installment ($60,000)</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+
+      <button class="action-btn btn-withdraw" id="withdrawBtn" onclick="alert('Withdrawal request initiated to main balance!')">
+        <span>Withdraw to Main Balance</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12M2 7h20v5H2zM12 2v10"/></svg>
+      </button>
     </div>
   </div>
 
@@ -112,7 +265,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || 'default_user';
 
-    // The exact same localStorage key used in your admin edit panel
+    // The exact localStorage key used in your admin edit panel
     const storageKey = `config_starter_full_${targetUserId}`;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -124,28 +277,35 @@
           // Populate text fields
           if(data.dayText) document.getElementById('client-day').innerText = data.dayText;
           if(data.currentValue) document.getElementById('client-current').innerText = data.currentValue;
-          if(data.paidVolumeText) document.getElementById('client-paid-volume-text').innerText = data.paidVolumeText;
-          if(data.timeRemaining) document.getElementById('client-time-remaining').innerText = data.timeRemaining;
+          if(data.paidVolumeText) document.getElementById('client-paid-volume-header').innerText = data.paidVolumeText;
+          if(data.timeRemaining) document.getElementById('client-time-remaining').innerHTML = `⏳ ${data.timeRemaining}`;
           if(data.totalGoal) document.getElementById('client-total-goal').innerText = data.totalGoal;
           if(data.remainingBalance) document.getElementById('client-remaining').innerText = data.remainingBalance;
           if(data.guaranteedPayout) document.getElementById('client-payout').innerText = data.guaranteedPayout;
-          if(data.installmentButtonText) document.getElementById('client-btn-text').innerText = data.installmentButtonText;
+          
+          if(data.installmentButtonText) {
+            const btn = document.getElementById('client-btn-text');
+            btn.querySelector('span').innerText = data.installmentButtonText;
+          }
 
           // Populate progress bar percentage
           if(data.progressPercent) {
             document.getElementById('client-progress-fill').style.width = data.progressPercent + '%';
           }
 
-          // Populate live graph curve based on saved graph height
+          // Populate live SVG graph curve based on saved graph height
           if(data.graphHeight) {
             const numericVal = parseInt(data.graphHeight);
             const yCoord = 100 - numericVal;
-            const pathString = `M0,${yCoord} Q 150,${yCoord * 0.4} 300,${yCoord * 0.7} L 300,100 L 0,100 Z`;
-            document.getElementById('clientSvgPath').setAttribute('d', pathString);
+            const pathLine = `M0,${yCoord} Q 200,${yCoord * 0.5} 400,${yCoord * 0.8}`;
+            const pathArea = `${pathLine} L400,100 L0,100 Z`;
+            
+            document.getElementById('clientSvgLine').setAttribute('d', pathLine);
+            document.getElementById('clientSvgArea').setAttribute('d', pathArea);
           }
 
         } catch (e) {
-          console.error("Error loading plan config data", e);
+          console.error("Error loading saved plan config data", e);
         }
       }
     });
