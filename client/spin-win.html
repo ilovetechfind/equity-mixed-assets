@@ -3,15 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Spin & Win</title>
+  <title>Equity Mixed Assets - Premium Lucky Spin</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #050811;
-      --card-bg: rgba(15, 22, 36, 0.75);
-      --card-border: rgba(255, 255, 255, 0.08);
-      --text-muted: #8b9bb4;
-      --accent: #38bdf8;
+      --bg-main: #030712;
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(212, 175, 55, 0.2);
+      --text-muted: #94a3b8;
+      --gold-primary: #d4af37;
+      --gold-light: #fef08a;
+      --gold-gradient: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #9a7b20 100%);
       --success: #4ade80;
     }
 
@@ -20,8 +22,8 @@
     body { 
       background-color: var(--bg-main);
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(74, 222, 128, 0.06) 0%, transparent 40%);
+        radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 40%);
       background-attachment: fixed; 
       color: white; 
       font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -37,21 +39,21 @@
     
     /* Navigation Bar */
     .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; }
-    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); backdrop-filter: blur(12px); color: white; padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-    .back-btn:hover { background: rgba(255,255,255,0.08); }
-    .view-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--text-muted); letter-spacing: -0.5px; }
+    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); backdrop-filter: blur(12px); color: var(--gold-light); padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
+    .back-btn:hover { background: rgba(212, 175, 55, 0.1); }
+    .view-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--gold-primary); letter-spacing: -0.5px; }
 
     /* Hero Banner */
     .plan-hero {
-      background: linear-gradient(135deg, rgba(25, 35, 55, 0.6) 0%, rgba(15, 22, 36, 0.8) 100%);
+      background: linear-gradient(135deg, rgba(30, 27, 12, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(16px);
       border-radius: 24px;
       padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
     }
-    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; color: white; }
+    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
     /* Wheel Container */
@@ -62,48 +64,50 @@
       border-radius: 24px;
       padding: 24px 20px;
       margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
       position: relative;
     }
 
     .spins-left-badge {
       font-size: 0.85rem;
-      color: var(--accent);
-      background: rgba(56, 189, 248, 0.12);
-      padding: 6px 14px;
+      color: var(--gold-light);
+      background: rgba(212, 175, 55, 0.1);
+      padding: 6px 16px;
       border-radius: 20px;
       display: inline-block;
       margin-bottom: 16px;
       font-weight: 600;
-      border: 1px solid rgba(56, 189, 248, 0.2);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
     }
 
     .wheel-container {
       position: relative;
-      width: 280px;
-      height: 280px;
+      width: 290px;
+      height: 290px;
       margin: 0 auto 20px auto;
     }
 
     .wheel-pointer {
       position: absolute;
-      top: -10px;
+      top: -12px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
-      border-left: 12px solid transparent;
-      border-right: 12px solid transparent;
-      border-top: 24px solid #38bdf8;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 28px solid #fef08a;
       z-index: 10;
-      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+      filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.5));
     }
 
     canvas {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
+      border: 4px solid rgba(212, 175, 55, 0.4);
       transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
 
@@ -120,23 +124,24 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%);
-      color: white;
-      box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+      background: var(--gold-gradient);
+      color: #1a1500;
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
       transition: 0.2s;
       text-decoration: none;
     }
     .action-btn:active { transform: scale(0.98); }
     .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .action-btn.buy-mode { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35); }
+    .action-btn.buy-mode { background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%); color: white; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3); }
 
     /* Result Popup Message */
     #result-msg {
       margin-top: 15px;
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: var(--success);
       min-height: 28px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
   </style>
 </head>
@@ -147,14 +152,14 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back
       </a>
-      <h2 class="view-title">Lucky Spin</h2>
+      <h2 class="view-title">VIP Lucky Spin</h2>
       <div style="width: 70px;"></div>
     </nav>
 
     <!-- Hero Banner -->
     <div class="plan-hero">
-      <div class="plan-name">Spin & Win Cash</div>
-      <div class="plan-subtitle">Test your luck and win instant rewards!</div>
+      <div class="plan-name">Elite Rewards Wheel</div>
+      <div class="plan-subtitle">Spin to claim your exclusive asset bonuses!</div>
     </div>
 
     <!-- Wheel Game Card -->
@@ -163,7 +168,7 @@
 
       <div class="wheel-container">
         <div class="wheel-pointer"></div>
-        <canvas id="wheelCanvas" width="300" height="300"></canvas>
+        <canvas id="wheelCanvas" width="320" height="320"></canvas>
       </div>
 
       <button id="spinBtn" class="action-btn" onclick="startSpin()">
@@ -204,16 +209,20 @@
     const resultMsg = document.getElementById('result-msg');
     const spinsCounter = document.getElementById('spinsCounter');
 
-    // Expanded sectors list (all values strictly under $1,000)
+    // Luxurious rich color palette with 12 expansive options (all strictly under $1,000)
     const sectors = [
-      { color: '#2563eb', text: '$500', value: 500 },
-      { color: '#10b981', text: '$750', value: 750 },
-      { color: '#f59e0b', text: '$100', value: 100 },
-      { color: '#8b5cf6', text: '$250', value: 250 },
-      { color: '#ec4899', text: '$50', value: 50 },
-      { color: '#06b6d4', text: '$900', value: 900 },
-      { color: '#e11d48', text: '$200', value: 200 },
-      { color: '#3b82f6', text: '$400', value: 400 }
+      { color: '#1e293b', text: '$50', value: 50 },
+      { color: '#0f172a', text: '$150', value: 150 },
+      { color: '#172554', text: '$250', value: 250 },
+      { color: '#1e3a8a', text: '$350', value: 350 },
+      { color: '#1e1b4b', text: '$450', value: 450 },
+      { color: '#312e81', text: '$550', value: 550 },
+      { color: '#581c87', text: '$650', value: 650 },
+      { color: '#701a75', text: '$750', value: 750 },
+      { color: '#831843', text: '$850', value: 850 },
+      { color: '#9f1239', text: '$950', value: 950 },
+      { color: '#713f12', text: '$300', value: 300 },
+      { color: '#365314', text: '$600', value: 600 }
     ];
 
     const arc = Math.PI / (sectors.length / 2);
@@ -237,25 +246,27 @@
       const angle = startAngle + i * arc;
       ctx.save();
       ctx.beginPath();
-      ctx.arc(150, 150, 145, angle, angle + arc, false);
-      ctx.lineTo(150, 150);
+      ctx.arc(160, 160, 152, angle, angle + arc, false);
+      ctx.lineTo(160, 160);
       ctx.fillStyle = sector.color;
       ctx.fill();
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
       ctx.stroke();
 
       ctx.save();
-      ctx.translate(150, 150);
+      ctx.translate(160, 160);
       ctx.rotate(angle + arc / 2);
       ctx.textAlign = 'right';
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = '#fef08a';
       ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(sector.text, 130, 6);
+      ctx.fillText(sector.text, 138, 5);
       ctx.restore();
       ctx.restore();
     }
 
     function drawWheel() {
-      ctx.clearRect(0, 0, 300, 300);
+      ctx.clearRect(0, 0, 320, 320);
       for (let i = 0; i < sectors.length; i++) {
         drawSector(sectors[i], i);
       }
@@ -283,7 +294,7 @@
       updateUI();
 
       // Random spin rotation calculation
-      const randomSpin = Math.floor(Math.random() * 360) + 1800;
+      const randomSpin = Math.floor(Math.random() * 360) + 2160;
       currentAngle += randomSpin;
 
       canvas.style.transform = `rotate(${currentAngle}deg)`;
@@ -292,17 +303,17 @@
         isSpinning = false;
         spinBtn.disabled = false;
 
-        // Calculate winning sector
+        // Calculate winning sector accurately matching pointer location
         const actualDegree = currentAngle % 360;
         const sectorDegree = 360 / sectors.length;
         const winningIndex = Math.floor((360 - (actualDegree % 360)) / sectorDegree) % sectors.length;
         
         const winningSector = sectors[winningIndex];
         
-        // Uses the exact sector text string as requested
+        // Displays exact winning text string on screen as requested
         resultMsg.innerText = `Congratulations! You won ${winningSector.text}!`;
 
-        // Add winning prize value directly to client balance storage
+        // Add exact winning prize value directly to client balance storage
         let currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
         currentBalance += winningSector.value;
         localStorage.setItem(balanceKey, currentBalance.toFixed(2));
@@ -315,4 +326,4 @@
     updateUI();
   </script>
 </body>
-  </html>
+</html>
