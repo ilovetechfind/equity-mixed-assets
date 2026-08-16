@@ -161,7 +161,7 @@
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <a href="investment-plan.html" class="back-btn">
+      <a href="investment-plan.html" id="client-back-btn" class="back-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back
       </a>
@@ -261,11 +261,13 @@
   </div>
 
   <script>
-    // Grab user ID from URL parameters (e.g., client-page.html?id=123)
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || 'default_user';
 
-    // The exact localStorage key used in your admin edit panel
+    // Keep the back button passing the user ID too
+    const backBtn = document.getElementById('client-back-btn');
+    backBtn.setAttribute('href', `investment-plan.html?id=${targetUserId}`);
+
     const storageKey = `config_starter_full_${targetUserId}`;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -274,11 +276,10 @@
         try {
           const data = JSON.parse(saved);
           
-          // Populate text fields
           if(data.dayText) document.getElementById('client-day').innerText = data.dayText;
           if(data.currentValue) document.getElementById('client-current').innerText = data.currentValue;
           if(data.paidVolumeText) document.getElementById('client-paid-volume-header').innerText = data.paidVolumeText;
-          if(data.timeRemaining) document.getElementById('client-time-remaining').innerHTML = `⏳ ${data.timeRemaining}`;
+          if(data.timeRemaining) document.getElementById('client-time-remaininginnerHTML') = `⏳ ${data.timeRemaining}`;
           if(data.totalGoal) document.getElementById('client-total-goal').innerText = data.totalGoal;
           if(data.remainingBalance) document.getElementById('client-remaining').innerText = data.remainingBalance;
           if(data.guaranteedPayout) document.getElementById('client-payout').innerText = data.guaranteedPayout;
@@ -288,12 +289,10 @@
             btn.querySelector('span').innerText = data.installmentButtonText;
           }
 
-          // Populate progress bar percentage
           if(data.progressPercent) {
             document.getElementById('client-progress-fill').style.width = data.progressPercent + '%';
           }
 
-          // Populate live SVG graph curve based on saved graph height
           if(data.graphHeight) {
             const numericVal = parseInt(data.graphHeight);
             const yCoord = 100 - numericVal;
