@@ -93,15 +93,18 @@
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id');
+    const targetUserId = urlParams.get('id') || 'default_user';
 
-    // Setup dynamic back link retention
+    // Setup dynamic back link retention with user id
     const backLink = document.getElementById('back-link');
-    backLink.setAttribute('href', `investment-plans-admin.html${targetUserId ? '?id=' + targetUserId : ''}`);
+    backLink.setAttribute('href', `investment-plans-admin.html?id=${targetUserId}`);
 
-    // Load saved settings if any exist
+    // Storage key tied specifically to this user and starter plan
+    const storageKey = `config_starter_${targetUserId}`;
+
+    // Load saved settings if any exist for this specific user
     document.addEventListener("DOMContentLoaded", () => {
-      const saved = localStorage.getItem('config_starter');
+      const saved = localStorage.getItem(storageKey);
       if (saved) {
         try {
           const data = JSON.parse(saved);
@@ -123,7 +126,7 @@
       const payout = document.getElementById('plan-payout').value;
       const statusEl = document.getElementById('form-status');
 
-      localStorage.setItem('config_starter', JSON.stringify({ total, initial, weekly, daily, payout }));
+      localStorage.setItem(storageKey, JSON.stringify({ total, initial, weekly, daily, payout }));
 
       statusEl.style.color = "#34d399";
       statusEl.innerText = "Starter plan payment wall updated successfully!";
