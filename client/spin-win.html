@@ -66,6 +66,18 @@
       position: relative;
     }
 
+    .spins-left-badge {
+      font-size: 0.85rem;
+      color: var(--accent);
+      background: rgba(56, 189, 248, 0.12);
+      padding: 6px 14px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 16px;
+      font-weight: 600;
+      border: 1px solid rgba(56, 189, 248, 0.2);
+    }
+
     .wheel-container {
       position: relative;
       width: 280px;
@@ -116,6 +128,7 @@
     }
     .action-btn:active { transform: scale(0.98); }
     .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .action-btn.buy-mode { background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.35); }
 
     /* Result Popup Message */
     #result-msg {
@@ -130,7 +143,7 @@
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <a href="dashboard.html" class="back-btn">
+      <a href="investment-plan.html" id="client-back-btn" class="back-btn">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         Back
       </a>
@@ -146,6 +159,8 @@
 
     <!-- Wheel Game Card -->
     <div class="wheel-card">
+      <div id="spinsCounter" class="spins-left-badge">Spins Remaining: 3</div>
+
       <div class="wheel-container">
         <div class="wheel-pointer"></div>
         <canvas id="wheelCanvas" width="300" height="300"></canvas>
@@ -160,24 +175,61 @@
   </div>
 
   <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id') || '';
+
+    // Bind Back Button URL parameter dynamically
+    document.getElementById('client-back-btn').setAttribute('href', targetUserId ? `investment-plan.html?id=${targetUserId}` : 'investment-plan.html');
+
+    const configKey = `spin_config_${targetUserId}`;
+    const userStateKey = `spin_state_${targetUserId}_${new Date().toDateString()}`;
+    const balanceKey = `user_balance_${targetUserId}`;
+
+    // Default configuration values
+    let config = { dailySpins: 3, costForMore: 150, extraSpinsCount: 3 };
+    const savedConfig = localStorage.getItem(configKey);
+    if(savedConfig) {
+      try { config = JSON.parse(savedConfig); } catch(e){}
+    }
+
+    // Load or initialize daily state
+    let state = JSON.parse(localStorage.getItem(userStateKey)) || { spinsLeft: config.dailySpins };
+    if(state.spinsLeft > config.dailySpins && !state.hasPaid) {
+      state.spinsLeft = config.dailySpins;
+    }
+
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const spinBtn = document.getElementById('spinBtn');
     const resultMsg = document.getElementById('result-msg');
+    const spinsCounter = document.getElementById('spinsCounter');
 
     const sectors = [
-      { color: '#2563eb', text: '$500' },
-      { color: '#10b981', text: '$1,000' },
-      { color: '#f59e0b', text: '$100' },
-      { color: '#8b5cf6', text: '$5,000' },
-      { color: '#ec4899', text: '$250' },
-      { color: '#06b6d4', text: '$10,000' }
+      { color: '#2563eb', text: '$500', value: 500 },
+      { color: '#10b981', text: '$1,000', value: 1000 },
+      { color: '#f59e0b', text: '$100', value: 100 },
+      { color: '#8b5cf6', text: '$5,000', value: 5000 },
+      { color: '#ec4899', text: '$250', value: 250 },
+      { color: '#06b6d4', text: '$10,000', value: 10000 },
+      { color: '#e11d48', text: '$50', value: 50 }
     ];
 
     const arc = Math.PI / (sectors.length / 2);
     let startAngle = 0;
     let currentAngle = 0;
     let isSpinning = false;
+
+    function updateUI() {
+      if (state.spinsLeft > 0) {
+        spinsCounter.innerText = `Spins Remaining: ${state.spinsLeft}`;
+        spinBtn.innerHTML = `<span>Spin the Wheel</span>`;
+        spinBtn.className = "action-btn";
+      } else {
+        spinsCounter.innerText = `Spins Remaining: 0`;
+        spinBtn.innerHTML = `<span>Buy ${config.extraSpinsCount} more spins for $${config.costForMore}</span>`;
+        spinBtn.className = "action-btn buy-mode";
+      }
+    }
 
     function drawSector(sector, i) {
       const angle = startAngle + i * arc;
@@ -194,7 +246,7 @@
       ctx.rotate(angle + arc / 2);
       ctx.textAlign = 'right';
       ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'bold 15px "Plus Jakarta Sans", sans-serif';
       ctx.fillText(sector.text, 130, 10);
       ctx.restore();
       ctx.restore();
@@ -209,11 +261,26 @@
 
     function startSpin() {
       if (isSpinning) return;
+
+      // If spins run out, direct user to deposit/payment page
+      if (state.spinsLeft <= 0) {
+        const paymentUrl = targetUserId 
+          ? `deposit.html?id=${targetUserId}&amount=${config.costForMore}&type=spins` 
+          : `deposit.html?amount=${config.costForMore}&type=spins`;
+        window.location.href = paymentUrl;
+        return;
+      }
+
       isSpinning = true;
       spinBtn.disabled = true;
       resultMsg.innerText = '';
 
-      // Random spin between 5 and 8 full rotations plus random sector offset
+      // Deduct spin count and persist state
+      state.spinsLeft--;
+      localStorage.setItem(userStateKey, JSON.stringify(state));
+      updateUI();
+
+      // Random spin rotation calculation
       const randomSpin = Math.floor(Math.random() * 360) + 1800;
       currentAngle += randomSpin;
 
@@ -223,17 +290,25 @@
         isSpinning = false;
         spinBtn.disabled = false;
 
-        // Calculate winning prize based on final rotation angle
+        // Calculate winning sector
         const actualDegree = currentAngle % 360;
         const sectorDegree = 360 / sectors.length;
         const winningIndex = Math.floor((360 - (actualDegree % 360)) / sectorDegree) % sectors.length;
         
-        const winningPrize = sectors[winningIndex].text;
-        resultMsg.innerText = `Congratulations! You won ${winningPrize}!`;
+        const winningSector = sectors[winningIndex];
+        resultMsg.innerText = `Congratulations! You won ${winningSector.text}!`;
+
+        // Add winning prize directly to client balance storage
+        let currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
+        currentBalance += winningSector.value;
+        localStorage.setItem(balanceKey, currentBalance.toFixed(2));
+
+        updateUI();
       }, 4000);
     }
 
     drawWheel();
+    updateUI();
   </script>
 </body>
-  </html>
+          </html>
