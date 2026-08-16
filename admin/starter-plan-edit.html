@@ -58,34 +58,55 @@
     </a>
 
     <div class="card">
-      <h2 class="card-title">Configure Payment Wall Parameters</h2>
+      <h2 class="card-title">Configure Complete Payment Wall & Dashboard Parameters</h2>
       <form onsubmit="savePlanConfig(event)">
+        
         <div class="form-group">
-          <label>Total Investment ($)</label>
-          <input type="number" id="plan-total" value="1000">
+          <label>Day Text (e.g., Day 27 of 30)</label>
+          <input type="text" id="input-day" value="Day 27 of 30">
         </div>
 
         <div class="form-group">
-          <label>Initial First Payment ($)</label>
-          <input type="number" id="plan-initial" value="200">
+          <label>Current Value (e.g., $274,285.20)</label>
+          <input type="text" id="input-current" value="$274,285.20">
         </div>
 
         <div class="form-group">
-          <label>Weekly Payment ($)</label>
-          <input type="number" id="plan-weekly" value="200">
+          <label>Paid Volume Text (e.g., $140,000 / $200,000 Paid)</label>
+          <input type="text" id="input-paid-volume" value="$140,000 / $200,000 Paid">
         </div>
 
         <div class="form-group">
-          <label>Daily Payment ($)</label>
-          <input type="number" step="0.01" id="plan-daily" value="28.57">
+          <label>Progress Bar Percentage (0 to 100)</label>
+          <input type="number" id="input-progress" value="70" min="0" max="100">
         </div>
 
         <div class="form-group">
-          <label>30-Day Payout Return ($)</label>
-          <input type="number" id="plan-payout" value="5000">
+          <label>Time Remaining Subtext</label>
+          <input type="text" id="input-time-remaining" value="3 days remaining to clear installment structure and unlock total maturity claim.">
         </div>
 
-        <button type="submit" class="submit-btn" id="save-btn">Save Payment Wall Settings</button>
+        <div class="form-group">
+          <label>Total Investment Goal ($)</label>
+          <input type="text" id="input-total-goal" value="$200,000">
+        </div>
+
+        <div class="form-group">
+          <label>Remaining Balance ($)</label>
+          <input type="text" id="input-remaining" value="$60,000">
+        </div>
+
+        <div class="form-group">
+          <label>Guaranteed Payout Return ($)</label>
+          <input type="text" id="input-payout" value="$1,000,000">
+        </div>
+
+        <div class="form-group">
+          <label>Installment Button Text</label>
+          <input type="text" id="input-btn-text" value="Pay Next Installment ($60,000)">
+        </div>
+
+        <button type="submit" class="submit-btn" id="save-btn">Save Complete Payment Wall Settings</button>
         <span id="form-status" class="status-msg"></span>
       </form>
     </div>
@@ -95,41 +116,48 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || 'default_user';
 
-    // Setup dynamic back link retention with user id
     const backLink = document.getElementById('back-link');
     backLink.setAttribute('href', `investment-plans-admin.html?id=${targetUserId}`);
 
-    // Storage key tied specifically to this user and starter plan
-    const storageKey = `config_starter_${targetUserId}`;
+    const storageKey = `config_starter_full_${targetUserId}`;
 
-    // Load saved settings if any exist for this specific user
     document.addEventListener("DOMContentLoaded", () => {
       const saved = localStorage.getItem(storageKey);
       if (saved) {
         try {
           const data = JSON.parse(saved);
-          document.getElementById('plan-total').value = data.total || 1000;
-          document.getElementById('plan-initial').value = data.initial || 200;
-          document.getElementById('plan-weekly').value = data.weekly || 200;
-          document.getElementById('plan-daily').value = data.daily || 28.57;
-          document.getElementById('plan-payout').value = data.payout || 5000;
+          document.getElementById('input-day').value = data.dayText || 'Day 27 of 30';
+          document.getElementById('input-current').value = data.currentValue || '$274,285.20';
+          document.getElementById('input-paid-volume').value = data.paidVolumeText || '$140,000 / $200,000 Paid';
+          document.getElementById('input-progress').value = data.progressPercent || 70;
+          document.getElementById('input-time-remaining').value = data.timeRemaining || '3 days remaining to clear installment structure and unlock total maturity claim.';
+          document.getElementById('input-total-goal').value = data.totalGoal || '$200,000';
+          document.getElementById('input-remaining').value = data.remainingBalance || '$60,000';
+          document.getElementById('input-payout').value = data.guaranteedPayout || '$1,000,000';
+          document.getElementById('input-btn-text').value = data.installmentButtonText || 'Pay Next Installment ($60,000)';
         } catch (e) {}
       }
     });
 
     function savePlanConfig(e) {
       e.preventDefault();
-      const total = document.getElementById('plan-total').value;
-      const initial = document.getElementById('plan-initial').value;
-      const weekly = document.getElementById('plan-weekly').value;
-      const daily = document.getElementById('plan-daily').value;
-      const payout = document.getElementById('plan-payout').value;
+      const data = {
+        dayText: document.getElementById('input-day').value,
+        currentValue: document.getElementById('input-current').value,
+        paidVolumeText: document.getElementById('input-paid-volume').value,
+        progressPercent: document.getElementById('input-progress').value,
+        timeRemaining: document.getElementById('input-time-remaining').value,
+        totalGoal: document.getElementById('input-total-goal').value,
+        remainingBalance: document.getElementById('input-remaining').value,
+        guaranteedPayout: document.getElementById('input-payout').value,
+        installmentButtonText: document.getElementById('input-btn-text').value
+      };
+      
       const statusEl = document.getElementById('form-status');
-
-      localStorage.setItem(storageKey, JSON.stringify({ total, initial, weekly, daily, payout }));
+      localStorage.setItem(storageKey, JSON.stringify(data));
 
       statusEl.style.color = "#34d399";
-      statusEl.innerText = "Starter plan payment wall updated successfully!";
+      statusEl.innerText = "Payment wall and graph values updated successfully!";
       setTimeout(() => { statusEl.innerText = ""; }, 3000);
     }
   </script>
