@@ -83,6 +83,7 @@
       <a href="dashboard.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Dashboard</a>
       <a href="investment-plan.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Investment Plans</a>
       <a href="deposit.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Deposit Funds</a>
+      <a href="spin-win.html" id="spin-menu-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Spin & Win</a>
       <a href="settings.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Settings</a>
       <button onclick="logout()" style="margin-top: auto; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer;">Log Out</button>
     </div>
@@ -166,7 +167,7 @@
         targetUserId = user.id;
       } else {
         // If we are viewing a target user via admin query parameter, append ?id= to internal navigation links so it persists across pages
-        ['deposit-link', 'plan-link', 'withdraw-link', 'nav-home', 'nav-plans', 'nav-deposit', 'nav-settings', 'support-link'].forEach(id => {
+        ['deposit-link', 'plan-link', 'withdraw-link', 'spin-menu-link', 'nav-home', 'nav-plans', 'nav-deposit', 'nav-settings', 'support-link'].forEach(id => {
           const el = document.getElementById(id);
           if (el && el.getAttribute('href')) {
             el.setAttribute('href', el.getAttribute('href') + '?id=' + targetUserId);
@@ -219,5 +220,4 @@
     checkUser();
   </script>
 </body>
-  </html>
-  
+</html>
