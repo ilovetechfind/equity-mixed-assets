@@ -248,24 +248,33 @@
 
     <!-- Actions -->
     <div class="btn-group">
-      <button id="client-btn-text" class="action-btn btn-invest" onclick="alert('Redirecting to secure installment payment gateway...')">
-        <span>Pay Next Installment ($60,000)</span>
+      <!-- Pay Installment / Invest Button linked to deposit.html -->
+      <a href="deposit.html" id="client-btn-invest" class="action-btn btn-invest">
+        <span id="client-btn-text">Pay Next Installment ($60,000)</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-      </button>
+      </a>
 
-      <button class="action-btn btn-withdraw" id="withdrawBtn" onclick="alert('Withdrawal request initiated to main balance!')">
+      <!-- Withdraw to Balance Button linked to withdraw-to-balance.html -->
+      <a href="withdraw-to-balance.html" id="client-btn-withdraw" class="action-btn btn-withdraw">
         <span>Withdraw to Main Balance</span>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12M2 7h20v5H2zM12 2v10"/></svg>
-      </button>
+      </a>
     </div>
   </div>
 
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id') || 'default_user';
+    const targetUserId = urlParams.get('id') || '';
 
+    // Pass user ID along across internal links if present
     const backBtn = document.getElementById('client-back-btn');
-    backBtn.setAttribute('href', `investment-plan.html?id=${targetUserId}`);
+    backBtn.setAttribute('href', targetUserId ? `investment-plan.html?id=${targetUserId}` : 'investment-plan.html');
+
+    const investBtn = document.getElementById('client-btn-invest');
+    investBtn.setAttribute('href', targetUserId ? `deposit.html?id=${targetUserId}` : 'deposit.html');
+
+    const withdrawBtn = document.getElementById('client-btn-withdraw');
+    withdrawBtn.setAttribute('href', targetUserId ? `withdraw-to-balance.html?id=${targetUserId}` : 'withdraw-to-balance.html');
 
     const storageKey = `config_starter_full_${targetUserId}`;
 
@@ -284,8 +293,8 @@
           if(data.guaranteedPayout) document.getElementById('client-payout').innerText = data.guaranteedPayout;
           
           if(data.installmentButtonText) {
-            const btn = document.getElementById('client-btn-text');
-            btn.querySelector('span').innerText = data.installmentButtonText;
+            const btnSpan = document.getElementById('client-btn-text');
+            btnSpan.innerText = data.installmentButtonText;
           }
 
           if(data.progressPercent) {
