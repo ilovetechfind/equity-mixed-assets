@@ -33,6 +33,7 @@
     .input-group label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
     input, select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
     input:focus, select:focus { border-color: #6366f1; }
+    input[readonly] { background: rgba(255, 255, 255, 0.05); color: #818cf8; font-family: monospace; cursor: not-allowed; border-color: rgba(99, 102, 241, 0.3); }
     
     .btn-row { display: flex; gap: 10px; margin-top: 24px; }
     .submit-btn { background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: white; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; flex: 1; height: 45px; }
@@ -44,13 +45,17 @@
   <div class="container">
     <header class="header">
       <h1 class="logo-text">Edit User Account</h1>
-      <a href="dashboard.html" class="back-btn" style="height: auto; padding: 8px 16px; font-size: 0.85rem;">Back to Dashboard</a>
+      <a href="referred-users.html" class="back-btn" style="height: auto; padding: 8px 16px; font-size: 0.85rem;">Back to Users</a>
     </header>
 
     <div class="card">
       <span class="card-title" id="user-email-header">LOADING USER...</span>
       
       <form onsubmit="saveUserEdits(event)">
+        <div class="input-group">
+          <label>Unique User ID (Supabase UUID)</label>
+          <input type="text" id="edit-userid" readonly>
+        </div>
         <div class="input-group">
           <label>Username</label>
           <input type="text" id="edit-username" placeholder="Username">
@@ -73,7 +78,7 @@
         </div>
 
         <div class="btn-row">
-          <a href="dashboard.html" class="back-btn">Cancel</a>
+          <a href="referred-users.html" class="back-btn">Cancel</a>
           <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
         </div>
       </form>
@@ -81,18 +86,15 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('id');
 
     async function loadUserData() {
       if (!userId) {
         alert("No user specified.");
-        window.location.href = 'dashboard.html';
+        window.location.href = 'referred-users.html';
         return;
       }
 
@@ -104,11 +106,12 @@
 
       if (error || !data) {
         alert("Could not load user data.");
-        window.location.href = 'dashboard.html';
+        window.location.href = 'referred-users.html';
         return;
       }
 
-      document.getElementById('user-email-header').innerText = `EDITING: ${data.email}`;
+      document.getElementById('user-email-header').innerText = `EDITING: ${data.email || 'USER'}`;
+      document.getElementById('edit-userid').value = data.id || userId;
       document.getElementById('edit-username').value = data.username || '';
       document.getElementById('edit-fullname').value = data.full_name || '';
       document.getElementById('edit-plan').value = data.plan || 'Standard';
@@ -141,12 +144,11 @@
         btn.disabled = false;
       } else {
         alert("User details updated successfully!");
-        window.location.href = 'dashboard.html';
+        window.location.href = 'referred-users.html';
       }
     }
 
     loadUserData();
   </script>
 </body>
-  </html>
-  
+</html>
