@@ -39,10 +39,11 @@
     th { color: var(--text-muted); font-weight: 600; }
     td { color: #f8fafc; }
     
-    .uid-tag { font-family: monospace; font-size: 0.75rem; color: #818cf8; background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.2); display: inline-block; }
-
     .view-btn { background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 0.75rem; transition: background 0.2s; display: inline-block; }
     .view-btn:hover { background: rgba(99, 102, 241, 0.25); }
+
+    .copy-btn { background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #c084fc; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; cursor: pointer; margin-left: 6px; font-weight: 600; }
+    .copy-btn:hover { background: rgba(255, 255, 255, 0.2); }
 
     .logout-btn { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 8px 16px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
@@ -149,13 +150,26 @@
 
       tbody.innerHTML = data.map(user => `
         <tr>
-          <td><span class="uid-tag">${user.id ? user.id.substring(0, 8) + '...' : 'N/A'}</span></td>
+          <td>
+            <div style="display: flex; align-items: center;">
+              <span style="font-family: monospace; color: #94a3b8;">${user.id ? user.id.substring(0, 6) + '...' : 'N/A'}</span>
+              <button class="copy-btn" onclick="copyId('${user.id}')">Copy</button>
+            </div>
+          </td>
           <td><strong>${user.username || 'N/A'}</strong></td>
           <td>${user.email || 'N/A'}</td>
           <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td><a href="edit-user.html?id=${user.id}" class="view-btn">Edit User</a></td>
+          <td><a href="user-info.html?id=${user.id}" class="view-btn">View Info</a></td>
         </tr>
       `).join('');
+    }
+
+    function copyId(id) {
+      if(id && id !== 'undefined') {
+        navigator.clipboard.writeText(id).then(() => {
+          alert('Full User ID copied to clipboard!');
+        });
+      }
     }
 
     async function logout() {
@@ -166,5 +180,4 @@
     checkAdminAndLoad();
   </script>
 </body>
-                                                                                                                                          </html>
-                                                                                            
+</html>
