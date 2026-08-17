@@ -249,7 +249,59 @@
     }
 
     checkAdmin();
-  </script>
+  </script> <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script> 
+<script>
+  async function fetchUserDashboardData() {
+    // 1. Check who is currently logged in
+    const { data: { user }, error: authError } = await client.auth.getUser();
+    
+    if (!user) {
+      console.log("No user logged in. Redirecting...");
+      window.location.replace('login.html');
+      return;
+    }
+
+    // 2. Fetch their specific balance and volume from the profiles table
+    const { data, error } = await client
+      .from('profiles')
+      .select('balance, volume_percentage')
+      .eq('id', user.id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching data:", error);
+      return;
+    }
+
+    if (data) {
+      // 3. Update the Balance on the screen
+      // Assuming your balance element has an id like 'user-balance-display'
+      // You will need to add id="user-balance-display" to the <h1> or <span> showing $0.00
+      const balanceEl = document.getElementById('user-balance-display');
+      if (balanceEl) {
+        balanceEl.innerText = '$' + data.balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      }
+
+      // 4. Update the Volume text and progress bar
+      // Add id="volume-text" to the span showing "0% Full"
+      // Add id="volume-fill" to the actual colored bar inside the volume track
+      const volumeText = document.getElementById('volume-text');
+      const volumeFill = document.getElementById('volume-fill');
+      
+      if (volumeText) {
+        volumeText.innerText = data.volume_percentage + '% Full';
+      }
+      if (volumeFill) {
+        volumeFill.style.width = data.volume_percentage + '%';
+      }
+    }
+  }
+
+  // Run the function as soon as the dashboard loads
+  fetchUserDashboardData();
+</script>
+  
 </body>
   </html>
   
