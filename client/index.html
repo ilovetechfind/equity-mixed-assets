@@ -22,7 +22,7 @@
       font-family: 'Plus Jakarta Sans', sans-serif; 
       margin: 0; 
       padding: 16px; 
-      padding-bottom: 120px; 
+      padding-bottom: 100px; 
       display: flex; 
       justify-content: center; 
     }
@@ -62,62 +62,12 @@
     .submit-sm { background: rgba(255, 255, 255, 0.06); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 0 18px; border-radius: 12px; font-weight: 700; cursor: pointer; }
     .submit-lg { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
 
-    /* Fixed Navigation Bar Styling */
-    .bottom-nav { 
-      position: fixed; 
-      bottom: 12px; 
-      left: 16px; 
-      right: 16px; 
-      max-width: 448px; 
-      margin: 0 auto; 
-      background: rgba(15, 23, 42, 0.95); 
-      backdrop-filter: blur(16px); 
-      border: 1px solid rgba(255, 255, 255, 0.12); 
-      display: flex; 
-      justify-content: space-around; 
-      align-items: center; 
-      padding: 10px 4px; 
-      border-radius: 20px; 
-      z-index: 100; 
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-    }
-    .nav-item { 
-      color: var(--text-muted); 
-      text-decoration: none; 
-      font-size: 0.72rem; 
-      font-weight: 600; 
-      display: flex; 
-      flex-direction: column; 
-      align-items: center; 
-      justify-content: center;
-      gap: 4px; 
-      flex: 1;
-      text-align: center;
-      transition: 0.2s; 
-    }
+    .bottom-nav { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-around; padding: 10px 0; border-radius: 20px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
     .nav-item.active { color: #4ade80; }
-    .nav-icon { font-size: 19px; line-height: 1; }
+    .nav-icon { font-size: 18px; }
 
-    /* Positioned support icon higher to avoid overlapping navigation */
-    .support-bubble { 
-      position: fixed; 
-      bottom: 92px; 
-      right: 20px; 
-      width: 50px; 
-      height: 50px; 
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
-      border-radius: 50%; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); 
-      cursor: pointer; 
-      z-index: 99; 
-      border: 2px solid rgba(255, 255, 255, 0.2); 
-      transition: transform 0.2s ease; 
-      text-decoration: none; 
-      font-size: 22px; 
-    }
+    .support-bubble { position: fixed; bottom: 85px; right: 20px; width: 52px; height: 52px; background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); cursor: pointer; z-index: 99; border: 2px solid rgba(255, 255, 255, 0.2); transition: transform 0.2s ease; text-decoration: none; font-size: 22px; }
     .support-bubble:hover { transform: scale(1.08); }
   </style>
 </head>
@@ -130,11 +80,11 @@
         <h3 style="margin:0; font-size: 1rem; color: #4ade80;">Menu</h3>
         <button onclick="toggleMenu()" style="background:none; border:none; color:white; font-size: 1.2rem; cursor: pointer;">✕</button>
       </div>
-      <a href="dashboard.html" id="menu-dash-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Dashboard</a>
-      <a href="investment-plan.html" id="menu-plan-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Investment Plans</a>
-      <a href="deposit.html" id="menu-deposit-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Deposit Funds</a>
+      <a href="dashboard.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Dashboard</a>
+      <a href="investment-plan.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Investment Plans</a>
+      <a href="deposit.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Deposit Funds</a>
       <a href="spin-win.html" id="spin-menu-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Spin & Win</a>
-      <a href="settings.html" id="menu-settings-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Settings</a>
+      <a href="settings.html" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Settings</a>
       <button onclick="logout()" style="margin-top: auto; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer;">Log Out</button>
     </div>
   </div>
@@ -183,10 +133,10 @@
   </div>
 
   <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item active" id="nav-home"><span class="nav-icon">🏠</span><span>Home</span></a>
-    <a href="investment-plan.html" class="nav-item" id="nav-plans"><span class="nav-icon">📈</span><span>Plans</span></a>
-    <a href="deposit.html" class="nav-item" id="nav-deposit"><span class="nav-icon">💳</span><span>Deposit</span></a>
-    <a href="settings.html" class="nav-item" id="nav-settings"><span class="nav-icon">⚙️</span><span>Settings</span></a>
+    <a href="dashboard.html" class="nav-item active" id="nav-home"><span class="nav-icon">🏠</span>Home</a>
+    <a href="investment-plan.html" class="nav-item" id="nav-plans"><span class="nav-icon">📈</span>Plans</a>
+    <a href="deposit.html" class="nav-item" id="nav-deposit"><span class="nav-icon">💳</span>Deposit</a>
+    <a href="settings.html" class="nav-item" id="nav-settings"><span class="nav-icon">⚙️</span>Settings</a>
   </nav>
 
   <!-- Customer Care Support Bubble Widget -->
@@ -214,10 +164,10 @@
       const balanceElem = document.getElementById('user-balance');
 
       if (isBalanceHidden) {
-        eyeIcon.innerText = '🙈';
+        eyeIcon.innerText = '🙈'; // Hidden/Closed eye state
         balanceElem.innerText = '********';
       } else {
-        eyeIcon.innerText = '👁️';
+        eyeIcon.innerText = '👁️'; // Open eye state
         balanceElem.innerText = `$${Number(currentRawBalance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
       }
     }
@@ -231,19 +181,10 @@
         if (!user) { window.location.href = 'index.html'; return; }
         targetUserId = user.id;
       } else {
-        const linksToUpdate = [
-          'deposit-link', 'plan-link', 'withdraw-link', 'spin-menu-link', 
-          'nav-home', 'nav-plans', 'nav-deposit', 'nav-settings', 'support-link',
-          'menu-dash-link', 'menu-plan-link', 'menu-deposit-link', 'menu-settings-link'
-        ];
-        
-        linksToUpdate.forEach(id => {
+        ['deposit-link', 'plan-link', 'withdraw-link', 'spin-menu-link', 'nav-home', 'nav-plans', 'nav-deposit', 'nav-settings', 'support-link'].forEach(id => {
           const el = document.getElementById(id);
           if (el && el.getAttribute('href')) {
-            const currentHref = el.getAttribute('href');
-            if (!currentHref.includes('?id=')) {
-              el.setAttribute('href', currentHref + '?id=' + targetUserId);
-            }
+            el.setAttribute('href', el.getAttribute('href') + '?id=' + targetUserId);
           }
         });
       }
@@ -268,7 +209,6 @@
         document.getElementById('volume-progress-bar').style.width = `${vol}%`;
       }
 
-      // Realtime listener for immediate admin edits
       client
         .channel('public:profiles:' + targetUserId)
         .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${targetUserId}` }, payload => {
