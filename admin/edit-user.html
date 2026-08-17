@@ -34,7 +34,6 @@
     input, select { background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); color: white; padding: 12px; border-radius: 10px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
     input:focus, select:focus { border-color: #6366f1; }
     
-    /* Styles for the copy field */
     .copy-group { display: flex; gap: 10px; }
     .copy-group input { flex: 1; background: rgba(255, 255, 255, 0.05); color: #94a3b8; cursor: not-allowed; }
     .copy-btn-large { background: rgba(99, 102, 241, 0.2); border: 1px solid rgba(99, 102, 241, 0.4); color: #818cf8; padding: 0 16px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: background 0.2s; }
@@ -50,14 +49,13 @@
   <div class="container">
     <header class="header">
       <h1 class="logo-text">Edit User Account</h1>
-      <a href="dashboard.html" class="back-btn" style="height: auto; padding: 8px 16px; font-size: 0.85rem;">Back to Dashboard</a>
+      <a href="referred-users.html" class="back-btn" style="height: auto; padding: 8px 16px; font-size: 0.85rem;">Back to List</a>
     </header>
 
     <div class="card">
       <span class="card-title" id="user-email-header">LOADING USER...</span>
       
       <form onsubmit="saveUserEdits(event)">
-        <!-- New Copy ID Field added here -->
         <div class="input-group">
           <label>Unique User ID</label>
           <div class="copy-group">
@@ -88,7 +86,7 @@
         </div>
 
         <div class="btn-row">
-          <a href="dashboard.html" class="back-btn">Cancel</a>
+          <a href="referred-users.html" class="back-btn">Cancel</a>
           <button type="submit" class="submit-btn" id="save-btn">Save Changes</button>
         </div>
       </form>
@@ -96,35 +94,32 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     const urlParams = new URLSearchParams(window.location.search);
     const userId = urlParams.get('id');
 
     async function loadUserData() {
       if (!userId) {
         alert("No user specified.");
-        window.location.href = 'dashboard.html';
+        window.location.href = 'referred-users.html';
         return;
       }
 
+      // Fetch directly from the profiles table instead of the view
       const { data, error } = await client
-        .from('user_profiles_view')
+        .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
       if (error || !data) {
-        alert("Could not load user data.");
-        window.location.href = 'dashboard.html';
+        alert("Could not load user data from profiles table.");
+        window.location.href = 'referred-users.html';
         return;
       }
 
-      document.getElementById('user-email-header').innerText = `EDITING: ${data.email}`;
-      // Populate the newly added ID field
+      document.getElementById('user-email-header').innerText = `EDITING USER`;
       document.getElementById('display-userid').value = data.id || userId;
       
       document.getElementById('edit-username').value = data.username || '';
@@ -160,13 +155,14 @@
         .update(updatedData)
         .eq('id', userId);
 
+      btn.innerText = "Save Changes";
+      btn.disabled = false;
+
       if (error) {
         alert("Failed to update user: " + error.message);
-        btn.innerText = "Save Changes";
-        btn.disabled = false;
       } else {
         alert("User details updated successfully!");
-        window.location.href = 'dashboard.html';
+        window.location.href = 'referred-users.html';
       }
     }
 
