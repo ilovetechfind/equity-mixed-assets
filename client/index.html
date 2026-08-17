@@ -3,117 +3,300 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Login</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Equity Mixed Assets - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
-    .ticker-bar { width: 100%; background: #1e293b; border-bottom: 1px solid #334155; padding: 10px 0; overflow: hidden; white-space: nowrap; font-size: 13px; color: #94a3b8; }
-    .ticker-content { display: inline-block; animation: marquee 25s linear infinite; }
-    .ticker-item { margin-right: 40px; }
-    .ticker-item span { color: #10b981; font-weight: 600; }
-    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
+      --card-bg: rgba(19, 27, 54, 0.7);
+      --card-border: rgba(255, 255, 255, 0.07);
+      --primary-glow: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      --accent-green: #10b981;
+      --text-muted: #94a3b8;
+    }
 
-    .card-container { display: flex; justify-content: center; align-items: center; flex: 1; width: 100%; padding: 20px; box-sizing: border-box; }
-    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 420px; border: 1px solid #334155; box-sizing: border-box; }
-    .badge { background: #10b981; color: white; font-size: 11px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; display: inline-block; margin-bottom: 12px; }
-    .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
-    .input-group { margin-bottom: 16px; position: relative; }
-    .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-    .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
-    .toggle-pass { position: absolute; right: 12px; top: 35px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; }
-    .btn { width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
-    .btn:disabled { opacity: 0.7; cursor: not-allowed; }
-    .links { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
-    .links a { color: #10b981; text-decoration: none; }
-    .alert-msg { color: #ef4444; font-size: 13px; text-align: center; margin-top: 12px; padding: 10px; background: rgba(239, 68, 68, 0.1); border-radius: 6px; display: none; }
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+      padding-bottom: 120px; 
+      display: flex; 
+      justify-content: center; 
+    }
+
+    .container { width: 100%; max-width: 480px; }
+    
+    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 0 4px; }
+    .logo-text { background: linear-gradient(90deg, #4ade80, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.3rem; font-weight: 800; letter-spacing: -0.5px; margin: 0; }
+    .menu-btn { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(10px); color: white; width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; }
+    
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
+    
+    .balance-row { display: flex; align-items: center; gap: 14px; margin-top: 10px; margin-bottom: 20px; }
+    .user-avatar-icon { background: linear-gradient(135deg, #1e294b, #0f172a); border: 1px solid rgba(255,255,255,0.1); width: 48px; height: 48px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; box-shadow: inset 0 2px 4px rgba(255,255,255,0.05); }
+    .user-avatar-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .balance-amount { font-size: 2.2rem; font-weight: 800; margin: 0; letter-spacing: -1px; }
+    
+    .action-grid { display: flex; gap: 12px; }
+    .btn-primary { background: var(--primary-glow); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+    .btn-secondary { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px; border-radius: 14px; font-weight: 700; cursor: pointer; flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; }
+
+    .volume-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .volume-title { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; }
+    .volume-status { color: #38bdf8; font-weight: 700; font-size: 0.85rem; background: rgba(56, 189, 248, 0.1); padding: 4px 10px; border-radius: 20px; }
+    
+    .progress-bg { background-color: rgba(255, 255, 255, 0.05); height: 10px; border-radius: 6px; overflow: hidden; margin-bottom: 14px; border: 1px solid rgba(255,255,255,0.03); }
+    .progress-fill { background: linear-gradient(90deg, #3b82f6, #60a5fa); height: 100%; width: 15%; border-radius: 6px; transition: width 0.4s ease; }
+    
+    .warning-text { color: #facc15; font-size: 0.8rem; margin-bottom: 14px; line-height: 1.4; background: rgba(250, 204, 21, 0.08); padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(250, 204, 21, 0.15); }
+    .ticker-box { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.04); padding: 12px; border-radius: 12px; font-size: 0.85rem; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; color: #e2e8f0; }
+    
+    .input-row { display: flex; gap: 8px; margin-top: 10px; }
+    input[type="text"], input[type="number"] { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+    input:focus { border-color: #3b82f6; }
+    
+    .submit-sm { background: rgba(255, 255, 255, 0.06); color: white; border: 1px solid rgba(255, 255, 255, 0.1); padding: 0 18px; border-radius: 12px; font-weight: 700; cursor: pointer; }
+    .submit-lg { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; text-align: center; text-decoration: none; display: block; box-sizing: border-box; }
+
+    /* Fixed Navigation Bar Styling */
+    .bottom-nav { 
+      position: fixed; 
+      bottom: 12px; 
+      left: 16px; 
+      right: 16px; 
+      max-width: 448px; 
+      margin: 0 auto; 
+      background: rgba(15, 23, 42, 0.95); 
+      backdrop-filter: blur(16px); 
+      border: 1px solid rgba(255, 255, 255, 0.12); 
+      display: flex; 
+      justify-content: space-around; 
+      align-items: center; 
+      padding: 10px 4px; 
+      border-radius: 20px; 
+      z-index: 100; 
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+    }
+    .nav-item { 
+      color: var(--text-muted); 
+      text-decoration: none; 
+      font-size: 0.72rem; 
+      font-weight: 600; 
+      display: flex; 
+      flex-direction: column; 
+      align-items: center; 
+      justify-content: center;
+      gap: 4px; 
+      flex: 1;
+      text-align: center;
+      transition: 0.2s; 
+    }
+    .nav-item.active { color: #4ade80; }
+    .nav-icon { font-size: 19px; line-height: 1; }
+
+    /* Positioned support icon higher to avoid overlapping navigation */
+    .support-bubble { 
+      position: fixed; 
+      bottom: 92px; 
+      right: 20px; 
+      width: 50px; 
+      height: 50px; 
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); 
+      border-radius: 50%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5); 
+      cursor: pointer; 
+      z-index: 99; 
+      border: 2px solid rgba(255, 255, 255, 0.2); 
+      transition: transform 0.2s ease; 
+      text-decoration: none; 
+      font-size: 22px; 
+    }
+    .support-bubble:hover { transform: scale(1.08); }
   </style>
 </head>
 <body>
 
-  <div class="ticker-bar">
-    <div class="ticker-content">
-      <span class="ticker-item">Equity Mixed Assets Index: <span>$4,280.50 (+2.4%)</span></span>
-      <span class="ticker-item">Global Tech Blend: <span>$1,412.20 (+3.1%)</span></span>
-      <span class="ticker-item">Commodity Core Fund: <span>$892.40 (+0.9%)</span></span>
-      <span class="ticker-item">Stable Growth Portfolio: <span>$2,150.00 (+1.5%)</span></span>
+  <!-- Slide-out Menu Overlay -->
+  <div id="side-menu" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: flex-end;">
+    <div style="width: 280px; background: #0f172a; height: 100%; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h3 style="margin:0; font-size: 1rem; color: #4ade80;">Menu</h3>
+        <button onclick="toggleMenu()" style="background:none; border:none; color:white; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+      <a href="dashboard.html" id="menu-dash-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Dashboard</a>
+      <a href="investment-plan.html" id="menu-plan-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Investment Plans</a>
+      <a href="deposit.html" id="menu-deposit-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Deposit Funds</a>
+      <a href="spin-win.html" id="spin-menu-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Spin & Win</a>
+      <a href="settings.html" id="menu-settings-link" style="color: white; text-decoration: none; padding: 12px 0; font-weight: 600; border-bottom: 1px solid rgba(255,255,255,0.05);">Settings</a>
+      <button onclick="logout()" style="margin-top: auto; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 14px; border-radius: 12px; font-weight: 700; cursor: pointer;">Log Out</button>
     </div>
   </div>
 
-  <div class="card-container">
+  <div class="container">
+    <header class="app-header">
+      <h1 class="logo-text">Equity Mixed Assets</h1>
+      <button class="menu-btn" onclick="toggleMenu()">☰</button>
+    </header>
+
     <div class="card">
-      <span class="badge">Equity Mixed Assets</span>
-      <div class="title">Client Portal Login</div>
-      <div class="subtitle">Access your investment dashboard</div>
-
-      <div class="input-group">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="client@example.com">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="card-title" id="user-greeting">TOTAL ACCOUNT BALANCE</span>
+        <span id="toggle-balance-visibility" style="cursor: pointer; opacity: 0.7; font-size: 1.1rem;" onclick="toggleBalanceVisibility()">👁️</span>
       </div>
-      <div class="input-group">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="••••••••">
-        <button type="button" class="toggle-pass" onclick="togglePassword('password', this)">Show</button>
+      <div class="balance-row">
+        <div class="user-avatar-icon" id="avatar-box">👤</div>
+        <h2 class="balance-amount" id="user-balance">$0.00</h2>
       </div>
-      
-      <button class="btn" id="login-btn" onclick="handleLogin()">Log In</button>
-      <div id="alert-box" class="alert-msg"></div>
-
-      <div class="links">
-        Don't have an account? <a href="signup.html">Sign up</a>
+      <div class="action-grid">
+        <a href="deposit.html" class="btn-primary" id="deposit-link">Deposit</a>
+        <a href="investment-plan.html" class="btn-secondary" id="plan-link">Investment Plan</a>
       </div>
     </div>
+
+    <div class="card">
+      <div class="volume-header">
+        <span class="volume-title">VOLUME POSITION</span>
+        <span class="volume-status" id="volume-status-text">15% Full</span>
+      </div>
+      <div class="progress-bg"><div class="progress-fill" id="volume-progress-bar" style="width: 15%;"></div></div>
+      <div class="warning-text">⚠️ Volume motion locked. Make a deposit to activate full volume flow.</div>
+      
+      <div class="ticker-box" id="live-ticker">💎 <span>Jessica T. deposited $5,000 via Bitcoin</span></div>
+      
+      <div class="input-row">
+        <input type="text" placeholder="Enter Promo Code">
+        <button class="submit-sm">Enter</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="card-title" style="display: block; margin-bottom: 10px;">WITHDRAW FUNDS</span>
+      <a href="withdraw.html" class="submit-lg" id="withdraw-link">Withdraw Funds</a>
+    </div>
   </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item active" id="nav-home"><span class="nav-icon">🏠</span><span>Home</span></a>
+    <a href="investment-plan.html" class="nav-item" id="nav-plans"><span class="nav-icon">📈</span><span>Plans</span></a>
+    <a href="deposit.html" class="nav-item" id="nav-deposit"><span class="nav-icon">💳</span><span>Deposit</span></a>
+    <a href="settings.html" class="nav-item" id="nav-settings"><span class="nav-icon">⚙️</span><span>Settings</span></a>
+  </nav>
+
+  <!-- Customer Care Support Bubble Widget -->
+  <a href="customer-care.html" class="support-bubble" id="support-link" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="ticker.js"></script>
+  
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function togglePassword(fieldId, btn) {
-      const field = document.getElementById(fieldId);
-      if (field.type === 'password') {
-        field.type = 'text';
-        btn.innerText = 'Hide';
+    let isBalanceHidden = false;
+    let currentRawBalance = 0;
+
+    function toggleMenu() {
+      const menu = document.getElementById('side-menu');
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function toggleBalanceVisibility() {
+      isBalanceHidden = !isBalanceHidden;
+      const eyeIcon = document.getElementById('toggle-balance-visibility');
+      const balanceElem = document.getElementById('user-balance');
+
+      if (isBalanceHidden) {
+        eyeIcon.innerText = '🙈';
+        balanceElem.innerText = '********';
       } else {
-        field.type = 'password';
-        btn.innerText = 'Show';
+        eyeIcon.innerText = '👁️';
+        balanceElem.innerText = `$${Number(currentRawBalance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
       }
     }
 
-    async function handleLogin() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      const alertBox = document.getElementById('alert-box');
-      const btn = document.getElementById('login-btn');
+    async function checkUser() {
+      const urlParams = new URLSearchParams(window.location.search);
+      let targetUserId = urlParams.get('id');
 
-      alertBox.style.display = 'none';
-      if (!email || !password) {
-        alertBox.innerText = "Please fill in all fields.";
-        alertBox.style.display = 'block';
-        return;
-      }
-
-      btn.innerText = "Logging in...";
-      btn.disabled = true;
-
-      const { data, error } = await client.auth.signInWithPassword({ email, password });
-
-      if (error) {
-        alertBox.innerText = error.message;
-        alertBox.style.display = 'block';
-        btn.innerText = "Log In";
-        btn.disabled = false;
+      if (!targetUserId) {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) { window.location.href = 'index.html'; return; }
+        targetUserId = user.id;
       } else {
-        const { data: profile } = await client.from('profiles').select('role').eq('id', data.user.id).single();
-        if (profile && profile.role === 'admin') {
-          window.location.href = 'admin.html';
-        } else {
-          window.location.href = 'dashboard.html';
+        const linksToUpdate = [
+          'deposit-link', 'plan-link', 'withdraw-link', 'spin-menu-link', 
+          'nav-home', 'nav-plans', 'nav-deposit', 'nav-settings', 'support-link',
+          'menu-dash-link', 'menu-plan-link', 'menu-deposit-link', 'menu-settings-link'
+        ];
+        
+        linksToUpdate.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && el.getAttribute('href')) {
+            const currentHref = el.getAttribute('href');
+            if (!currentHref.includes('?id=')) {
+              el.setAttribute('href', currentHref + '?id=' + targetUserId);
+            }
+          }
+        });
+      }
+      
+      const { data: profile } = await client.from('profiles').select('balance, username, avatar_url, volume_percentage').eq('id', targetUserId).single();
+      if (profile) {
+        currentRawBalance = profile.balance || 0;
+        if (!isBalanceHidden) {
+          document.getElementById('user-balance').innerText = `$${Number(currentRawBalance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         }
+        
+        if (profile.username) {
+          document.getElementById('user-greeting').innerText = `WELCOME, ${profile.username.toUpperCase()}`;
+        }
+        
+        if (profile.avatar_url) {
+          document.getElementById('avatar-box').innerHTML = `<img src="${profile.avatar_url}" alt="Profile">`;
+        }
+
+        const vol = profile.volume_percentage || 0;
+        document.getElementById('volume-status-text').innerText = `${vol}% Full`;
+        document.getElementById('volume-progress-bar').style.width = `${vol}%`;
       }
+
+      // Realtime listener for immediate admin edits
+      client
+        .channel('public:profiles:' + targetUserId)
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'profiles', filter: `id=eq.${targetUserId}` }, payload => {
+          const newDat = payload.new;
+          if (newDat.balance !== undefined) {
+            currentRawBalance = newDat.balance || 0;
+            if (!isBalanceHidden) {
+              document.getElementById('user-balance').innerText = `$${Number(currentRawBalance).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+            }
+          }
+          if (newDat.username) {
+            document.getElementById('user-greeting').innerText = `WELCOME, ${newDat.username.toUpperCase()}`;
+          }
+          if (newDat.volume_percentage !== undefined) {
+            const v = newDat.volume_percentage;
+            document.getElementById('volume-status-text').innerText = `${v}% Full`;
+            document.getElementById('volume-progress-bar').style.width = `${v}%`;
+          }
+        })
+        .subscribe();
     }
+
+    async function logout() {
+      await client.auth.signOut();
+      window.location.href = 'index.html';
+    }
+
+    checkUser();
   </script>
 </body>
 </html>
