@@ -39,6 +39,8 @@
     th { color: var(--text-muted); font-weight: 600; }
     td { color: #f8fafc; }
     
+    .uid-tag { font-family: monospace; font-size: 0.75rem; color: #818cf8; background: rgba(99, 102, 241, 0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(99, 102, 241, 0.2); display: inline-block; }
+
     .view-btn { background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8; padding: 6px 12px; border-radius: 8px; font-weight: 700; cursor: pointer; text-decoration: none; font-size: 0.75rem; transition: background 0.2s; display: inline-block; }
     .view-btn:hover { background: rgba(99, 102, 241, 0.25); }
 
@@ -66,6 +68,7 @@
         <table>
           <thead>
             <tr>
+              <th>User ID</th>
               <th>Username</th>
               <th>Gmail</th>
               <th>Balance</th>
@@ -73,7 +76,7 @@
             </tr>
           </thead>
           <tbody id="referred-users-body">
-            <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Loading network data...</td></tr>
+            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading network data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -119,7 +122,7 @@
 
       if (!code || code.trim() === '') {
         document.getElementById('user-count-display').innerText = "Total Users Joined: 0";
-        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">Please set up your referral code in the Home dashboard first.</td></tr>`;
+        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Please set up your referral code in the Home dashboard first.</td></tr>`;
         return;
       }
 
@@ -138,7 +141,7 @@
 
       if (error || !data || data.length === 0) {
         countDisplay.innerText = "Total Users Joined: 0";
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No users have joined with your code yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No users have joined with your code yet.</td></tr>`;
         return;
       }
 
@@ -146,10 +149,11 @@
 
       tbody.innerHTML = data.map(user => `
         <tr>
+          <td><span class="uid-tag">${user.id ? user.id.substring(0, 8) + '...' : 'N/A'}</span></td>
           <td><strong>${user.username || 'N/A'}</strong></td>
           <td>${user.email || 'N/A'}</td>
           <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
-          <td><a href="user-info.html?id=${user.id}" class="view-btn">View Info</a></td>
+          <td><a href="edit-user.html?id=${user.id}" class="view-btn">Edit User</a></td>
         </tr>
       `).join('');
     }
@@ -162,4 +166,5 @@
     checkAdminAndLoad();
   </script>
 </body>
-</html>
+                                                                                                                                          </html>
+                                                                                            
