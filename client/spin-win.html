@@ -8,12 +8,13 @@
   <style>
     :root {
       --bg-main: #030712;
-      --card-bg: rgba(15, 23, 42, 0.85);
-      --card-border: rgba(212, 175, 55, 0.35);
+      --card-bg: rgba(15, 23, 42, 0.75);
+      --card-border: rgba(212, 175, 55, 0.25);
       --text-muted: #94a3b8;
       --gold-primary: #d4af37;
       --gold-light: #fef08a;
       --gold-gradient: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #9a7b20 100%);
+      --gold-glow: 0 0 30px rgba(212, 175, 55, 0.4);
       --success: #4ade80;
       --danger: #ef4444;
     }
@@ -23,8 +24,8 @@
     body { 
       background-color: var(--bg-main);
       background-image: 
-        radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.06) 0%, transparent 45%);
+        radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.04) 0%, transparent 40%);
       background-attachment: fixed; 
       color: white; 
       font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -40,56 +41,55 @@
     
     /* Navigation Bar */
     .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; gap: 8px; }
-    .nav-btn-group { display: flex; gap: 6px; }
-    
-    .back-btn, .home-btn { 
-      background: rgba(255,255,255,0.04); 
+    .nav-btn { 
+      background: rgba(255,255,255,0.03); 
       border: 1px solid var(--card-border); 
       backdrop-filter: blur(12px); 
       color: var(--gold-light); 
-      padding: 8px 12px; 
+      padding: 10px 14px; 
       border-radius: 12px; 
       cursor: pointer; 
-      font-size: 0.8rem; 
+      font-size: 0.85rem; 
       text-decoration: none; 
       font-weight: 600; 
       display: flex; 
       align-items: center; 
-      gap: 4px; 
-      transition: all 0.2s ease; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      gap: 6px; 
+      transition: 0.2s; 
+      line-height: 1;
     }
-    .back-btn:hover, .home-btn:hover { background: rgba(212, 175, 55, 0.15); transform: translateY(-1px); }
+    .nav-btn:hover { background: rgba(212, 175, 55, 0.12); }
+    .nav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
     
-    .view-title { font-size: 1.1rem; font-weight: 800; margin: 0; color: var(--gold-primary); letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    .view-title { font-size: 1.2rem; font-weight: 800; margin: 0; color: var(--gold-primary); letter-spacing: -0.5px; text-shadow: 0 0 20px rgba(212,175,55,0.2); }
     
     /* Live Balance Display */
     .balance-display {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%);
+      background: rgba(212, 175, 55, 0.15);
       border: 1px solid var(--card-border);
-      padding: 8px 12px;
+      padding: 8px 14px;
       border-radius: 12px;
-      font-weight: 800;
+      font-weight: 700;
       color: var(--gold-light);
-      font-size: 0.85rem;
-      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.15);
+      font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       white-space: nowrap;
     }
 
     /* Hero Banner */
     .plan-hero {
-      background: linear-gradient(135deg, rgba(35, 30, 10, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+      background: linear-gradient(135deg, rgba(30, 27, 12, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(16px);
       border-radius: 24px;
-      padding: 22px;
+      padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
     }
-    .plan-name { font-size: 1.6rem; font-weight: 800; margin: 0 0 4px 0; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3)); }
+    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 30px rgba(212,175,55,0.3); }
     .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
-    /* Wheel Container */
+    /* Wheel Card */
     .wheel-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -97,21 +97,30 @@
       border-radius: 24px;
       padding: 24px 20px;
       margin-bottom: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.08);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
       position: relative;
     }
 
     .spins-left-badge {
       font-size: 0.85rem;
       color: var(--gold-light);
-      background: rgba(212, 175, 55, 0.12);
+      background: rgba(212, 175, 55, 0.1);
       padding: 6px 16px;
       border-radius: 20px;
       display: inline-block;
       margin-bottom: 16px;
       font-weight: 700;
-      border: 1px solid rgba(212, 175, 55, 0.35);
-      box-shadow: inset 0 1px 3px rgba(255,255,255,0.15);
+      border: 1px solid rgba(212, 175, 55, 0.3);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
+    }
+    .timer-badge {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: rgba(0,0,0,0.2);
+      padding: 4px 12px;
+      border-radius: 12px;
+      margin-left: 6px;
+      font-weight: 500;
     }
 
     .wheel-container {
@@ -123,25 +132,25 @@
 
     .wheel-pointer {
       position: absolute;
-      top: -14px;
+      top: -12px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
       border-left: 14px solid transparent;
       border-right: 14px solid transparent;
-      border-top: 30px solid #fef08a;
+      border-top: 28px solid #fef08a;
       z-index: 10;
-      filter: drop-shadow(0 4px 10px rgba(212, 175, 55, 0.7));
+      filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.7));
     }
 
     canvas {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 35px rgba(212, 175, 55, 0.3), inset 0 0 20px rgba(0,0,0,0.5);
-      border: 5px solid rgba(212, 175, 55, 0.5);
-      transition: transform 4.5s cubic-bezier(0.15, 0.85, 0.15, 1);
+      box-shadow: 0 0 40px rgba(212, 175, 55, 0.3), inset 0 0 30px rgba(212, 175, 55, 0.1);
+      border: 4px solid rgba(212, 175, 55, 0.5);
+      transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
 
     /* Action Button */
@@ -150,7 +159,7 @@
       padding: 16px;
       border-radius: 16px;
       font-size: 1rem;
-      font-weight: 800;
+      font-weight: 700;
       border: none;
       cursor: pointer;
       display: flex;
@@ -159,103 +168,87 @@
       gap: 8px;
       background: var(--gold-gradient);
       color: #1a1500;
-      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4), inset 0 1px 0 rgba(255,255,255,0.6);
-      transition: all 0.2s ease;
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
+      transition: 0.2s;
       text-decoration: none;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.5px;
     }
-    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 35px rgba(212, 175, 55, 0.5); }
     .action-btn:active { transform: scale(0.98); }
-    .action-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
-    .action-btn.buy-mode { background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: white; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4), inset 0 1px 0 rgba(255,255,255,0.4); }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .action-btn.buy-mode { background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%); color: white; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4); }
 
-    /* Result Popup Message */
+    /* Result Popup */
     #result-msg {
       margin-top: 15px;
       font-size: 1.1rem;
       font-weight: 700;
-      min-height: 32px;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.6);
-    }
-
-    /* Timer Display */
-    .timer-display {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      margin-top: 10px;
-      font-weight: 600;
+      min-height: 28px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+      color: var(--gold-light);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <div class="nav-btn-group">
-        <a href="investment-plan.html" id="client-back-btn" class="back-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          Back
-        </a>
-        <a href="dashboard.html" id="client-home-btn" class="home-btn">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          Home
-        </a>
-      </div>
-      <h2 class="view-title">VIP Spin</h2>
+      <!-- Home / Withdraw button -->
+      <a href="dashboard.html" id="home-btn" class="nav-btn" title="Go to Home">
+        <svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
+        <span>Home</span>
+      </a>
+      <h2 class="view-title">VIP Lucky Spin</h2>
       <div class="balance-display" id="top-balance-display">$0.00</div>
     </nav>
 
-    <!-- Hero Banner -->
     <div class="plan-hero">
       <div class="plan-name">Elite Rewards Wheel</div>
-      <div class="plan-subtitle">Spin to claim your exclusive asset bonuses!</div>
+      <div class="plan-subtitle">Spin to claim exclusive bonuses up to $300!</div>
     </div>
 
-    <!-- Wheel Game Card -->
     <div class="wheel-card">
-      <div id="spinsCounter" class="spins-left-badge">Spins Remaining: 3</div>
+      <div id="spinsCounter" class="spins-left-badge">
+        Spins Remaining: 5 <span id="timerBadge" class="timer-badge"></span>
+      </div>
 
       <div class="wheel-container">
         <div class="wheel-pointer"></div>
         <canvas id="wheelCanvas" width="320" height="320"></canvas>
       </div>
 
-      <button id="spinBtn" class="action-btn" onclick="handleSpinAction()">
+      <button id="spinBtn" class="action-btn" onclick="startSpin()">
         <span>Spin the Wheel</span>
       </button>
 
-      <div id="timerDisplay" class="timer-display" style="display: none;"></div>
       <div id="result-msg"></div>
     </div>
   </div>
 
   <script>
+    // --- URL params and user ID ---
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || '';
 
-    // Bind Navigation links dynamically with ID preservation
-    document.getElementById('client-back-btn').setAttribute('href', targetUserId ? `investment-plan.html?id=${targetUserId}` : 'investment-plan.html');
-    document.getElementById('client-home-btn').setAttribute('href', targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html');
-
-    const configKey = `spin_config_${targetUserId}`;
-    const userStateKey = `spin_state_${targetUserId}_${new Date().toDateString()}`;
-    const timerKey = `spin_timer_${targetUserId}`;
-    const balanceKey = `user_balance_${targetUserId}`;
-
-    // Configuration: 3 daily spins, buy 12 spins for $150
-    let config = { dailySpins: 3, costForMore: 150, extraSpinsCount: 12 };
-
-    // Initialize or load user state
-    let state = JSON.parse(localStorage.getItem(userStateKey)) || { spinsLeft: config.dailySpins };
-
+    // --- DOM refs ---
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const spinBtn = document.getElementById('spinBtn');
     const resultMsg = document.getElementById('result-msg');
     const spinsCounter = document.getElementById('spinsCounter');
     const balanceDisplay = document.getElementById('top-balance-display');
-    const timerDisplay = document.getElementById('timerDisplay');
+    const timerBadge = document.getElementById('timerBadge');
 
-    // Luxurious sectors strictly capped under $300 (Max win is $300)
+    // --- Keys ---
+    const balanceKey = `user_balance_${targetUserId}`;
+    const stateKey = `spin_state_${targetUserId}`; // persistent state
+    const lastResetKey = `spin_last_reset_${targetUserId}`;
+
+    // --- Configuration ---
+    const DAILY_SPINS = 5;           // free spins given every 8 hours
+    const RESET_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 hours
+    const COST_FOR_MORE = 150;       // $150 for 12 spins
+    const EXTRA_SPINS = 12;          // buy 12 spins
+
+    // --- Sectors (all prizes <= 300) ---
     const sectors = [
       { color: '#1e293b', text: '$10', value: 10 },
       { color: '#0f172a', text: '$25', value: 25 },
@@ -266,8 +259,8 @@
       { color: '#581c87', text: '$150', value: 150 },
       { color: '#701a75', text: '$175', value: 175 },
       { color: '#831843', text: '$200', value: 200 },
-      { color: '#9f1239', text: '$250', value: 250 },
-      { color: '#713f12', text: '$275', value: 275 },
+      { color: '#9f1239', text: '$225', value: 225 },
+      { color: '#713f12', text: '$250', value: 250 },
       { color: '#365314', text: '$300', value: 300 }
     ];
 
@@ -276,68 +269,85 @@
     let currentAngle = 0;
     let isSpinning = false;
 
-    // Load or initialize balance (new users start at $0.00)
+    // --- Load / Initialize Balance (new users start at 0) ---
     function getBalance() {
       let bal = localStorage.getItem(balanceKey);
       if (bal === null) {
-        bal = 0.00;
-        localStorage.setItem(balanceKey, bal.toFixed(2));
+        bal = '0.00';
+        localStorage.setItem(balanceKey, bal);
       }
-      return parseFloat(bal);
+      return parseFloat(bal) || 0;
+    }
+
+    function setBalance(val) {
+      localStorage.setItem(balanceKey, val.toFixed(2));
     }
 
     function updateBalanceDisplay() {
-      const currentBalance = getBalance();
-      balanceDisplay.innerText = `$${currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      balanceDisplay.innerText = `$${getBalance().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     }
 
-    // 8-Hour Timer logic for refilling spins
-    function checkTimer() {
-      let timerEnd = localStorage.getItem(timerKey);
-      if (!timerEnd && state.spinsLeft <= 0) {
-        // Start 8-hour timer
-        timerEnd = new Date().getTime() + (8 * 60 * 60 * 1000);
-        localStorage.setItem(timerKey, timerEnd);
+    // --- Spin state with 8-hour reset ---
+    function getState() {
+      let state = JSON.parse(localStorage.getItem(stateKey));
+      if (!state) {
+        state = { spinsLeft: DAILY_SPINS };
+        localStorage.setItem(stateKey, JSON.stringify(state));
       }
-
-      if (timerEnd) {
-        const now = new Date().getTime();
-        const distance = timerEnd - now;
-
-        if (distance <= 0) {
-          // Refill spins after 8 hours
-          state.spinsLeft = config.dailySpins;
-          localStorage.setItem(userStateKey, JSON.stringify(state));
-          localStorage.removeItem(timerKey);
-          timerDisplay.style.display = 'none';
-          updateUI();
-        } else {
-          const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-          const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-          const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-          timerDisplay.style.display = 'block';
-          timerDisplay.innerText = `Free spins refresh in: ${hours}h ${minutes}m ${seconds}s`;
-        }
+      // Check reset timer
+      let lastReset = localStorage.getItem(lastResetKey);
+      if (!lastReset) {
+        lastReset = Date.now();
+        localStorage.setItem(lastResetKey, lastReset);
+      } else {
+        lastReset = parseInt(lastReset, 10);
       }
+      const now = Date.now();
+      if (now - lastReset >= RESET_INTERVAL_MS) {
+        // Reset spins and update lastReset
+        state.spinsLeft = DAILY_SPINS;
+        localStorage.setItem(stateKey, JSON.stringify(state));
+        localStorage.setItem(lastResetKey, String(now));
+      }
+      return state;
     }
 
-    setInterval(checkTimer, 1000);
+    function saveState(state) {
+      localStorage.setItem(stateKey, JSON.stringify(state));
+    }
 
+    // --- Update UI ---
     function updateUI() {
-      if (state.spinsLeft > 0) {
-        spinsCounter.innerText = `Spins Remaining: ${state.spinsLeft}`;
+      const state = getState();
+      const remaining = state.spinsLeft;
+      if (remaining > 0) {
+        spinsCounter.innerHTML = `Spins Remaining: ${remaining}`;
         spinBtn.innerHTML = `<span>Spin the Wheel</span>`;
         spinBtn.className = "action-btn";
-        timerDisplay.style.display = 'none';
+        spinBtn.disabled = false;
       } else {
-        spinsCounter.innerText = `Spins Remaining: 0`;
-        spinBtn.innerHTML = `<span>Buy ${config.extraSpinsCount} Spins for $${config.costForMore}</span>`;
+        spinsCounter.innerHTML = `Spins Remaining: 0`;
+        spinBtn.innerHTML = `<span>Buy ${EXTRA_SPINS} spins for $${COST_FOR_MORE}</span>`;
         spinBtn.className = "action-btn buy-mode";
-        checkTimer();
+        spinBtn.disabled = false;
       }
+      // Update timer badge
+      const lastReset = localStorage.getItem(lastResetKey);
+      if (lastReset) {
+        const elapsed = Date.now() - parseInt(lastReset, 10);
+        const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
+        if (remainingMs > 0) {
+          const hours = Math.floor(remainingMs / (3600 * 1000));
+          const minutes = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000));
+          timerBadge.textContent = `⏳ ${hours}h ${minutes}m`;
+        } else {
+          timerBadge.textContent = '⏳ Reset available';
+        }
+      }
+      updateBalanceDisplay();
     }
 
+    // --- Draw Wheel ---
     function drawSector(sector, i) {
       const angle = startAngle + i * arc;
       ctx.save();
@@ -347,7 +357,7 @@
       ctx.fillStyle = sector.color;
       ctx.fill();
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
       ctx.stroke();
 
       ctx.save();
@@ -355,7 +365,9 @@
       ctx.rotate(angle + arc / 2);
       ctx.textAlign = 'right';
       ctx.fillStyle = '#fef08a';
-      ctx.font = 'bold 13px "Plus Jakarta Sans", sans-serif';
+      ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = 4;
       ctx.fillText(sector.text, 138, 5);
       ctx.restore();
       ctx.restore();
@@ -368,28 +380,32 @@
       }
     }
 
-    function handleSpinAction() {
+    // --- Spin Action ---
+    function startSpin() {
       if (isSpinning) return;
 
-      // If spins run out, lead them directly to payment/deposit page for 12 spins ($150)
+      const state = getState();
+      const currentBalance = getBalance();
+
+      // If no spins left, process purchase (redirect to deposit)
       if (state.spinsLeft <= 0) {
-        const paymentUrl = targetUserId 
-          ? `deposit.html?id=${targetUserId}&amount=${config.costForMore}&type=spins` 
-          : `deposit.html?amount=${config.costForMore}&type=spins`;
-        window.location.href = paymentUrl;
+        // Redirect to deposit with amount and type
+        const depositUrl = targetUserId 
+          ? `deposit.html?id=${targetUserId}&amount=${COST_FOR_MORE}&type=spins` 
+          : `deposit.html?amount=${COST_FOR_MORE}&type=spins`;
+        window.location.href = depositUrl;
         return;
       }
+
+      // Deduct a spin
+      state.spinsLeft--;
+      saveState(state);
 
       isSpinning = true;
       spinBtn.disabled = true;
       resultMsg.innerText = '';
 
-      // Deduct spin count and save state
-      state.spinsLeft--;
-      localStorage.setItem(userStateKey, JSON.stringify(state));
-      updateUI();
-
-      // Spin rotation
+      // Random spin
       const randomSpin = Math.floor(Math.random() * 360) + 2160;
       currentAngle += randomSpin;
       canvas.style.transform = `rotate(${currentAngle}deg)`;
@@ -398,31 +414,40 @@
         isSpinning = false;
         spinBtn.disabled = false;
 
-        // Calculate winner
+        // Determine winning sector
         const actualDegree = currentAngle % 360;
         const sectorDegree = 360 / sectors.length;
         const winningIndex = Math.floor((360 - (actualDegree % 360)) / sectorDegree) % sectors.length;
         const winningSector = sectors[winningIndex];
-        
-        // Exact win display
-        resultMsg.style.color = "var(--success)";
-        resultMsg.innerText = `Congratulations! You won ${winningSector.text}!`;
 
-        // Add exact winning value to balance
-        let currentBalance = getBalance();
-        currentBalance += winningSector.value;
-        localStorage.setItem(balanceKey, currentBalance.toFixed(2));
+        // Display win message
+        resultMsg.style.color = "#4ade80";
+        resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`;
 
-        updateBalanceDisplay();
+        // Add to balance
+        const newBalance = currentBalance + winningSector.value;
+        setBalance(newBalance);
+
         updateUI();
-      }, 4500);
+      }, 4000);
     }
 
-    // Initialize View
-    updateBalanceDisplay();
-    drawWheel();
+    // --- Timer loop to refresh UI every minute ---
+    setInterval(updateUI, 60000);
+
+    // --- Init ---
+    // Ensure lastReset is set for new users
+    if (!localStorage.getItem(lastResetKey)) {
+      localStorage.setItem(lastResetKey, String(Date.now()));
+    }
     updateUI();
-    checkTimer();
+    drawWheel();
+
+    // Also set home button link with user ID if present
+    const homeBtn = document.getElementById('home-btn');
+    if (targetUserId) {
+      homeBtn.href = `dashboard.html?id=${targetUserId}`;
+    }
   </script>
 </body>
 </html>
