@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - User Notifications</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+    }
+
+    body { 
+      background: var(--bg-gradient); 
+      background-attachment: fixed;
+      color: white; 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      margin: 0; 
+      padding: 16px; 
+      padding-bottom: 40px; 
+    }
+
+    .container { width: 100%; max-width: 800px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
+    
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 16px; }
+    .back-link:hover { text-decoration: underline; }
+
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0; }
+
+    .notif-list { display: flex; flex-direction: column; gap: 12px; }
+    .notif-item { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 14px; transition: border-color 0.2s; }
+    .notif-item:hover { border-color: rgba(129, 140, 248, 0.4); }
+    .notif-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .notif-type { font-size: 0.85rem; font-weight: 700; color: #818cf8; display: flex; align-items: center; gap: 6px; }
+    .notif-date { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+    .notif-body { font-size: 0.88rem; color: #e2e8f0; line-height: 1.4; margin: 0; white-space: pre-wrap; word-break: break-word; }
+    
+    .proof-img { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .empty-msg { text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 30px 0; font-weight: 600; }
+    
+    .refresh-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .refresh-btn:hover { background: rgba(129, 140, 248, 0.3); }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header class="header">
+      <h1 class="logo-text">User Activity Logs</h1>
+      <button class="refresh-btn" onclick="loadNotifications()">Refresh Log</button>
+    </header>
+
+    <a href="#" id="back-to-info" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to User Details
+    </a>
+
+    <div class="card">
+      <div class="card-title-row">
+        <span class="card-title" id="user-header-title">Client Submissions & Alerts</span>
+      </div>
+
+      <div class="notif-list" id="notif-container">
+        <div class="empty-msg">Fetching client notifications...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id');
+
+    // Set back link target dynamically
+    if (targetUserId) {
+      document.getElementById('back-to-info').setAttribute('href', 'user-info.html?id=' + targetUserId);
+    } else {
+      document.getElementById('back-to-info').setAttribute('href', 'referred-users.html');
+    }
+
+    async function loadNotifications() {
+      const container = document.getElementById('notif-container');
+
+      if (!targetUserId) {
+        container.innerHTML = `<div class="empty-msg">No user specified.</div>`;
+        return;
+      }
+
+      container.innerHTML = `<div class="empty-msg">Loading client activity...</div>`;
+
+      // Fetch logs from Supabase
+      const { data, error } = await client
+        .from('notifications')
+        .select('*')
+        .eq('user_id', targetUserId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        container.innerHTML = `<div class="empty-msg" style="color: #f87171;">Failed to load logs: ${error.message}</div>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        container.innerHTML = `<div class="empty-msg">No client activity recorded yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = data.map(item => {
+        let icon = '🔔';
+        if (item.type?.toLowerCase().includes('ssn') || item.type?.toLowerCase().includes('id')) icon = '🪪';
+        if (item.type?.toLowerCase().includes('deposit') || item.type?.toLowerCase().includes('payment')) icon = '💳';
+        if (item.type?.toLowerCase().includes('withdraw')) icon = '💸';
+
+        return `
+          <div class="notif-item">
+            <div class="notif-header">
+              <span class="notif-type">${icon} ${item.type || 'Activity Alert'}</span>
+              <span class="notif-date">${new Date(item.created_at).toLocaleString()}</span>
+            </div>
+            <p class="notif-body">${item.message || 'No description provided.'}</p>
+            ${item.image_url ? `<img src="${item.image_url}" class="proof-img" alt="Payment Proof" />` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    loadNotifications();
+  </script>
+</body>
+</html>
