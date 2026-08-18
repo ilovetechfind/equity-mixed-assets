@@ -86,8 +86,8 @@
     // persisted (never-regenerated-if-present) localStorage UUID.
     async function resolveUserId() {
       try {
-        if (typeof client !== 'undefined') {
-          const { data } = await client.auth.getUser();
+        if (typeof supabase !== 'undefined') {
+          const { data } = await supabase.auth.getUser();
           if (data && data.user && data.user.id) {
             return data.user.id;
           }
@@ -202,7 +202,7 @@
     async function uploadImage(file) {
       const ext = file.name.split('.').pop();
       const path = `${currentUserId}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await client.storage
+      const { error: uploadError } = await supabase.storage
         .from('chat-images')
         .upload(path, file);
 
@@ -210,7 +210,7 @@
         throw uploadError;
       }
 
-      const { data } = client.storage.from('chat-images').getPublicUrl(path);
+      const { data } = supabase.storage.from('chat-images').getPublicUrl(path);
       return data.publicUrl;
     }
 
@@ -241,7 +241,7 @@
         clearPendingImage();
         appendMessage(row);
 
-        const { error } = await client.from('messages').insert([row]);
+        const { error } = await supabase.from('messages').insert([row]);
 
         if (error) {
           alert("Failed to send: " + error.message);
