@@ -6,11 +6,45 @@
   <title>Equity Mixed Assets - User Notifications</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* Your existing styles (unchanged) */
-    :root { /* ... */ }
-    body { /* ... */ }
-    .container { /* ... */ }
-    /* ... keep all your existing CSS ... */
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+    }
+    body {
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 16px;
+      padding-bottom: 40px;
+    }
+    .container { width: 100%; max-width: 800px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 16px; }
+    .back-link:hover { text-decoration: underline; }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
+    .card-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .card-title { font-size: 0.85rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0; }
+    .notif-list { display: flex; flex-direction: column; gap: 12px; }
+    .notif-item { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 14px; transition: border-color 0.2s; }
+    .notif-item:hover { border-color: rgba(129, 140, 248, 0.4); }
+    .notif-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .notif-type { font-size: 0.85rem; font-weight: 700; color: #818cf8; display: flex; align-items: center; gap: 6px; }
+    .notif-date { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
+    .notif-body { font-size: 0.88rem; color: #e2e8f0; line-height: 1.6; margin: 0; white-space: pre-wrap; word-break: break-word; }
+    .proof-img { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.1); max-height: 300px; object-fit: contain; }
+    .empty-msg { text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 30px 0; font-weight: 600; }
+    .refresh-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
+    .refresh-btn:hover { background: rgba(129, 140, 248, 0.3); }
+    .live-dot { display: inline-block; width: 10px; height: 10px; background: #ef4444; border-radius: 50%; animation: pulse 1.5s infinite; margin-right: 6px; }
+    @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+    .notification-enter { animation: slideIn 0.3s ease-out; }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
@@ -28,8 +62,8 @@
     <div class="card">
       <div class="card-title-row">
         <span class="card-title" id="user-header-title">Client Submissions & Alerts</span>
+        <span><span class="live-dot"></span>LIVE</span>
       </div>
-
       <div class="notif-list" id="notif-container">
         <div class="empty-msg">Fetching client notifications...</div>
       </div>
@@ -39,87 +73,95 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    // Ensure client is defined
+    // ===== CLIENT =====
     let client = window.client || supabase;
+    if (!client) {
+      const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      window.client = client;
+    }
 
+    // ===== GET USER ID FROM URL =====
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id');
 
+    // Back link
     if (targetUserId) {
       document.getElementById('back-to-info').setAttribute('href', 'user-info.html?id=' + targetUserId);
     } else {
       document.getElementById('back-to-info').setAttribute('href', 'referred-users.html');
     }
 
+    // ===== RENDER NOTIFICATION =====
     function createNotifHTML(item) {
       let icon = '🔔';
-      if (item.type?.toLowerCase().includes('ssn') || item.type?.toLowerCase().includes('id') || item.type?.toLowerCase().includes('verification')) icon = '🪪';
-      if (item.type?.toLowerCase().includes('deposit') || item.type?.toLowerCase().includes('payment')) icon = '💳';
-      if (item.type?.toLowerCase().includes('withdraw')) icon = '💸';
+      const type = (item.type || '').toLowerCase();
+      if (type.includes('verification')) icon = '🪪';
+      else if (type.includes('deposit') || type.includes('payment')) icon = '💳';
+      else if (type.includes('withdraw')) icon = '💸';
+      else if (type.includes('id')) icon = '📄';
 
       return `
-        <div class="notif-item">
+        <div class="notif-item notification-enter">
           <div class="notif-header">
             <span class="notif-type">${icon} ${item.type || 'Activity Alert'}</span>
             <span class="notif-date">${new Date(item.created_at).toLocaleString()}</span>
           </div>
           <p class="notif-body">${item.message || 'No description provided.'}</p>
-          ${item.image_url ? `<img src="${item.image_url}" class="proof-img" alt="Uploaded Document / Proof" />` : ''}
+          ${item.image_url ? `<img src="${item.image_url}" class="proof-img" alt="Uploaded Document" />` : ''}
         </div>
       `;
     }
 
+    // ===== LOAD NOTIFICATIONS =====
     async function loadNotifications() {
       const container = document.getElementById('notif-container');
-
       if (!targetUserId) {
         container.innerHTML = `<div class="empty-msg">No user specified.</div>`;
         return;
       }
 
-      const { data, error } = await client
-        .from('notifications')
-        .select('*')
-        .eq('user_id', targetUserId)
-        .order('created_at', { ascending: false });
+      try {
+        const { data, error } = await client
+          .from('notifications')
+          .select('*')
+          .eq('user_id', targetUserId)
+          .order('created_at', { ascending: false });
 
-      if (error) {
-        container.innerHTML = `<div class="empty-msg" style="color: #f87171;">Failed to load logs: ${error.message}</div>`;
-        return;
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+          container.innerHTML = `<div class="empty-msg">No client activity recorded yet.</div>`;
+          return;
+        }
+
+        container.innerHTML = data.map(item => createNotifHTML(item)).join('');
+      } catch (err) {
+        console.error('Load error:', err);
+        container.innerHTML = `<div class="empty-msg" style="color: #f87171;">❌ ${err.message}</div>`;
       }
-
-      if (!data || data.length === 0) {
-        container.innerHTML = `<div class="empty-msg">No client activity recorded yet.</div>`;
-        return;
-      }
-
-      container.innerHTML = data.map(item => createNotifHTML(item)).join('');
     }
 
+    // ===== REALTIME SUBSCRIPTION =====
     function subscribeRealtime() {
       if (!targetUserId) return;
-
       client
         .channel('notifs-' + targetUserId)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'notifications',
-            filter: `user_id=eq.${targetUserId}`
-          },
-          (payload) => {
-            const container = document.getElementById('notif-container');
-            if (container.querySelector('.empty-msg')) {
-              container.innerHTML = '';
-            }
-            container.insertAdjacentHTML('afterbegin', createNotifHTML(payload.new));
-          }
-        )
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${targetUserId}`
+        }, (payload) => {
+          const container = document.getElementById('notif-container');
+          if (container.querySelector('.empty-msg')) container.innerHTML = '';
+          container.insertAdjacentHTML('afterbegin', createNotifHTML(payload.new));
+        })
         .subscribe();
     }
 
+    // ===== INIT =====
     loadNotifications();
     subscribeRealtime();
   </script>
