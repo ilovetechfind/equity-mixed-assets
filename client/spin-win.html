@@ -15,6 +15,7 @@
       --gold-light: #fef08a;
       --gold-gradient: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #9a7b20 100%);
       --success: #4ade80;
+      --danger: #ef4444;
     }
 
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -42,6 +43,18 @@
     .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); backdrop-filter: blur(12px); color: var(--gold-light); padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
     .back-btn:hover { background: rgba(212, 175, 55, 0.1); }
     .view-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--gold-primary); letter-spacing: -0.5px; }
+    
+    /* Live Balance Display */
+    .balance-display {
+      background: rgba(212, 175, 55, 0.15);
+      border: 1px solid var(--card-border);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-weight: 700;
+      color: var(--gold-light);
+      font-size: 0.9rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    }
 
     /* Hero Banner */
     .plan-hero {
@@ -139,7 +152,6 @@
       margin-top: 15px;
       font-size: 1.1rem;
       font-weight: 700;
-      color: var(--success);
       min-height: 28px;
       text-shadow: 0 2px 4px rgba(0,0,0,0.5);
     }
@@ -153,7 +165,7 @@
         Back
       </a>
       <h2 class="view-title">VIP Lucky Spin</h2>
-      <div style="width: 70px;"></div>
+      <div class="balance-display" id="top-balance-display">$0.00</div>
     </nav>
 
     <!-- Hero Banner -->
@@ -208,6 +220,7 @@
     const spinBtn = document.getElementById('spinBtn');
     const resultMsg = document.getElementById('result-msg');
     const spinsCounter = document.getElementById('spinsCounter');
+    const balanceDisplay = document.getElementById('top-balance-display');
 
     // Luxurious rich color palette with 12 expansive options (all strictly under $1,000)
     const sectors = [
@@ -229,6 +242,12 @@
     let startAngle = 0;
     let currentAngle = 0;
     let isSpinning = false;
+
+    // Load and format the user's current balance
+    function updateBalanceDisplay() {
+      let currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
+      balanceDisplay.innerText = `$${currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    }
 
     function updateUI() {
       if (state.spinsLeft > 0) {
@@ -275,13 +294,35 @@
     function startSpin() {
       if (isSpinning) return;
 
-      // If spins run out, direct user to deposit/payment page
+      let currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
+
+      // If spins run out, process payment from balance directly
       if (state.spinsLeft <= 0) {
-        const paymentUrl = targetUserId 
-          ? `deposit.html?id=${targetUserId}&amount=${config.costForMore}&type=spins` 
-          : `deposit.html?amount=${config.costForMore}&type=spins`;
-        window.location.href = paymentUrl;
-        return;
+        if (currentBalance >= config.costForMore) {
+          // Deduct cost and save new balance
+          currentBalance -= config.costForMore;
+          localStorage.setItem(balanceKey, currentBalance.toFixed(2));
+          updateBalanceDisplay();
+
+          // Add extra spins and save state
+          state.spinsLeft += config.extraSpinsCount;
+          localStorage.setItem(userStateKey, JSON.stringify(state));
+          
+          resultMsg.style.color = "var(--gold-light)";
+          resultMsg.innerText = `Successfully purchased ${config.extraSpinsCount} more spins for $${config.costForMore}!`;
+          updateUI();
+        } else {
+          // Insufficient funds handling
+          resultMsg.style.color = "var(--danger)";
+          resultMsg.innerText = "Insufficient balance. Redirecting to deposit...";
+          setTimeout(() => {
+            const paymentUrl = targetUserId 
+              ? `deposit.html?id=${targetUserId}&amount=${config.costForMore}&type=spins` 
+              : `deposit.html?amount=${config.costForMore}&type=spins`;
+            window.location.href = paymentUrl;
+          }, 2000);
+        }
+        return; // Prevent spin from firing immediately during a purchase click
       }
 
       isSpinning = true;
@@ -310,18 +351,22 @@
         
         const winningSector = sectors[winningIndex];
         
-        // Displays exact winning text string on screen as requested
+        // Displays exact winning text string on screen
+        resultMsg.style.color = "var(--success)";
         resultMsg.innerText = `Congratulations! You won ${winningSector.text}!`;
 
         // Add exact winning prize value directly to client balance storage
-        let currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
+        currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
         currentBalance += winningSector.value;
         localStorage.setItem(balanceKey, currentBalance.toFixed(2));
 
+        updateBalanceDisplay();
         updateUI();
       }, 4000);
     }
 
+    // Initialize View
+    updateBalanceDisplay();
     drawWheel();
     updateUI();
   </script>
