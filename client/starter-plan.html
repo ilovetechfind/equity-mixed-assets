@@ -262,9 +262,12 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || '';
+    const PLAN_ID = 'starter';
 
     // Pass user ID along across internal links if present
     const backBtn = document.getElementById('client-back-btn');
@@ -276,46 +279,52 @@
     const withdrawBtn = document.getElementById('client-btn-withdraw');
     withdrawBtn.setAttribute('href', targetUserId ? `withdraw-to-balance.html?id=${targetUserId}` : 'withdraw-to-balance.html');
 
-    const storageKey = `config_starter_full_${targetUserId}`;
+    document.addEventListener("DOMContentLoaded", loadPlanData);
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const saved = localStorage.getItem(storageKey);
-      if (saved) {
-        try {
-          const data = JSON.parse(saved);
-          
-          if(data.dayText) document.getElementById('client-day').innerText = data.dayText;
-          if(data.currentValue) document.getElementById('client-current').innerText = data.currentValue;
-          if(data.paidVolumeText) document.getElementById('client-paid-volume-header').innerText = data.paidVolumeText;
-          if(data.timeRemaining) document.getElementById('client-time-remaining').innerHTML = `⏳ ${data.timeRemaining}`;
-          if(data.totalGoal) document.getElementById('client-total-goal').innerText = data.totalGoal;
-          if(data.remainingBalance) document.getElementById('client-remaining').innerText = data.remainingBalance;
-          if(data.guaranteedPayout) document.getElementById('client-payout').innerText = data.guaranteedPayout;
-          
-          if(data.installmentButtonText) {
-            const btnSpan = document.getElementById('client-btn-text');
-            btnSpan.innerText = data.installmentButtonText;
-          }
+    async function loadPlanData() {
+      const lookupId = targetUserId || 'default_user';
 
-          if(data.progressPercent) {
-            document.getElementById('client-progress-fill').style.width = data.progressPercent + '%';
-          }
+      const { data, error } = await client
+        .from('plan_configs')
+        .select('*')
+        .eq('user_id', lookupId)
+        .eq('plan_id', PLAN_ID)
+        .maybeSingle();
 
-          if(data.graphHeight) {
-            const numericVal = parseInt(data.graphHeight);
-            const yCoord = 100 - numericVal;
-            const pathLine = `M0,${yCoord} Q 200,${yCoord * 0.5} 400,${yCoord * 0.8}`;
-            const pathArea = `${pathLine} L400,100 L0,100 Z`;
-            
-            document.getElementById('clientSvgLine').setAttribute('d', pathLine);
-            document.getElementById('clientSvgArea').setAttribute('d', pathArea);
-          }
-
-        } catch (e) {
-          console.error("Error loading saved plan config data", e);
-        }
+      if (error) {
+        console.error("Error loading plan config data", error.message);
+        return;
       }
-    });
+
+      if (!data) return;
+
+      if (data.day_text) document.getElementById('client-day').innerText = data.day_text;
+      if (data.current_value) document.getElementById('client-current').innerText = data.current_value;
+      if (data.paid_volume_text) document.getElementById('client-paid-volume-header').innerText = data.paid_volume_text;
+      if (data.time_remaining) document.getElementById('client-time-remaining').innerHTML = `⏳ ${data.time_remaining}`;
+      if (data.total_goal) document.getElementById('client-total-goal').innerText = data.total_goal;
+      if (data.remaining_balance) document.getElementById('client-remaining').innerText = data.remaining_balance;
+      if (data.guaranteed_payout) document.getElementById('client-payout').innerText = data.guaranteed_payout;
+
+      if (data.installment_button_text) {
+        document.getElementById('client-btn-text').innerText = data.installment_button_text;
+      }
+
+      if (data.progress_percent != null) {
+        document.getElementById('client-progress-fill').style.width = data.progress_percent + '%';
+      }
+
+      if (data.graph_height != null) {
+        const numericVal = parseInt(data.graph_height);
+        const yCoord = 100 - numericVal;
+        const pathLine = `M0,${yCoord} Q 200,${yCoord * 0.5} 400,${yCoord * 0.8}`;
+        const pathArea = `${pathLine} L400,100 L0,100 Z`;
+
+        document.getElementById('clientSvgLine').setAttribute('d', pathLine);
+        document.getElementById('clientSvgArea').setAttribute('d', pathArea);
+      }
+    }
   </script>
 </body>
-</html>
+  </html>
+            
