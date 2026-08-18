@@ -130,6 +130,10 @@
           <span>Customer Care Chat Control</span>
           <span>🎧</span>
         </a>
+        <a href="user-notifications.html" id="btn-notifications" class="admin-nav-btn">
+          <span>All Client Notifications</span>
+          <span>🔔</span>
+        </a>
       </div>
     </div>
   </div>
@@ -146,7 +150,7 @@
 
     // Append user ID to control file links if available so the files know which user is being managed
     if (targetUserId) {
-      ['btn-payment', 'btn-plan', 'btn-chat', 'bubble-link'].forEach(id => {
+      ['btn-payment', 'btn-plan', 'btn-chat', 'bubble-link', 'btn-notifications'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.setAttribute('href', el.getAttribute('href') + '?id=' + targetUserId);
