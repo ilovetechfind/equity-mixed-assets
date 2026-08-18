@@ -8,13 +8,13 @@
   <style>
     :root {
       --bg-main: #030712;
-      --card-bg: rgba(15, 23, 42, 0.75);
-      --card-border: rgba(212, 175, 55, 0.25);
+      --card-bg: rgba(15, 23, 42, 0.85);
+      --card-border: rgba(212, 175, 55, 0.3);
       --text-muted: #94a3b8;
       --gold-primary: #d4af37;
       --gold-light: #fef08a;
       --gold-gradient: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #9a7b20 100%);
-      --gold-glow: 0 0 30px rgba(212, 175, 55, 0.4);
+      --gold-glow: 0 0 40px rgba(212, 175, 55, 0.4);
       --success: #4ade80;
       --danger: #ef4444;
     }
@@ -42,7 +42,7 @@
     /* Navigation Bar */
     .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; gap: 8px; }
     .nav-btn { 
-      background: rgba(255,255,255,0.03); 
+      background: rgba(255,255,255,0.05); 
       border: 1px solid var(--card-border); 
       backdrop-filter: blur(12px); 
       color: var(--gold-light); 
@@ -55,13 +55,23 @@
       display: flex; 
       align-items: center; 
       gap: 6px; 
-      transition: 0.2s; 
+      transition: 0.3s; 
       line-height: 1;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
     }
-    .nav-btn:hover { background: rgba(212, 175, 55, 0.12); }
+    .nav-btn:hover { background: rgba(212, 175, 55, 0.15); transform: scale(1.02); }
     .nav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
     
-    .view-title { font-size: 1.2rem; font-weight: 800; margin: 0; color: var(--gold-primary); letter-spacing: -0.5px; text-shadow: 0 0 20px rgba(212,175,55,0.2); }
+    .view-title { 
+      font-size: 1.2rem; 
+      font-weight: 800; 
+      margin: 0; 
+      background: var(--gold-gradient); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      letter-spacing: -0.5px; 
+      text-shadow: 0 0 30px rgba(212,175,55,0.3);
+    }
     
     /* Live Balance Display */
     .balance-display {
@@ -72,22 +82,31 @@
       font-weight: 700;
       color: var(--gold-light);
       font-size: 0.9rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3), inset 0 0 20px rgba(212,175,55,0.05);
       white-space: nowrap;
     }
 
     /* Hero Banner */
     .plan-hero {
-      background: linear-gradient(135deg, rgba(30, 27, 12, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+      background: linear-gradient(135deg, rgba(30, 27, 12, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(16px);
       border-radius: 24px;
       padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1), var(--gold-glow);
     }
-    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 30px rgba(212,175,55,0.3); }
-    .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    .plan-name { 
+      font-size: 1.8rem; 
+      font-weight: 800; 
+      margin: 0 0 4px 0; 
+      background: var(--gold-gradient); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      text-shadow: 0 0 40px rgba(212,175,55,0.4);
+      letter-spacing: 1px;
+    }
+    .plan-subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
 
     /* Wheel Card */
     .wheel-card {
@@ -97,15 +116,15 @@
       border-radius: 24px;
       padding: 24px 20px;
       margin-bottom: 20px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.5);
       position: relative;
     }
 
     .spins-left-badge {
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       color: var(--gold-light);
-      background: rgba(212, 175, 55, 0.1);
-      padding: 6px 16px;
+      background: rgba(212, 175, 55, 0.12);
+      padding: 8px 20px;
       border-radius: 20px;
       display: inline-block;
       margin-bottom: 16px;
@@ -116,11 +135,12 @@
     .timer-badge {
       font-size: 0.75rem;
       color: var(--text-muted);
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.3);
       padding: 4px 12px;
       border-radius: 12px;
-      margin-left: 6px;
+      margin-left: 8px;
       font-weight: 500;
+      border: 1px solid rgba(255,255,255,0.05);
     }
 
     .wheel-container {
@@ -141,14 +161,14 @@
       border-right: 14px solid transparent;
       border-top: 28px solid #fef08a;
       z-index: 10;
-      filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.7));
+      filter: drop-shadow(0 4px 12px rgba(212, 175, 55, 0.8));
     }
 
     canvas {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 40px rgba(212, 175, 55, 0.3), inset 0 0 30px rgba(212, 175, 55, 0.1);
+      box-shadow: 0 0 50px rgba(212, 175, 55, 0.3), inset 0 0 40px rgba(212, 175, 55, 0.1);
       border: 4px solid rgba(212, 175, 55, 0.5);
       transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
@@ -156,35 +176,61 @@
     /* Action Button */
     .action-btn {
       width: 100%;
-      padding: 16px;
+      padding: 18px;
       border-radius: 16px;
-      font-size: 1rem;
+      font-size: 1.05rem;
       font-weight: 700;
       border: none;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       background: var(--gold-gradient);
       color: #1a1500;
-      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.4);
-      transition: 0.2s;
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+      transition: 0.3s;
       text-decoration: none;
       letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
     }
-    .action-btn:active { transform: scale(0.98); }
-    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .action-btn.buy-mode { background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%); color: white; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.4); }
+    .action-btn::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 60%);
+      opacity: 0;
+      transition: 0.5s;
+    }
+    .action-btn:active { transform: scale(0.97); }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .action-btn.buy-mode { 
+      background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%); 
+      color: white; 
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4); 
+    }
 
     /* Result Popup */
     #result-msg {
       margin-top: 15px;
-      font-size: 1.1rem;
+      font-size: 1.2rem;
       font-weight: 700;
-      min-height: 28px;
+      min-height: 30px;
       text-shadow: 0 2px 8px rgba(0,0,0,0.6);
       color: var(--gold-light);
+      padding: 8px;
+      border-radius: 12px;
+    }
+    .win-animation {
+      animation: winPulse 0.8s ease-in-out 3;
+    }
+    @keyframes winPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); color: #4ade80; }
     }
   </style>
 </head>
@@ -239,16 +285,16 @@
 
     // --- Keys ---
     const balanceKey = `user_balance_${targetUserId}`;
-    const stateKey = `spin_state_${targetUserId}`; // persistent state
+    const stateKey = `spin_state_${targetUserId}`;
     const lastResetKey = `spin_last_reset_${targetUserId}`;
 
     // --- Configuration ---
-    const DAILY_SPINS = 5;           // free spins given every 8 hours
+    const FREE_SPINS = 5;
     const RESET_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 hours
-    const COST_FOR_MORE = 150;       // $150 for 12 spins
-    const EXTRA_SPINS = 12;          // buy 12 spins
+    const COST_FOR_MORE = 150;
+    const EXTRA_SPINS = 12;
 
-    // --- Sectors (all prizes <= 300) ---
+    // --- Sectors (all prizes <= $300) ---
     const sectors = [
       { color: '#1e293b', text: '$10', value: 10 },
       { color: '#0f172a', text: '$25', value: 25 },
@@ -269,7 +315,7 @@
     let currentAngle = 0;
     let isSpinning = false;
 
-    // --- Load / Initialize Balance (new users start at 0) ---
+    // --- Balance (new users start at 0) ---
     function getBalance() {
       let bal = localStorage.getItem(balanceKey);
       if (bal === null) {
@@ -284,28 +330,29 @@
     }
 
     function updateBalanceDisplay() {
-      balanceDisplay.innerText = `$${getBalance().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+      const bal = getBalance();
+      balanceDisplay.innerText = `$${bal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     }
 
     // --- Spin state with 8-hour reset ---
     function getState() {
       let state = JSON.parse(localStorage.getItem(stateKey));
       if (!state) {
-        state = { spinsLeft: DAILY_SPINS };
+        state = { spinsLeft: FREE_SPINS };
         localStorage.setItem(stateKey, JSON.stringify(state));
       }
-      // Check reset timer
+      
       let lastReset = localStorage.getItem(lastResetKey);
       if (!lastReset) {
         lastReset = Date.now();
-        localStorage.setItem(lastResetKey, lastReset);
+        localStorage.setItem(lastResetKey, String(lastReset));
       } else {
         lastReset = parseInt(lastReset, 10);
       }
+      
       const now = Date.now();
       if (now - lastReset >= RESET_INTERVAL_MS) {
-        // Reset spins and update lastReset
-        state.spinsLeft = DAILY_SPINS;
+        state.spinsLeft = FREE_SPINS;
         localStorage.setItem(stateKey, JSON.stringify(state));
         localStorage.setItem(lastResetKey, String(now));
       }
@@ -320,17 +367,19 @@
     function updateUI() {
       const state = getState();
       const remaining = state.spinsLeft;
+      
       if (remaining > 0) {
         spinsCounter.innerHTML = `Spins Remaining: ${remaining}`;
-        spinBtn.innerHTML = `<span>Spin the Wheel</span>`;
+        spinBtn.innerHTML = `<span>🔄 Spin the Wheel</span>`;
         spinBtn.className = "action-btn";
         spinBtn.disabled = false;
       } else {
         spinsCounter.innerHTML = `Spins Remaining: 0`;
-        spinBtn.innerHTML = `<span>Buy ${EXTRA_SPINS} spins for $${COST_FOR_MORE}</span>`;
+        spinBtn.innerHTML = `<span>💰 Buy ${EXTRA_SPINS} spins for $${COST_FOR_MORE}</span>`;
         spinBtn.className = "action-btn buy-mode";
         spinBtn.disabled = false;
       }
+      
       // Update timer badge
       const lastReset = localStorage.getItem(lastResetKey);
       if (lastReset) {
@@ -341,7 +390,7 @@
           const minutes = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000));
           timerBadge.textContent = `⏳ ${hours}h ${minutes}m`;
         } else {
-          timerBadge.textContent = '⏳ Reset available';
+          timerBadge.textContent = '⏳ Reset now!';
         }
       }
       updateBalanceDisplay();
@@ -357,7 +406,7 @@
       ctx.fillStyle = sector.color;
       ctx.fill();
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.25)';
       ctx.stroke();
 
       ctx.save();
@@ -366,8 +415,8 @@
       ctx.textAlign = 'right';
       ctx.fillStyle = '#fef08a';
       ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
-      ctx.shadowColor = 'rgba(0,0,0,0.5)';
-      ctx.shadowBlur = 4;
+      ctx.shadowColor = 'rgba(0,0,0,0.7)';
+      ctx.shadowBlur = 6;
       ctx.fillText(sector.text, 138, 5);
       ctx.restore();
       ctx.restore();
@@ -385,11 +434,9 @@
       if (isSpinning) return;
 
       const state = getState();
-      const currentBalance = getBalance();
 
-      // If no spins left, process purchase (redirect to deposit)
+      // If no spins left, redirect to deposit
       if (state.spinsLeft <= 0) {
-        // Redirect to deposit with amount and type
         const depositUrl = targetUserId 
           ? `deposit.html?id=${targetUserId}&amount=${COST_FOR_MORE}&type=spins` 
           : `deposit.html?amount=${COST_FOR_MORE}&type=spins`;
@@ -404,6 +451,7 @@
       isSpinning = true;
       spinBtn.disabled = true;
       resultMsg.innerText = '';
+      resultMsg.className = '';
 
       // Random spin
       const randomSpin = Math.floor(Math.random() * 360) + 2160;
@@ -420,15 +468,18 @@
         const winningIndex = Math.floor((360 - (actualDegree % 360)) / sectorDegree) % sectors.length;
         const winningSector = sectors[winningIndex];
 
-        // Display win message
+        // Display win message with animation
+        resultMsg.className = 'win-animation';
         resultMsg.style.color = "#4ade80";
         resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`;
 
-        // Add to balance
+        // Add exact amount to balance
+        const currentBalance = getBalance();
         const newBalance = currentBalance + winningSector.value;
         setBalance(newBalance);
 
         updateUI();
+        updateBalanceDisplay();
       }, 4000);
     }
 
@@ -436,14 +487,13 @@
     setInterval(updateUI, 60000);
 
     // --- Init ---
-    // Ensure lastReset is set for new users
     if (!localStorage.getItem(lastResetKey)) {
       localStorage.setItem(lastResetKey, String(Date.now()));
     }
     updateUI();
     drawWheel();
 
-    // Also set home button link with user ID if present
+    // Set home button link with user ID if present
     const homeBtn = document.getElementById('home-btn');
     if (targetUserId) {
       homeBtn.href = `dashboard.html?id=${targetUserId}`;
