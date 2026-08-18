@@ -186,7 +186,13 @@
       transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
 
-    /* Action Button */
+    /* Action Buttons Area */
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .action-btn {
       width: 100%;
       padding: 16px;
@@ -224,6 +230,17 @@
       box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
     }
 
+    /* Withdraw to Balance Button Styling */
+    .withdraw-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+      color: white;
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    }
+    .withdraw-btn:hover {
+      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+    }
+
     /* Result Popup */
     #result-msg {
       margin-top: 15px;
@@ -238,7 +255,7 @@
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <!-- Withdraw / Home button on the left -->
+      <!-- Home button on the left -->
       <a href="dashboard.html" id="home-btn" class="nav-btn" title="Go to Home">
         <svg viewBox="0 0 24 24" fill="none"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Home</span>
@@ -263,9 +280,16 @@
         <canvas id="wheelCanvas" width="320" height="320"></canvas>
       </div>
 
-      <button id="spinBtn" class="action-btn" onclick="startSpin()">
-        <span>Spin the Wheel</span>
-      </button>
+      <div class="button-group">
+        <button id="spinBtn" class="action-btn" onclick="startSpin()">
+          <span>Spin the Wheel</span>
+        </button>
+
+        <!-- Withdraw Winnings Button -->
+        <a href="#" id="withdrawBtn" class="action-btn withdraw-btn" onclick="withdrawWinnings(event)">
+          <span>Withdraw Winnings to Balance</span>
+        </a>
+      </div>
 
       <div id="result-msg"></div>
     </div>
@@ -286,14 +310,16 @@
     const timerBadge = document.getElementById('timerBadge');
 
     // --- Keys ---
+    // Updated keys to ensure brand new users start at 0 balance strictly
     const balanceKey = `user_balance_${targetUserId}`;
+    const spinEarningsKey = `spin_earnings_${targetUserId}`;
     const stateKey = `spin_state_${targetUserId}`; 
     const lastResetKey = `spin_last_reset_${targetUserId}`;
 
     // --- Configuration ---
     const DAILY_SPINS = 5;           
     const RESET_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 hours
-    const COST_FOR_MORE = 150;       // $150 for 5 extra spins after 8h timer / payment
+    const COST_FOR_MORE = 150;       // $150 for 5 extra spins
     const EXTRA_SPINS = 5;          
 
     // --- Sectors (strictly all prizes <= $300) ---
@@ -317,22 +343,24 @@
     let currentAngle = 0;
     let isSpinning = false;
 
-    // --- Load / Initialize Balance (new users start strictly at 0) ---
-    function getBalance() {
-      let bal = localStorage.getItem(balanceKey);
-      if (bal === null) {
-        bal = '0.00';
-        localStorage.setItem(balanceKey, bal);
+    // --- Balance Management (Strictly 0.00 for new user accounts) ---
+    function getSpinEarnings() {
+      let earnings = localStorage.getItem(spinEarningsKey);
+      if (earnings === null) {
+        earnings = '0.00';
+        localStorage.setItem(spinEarningsKey, earnings);
       }
-      return parseFloat(bal) || 0;
+      return parseFloat(earnings) || 0;
     }
 
-    function setBalance(val) {
-      localStorage.setItem(balanceKey, val.toFixed(2));
+    function setSpinEarnings(val) {
+      localStorage.setItem(spinEarningsKey, val.toFixed(2));
     }
 
     function updateBalanceDisplay() {
-      balanceDisplay.innerText = `$${getBalance().toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+      // Show accumulated spin winnings on screen as requested
+      const currentEarnings = getSpinEarnings();
+      balanceDisplay.innerText = `$${currentEarnings.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     }
 
     // --- Spin state with 8-hour automatic reset timer ---
@@ -436,7 +464,7 @@
       if (isSpinning) return;
 
       const state = getState();
-      const currentBalance = getBalance();
+      const currentEarnings = getSpinEarnings();
 
       // If spins run out, directly lead to payment gateway
       if (state.spinsLeft <= 0) {
@@ -474,12 +502,44 @@
         resultMsg.style.color = "#4ade80";
         resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`;
 
-        // Add exact winning amount directly to the user balance
-        const newBalance = currentBalance + winningSector.value;
-        setBalance(newBalance);
+        // Accumulate exact winning amount to spin winnings balance
+        const newEarnings = currentEarnings + winningSector.value;
+        setSpinEarnings(newEarnings);
 
         updateUI();
       }, 4000);
+    }
+
+    // --- Withdraw Winnings to Main Account Balance ---
+    function withdrawWinnings(e) {
+      e.preventDefault();
+      const spinEarnings = getSpinEarnings();
+
+      if (spinEarnings <= 0) {
+        resultMsg.style.color = "var(--danger)";
+        resultMsg.innerText = "No winnings available to withdraw yet. Spin to win!";
+        return;
+      }
+
+      // Read master user balance or initialize to 0
+      let masterBalance = parseFloat(localStorage.getItem(balanceKey)) || 0.00;
+      masterBalance += spinEarnings;
+
+      // Save to main balance storage
+      localStorage.setItem(balanceKey, masterBalance.toFixed(2));
+
+      // Reset spin earnings back to 0.00 after successful transfer
+      setSpinEarnings(0.00);
+      updateUI();
+
+      resultMsg.style.color = "#4ade80";
+      resultMsg.innerText = `Successfully transferred $${spinEarnings.toFixed(2)} to your main balance!`;
+
+      // Optional redirect to dashboard/home after a short delay
+      setTimeout(() => {
+        const dashboardUrl = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
+        window.location.href = dashboardUrl;
+      }, 1500);
     }
 
     // --- Live Tick Loop for timer update ---
@@ -489,10 +549,16 @@
     if (!localStorage.getItem(lastResetKey)) {
       localStorage.setItem(lastResetKey, String(Date.now()));
     }
+
+    // Ensure completely zero default balance for brand new user accounts if not initialized
+    if (localStorage.getItem(balanceKey) === null) {
+      localStorage.setItem(balanceKey, '0.00');
+    }
+
     updateUI();
     drawWheel();
 
-    // Set home / withdraw button link dynamically with user ID if present
+    // Set home button link dynamically with user ID if present
     const homeBtn = document.getElementById('home-btn');
     if (targetUserId) {
       homeBtn.href = `dashboard.html?id=${targetUserId}`;
