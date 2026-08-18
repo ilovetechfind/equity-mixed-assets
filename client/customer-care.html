@@ -15,27 +15,33 @@
 
     body { background: var(--bg-gradient); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 16px; display: flex; justify-content: center; min-height: 100vh; box-sizing: border-box; }
     .container { width: 100%; max-width: 480px; display: flex; flex-direction: column; justify-content: space-between; }
-    
+
     .chat-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; backdrop-filter: blur(12px); margin-bottom: 16px; }
     .agent-info { display: flex; align-items: center; gap: 12px; }
     .agent-avatar { width: 40px; height: 40px; border-radius: 50%; background: #3b82f6; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; border: 1px solid rgba(255,255,255,0.2); }
     .agent-details h4 { margin: 0; font-size: 0.95rem; }
     .agent-details p { margin: 2px 0 0 0; font-size: 0.75rem; color: #4ade80; display: flex; align-items: center; gap: 4px; }
     .agent-details p::before { content: ''; width: 6px; height: 6px; background: #4ade80; border-radius: 50%; display: inline-block; }
-    
+
     .close-btn { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: white; width: 32px; height: 32px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
     .chat-box { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 16px; backdrop-filter: blur(12px); display: flex; flex-direction: column; gap: 12px; overflow-y: auto; max-height: calc(100vh - 180px); margin-bottom: 16px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.3); }
-    
+
     .message { max-width: 80%; padding: 12px 16px; border-radius: 14px; font-size: 0.85rem; line-height: 1.4; word-break: break-word; }
     .message.incoming { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.05); align-self: flex-start; border-bottom-left-radius: 4px; color: #e2e8f0; }
     .message.outgoing { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); align-self: flex-end; border-bottom-right-radius: 4px; color: white; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3); }
+    .message img { max-width: 100%; border-radius: 10px; display: block; margin-top: 6px; cursor: pointer; }
 
-    .chat-input-area { display: flex; gap: 10px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px; border-radius: 16px; backdrop-filter: blur(12px); }
-    .chat-input-area input { flex: 1; background: transparent; border: none; outline: none; color: white; padding: 10px; font-size: 0.9rem; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .chat-input-area { display: flex; gap: 8px; background: var(--card-bg); border: 1px solid var(--card-border); padding: 8px; border-radius: 16px; backdrop-filter: blur(12px); align-items: center; }
+    .chat-input-area input[type="text"] { flex: 1; background: transparent; border: none; outline: none; color: white; padding: 10px; font-size: 0.9rem; font-family: 'Plus Jakarta Sans', sans-serif; min-width: 0; }
     .chat-input-area input::placeholder { color: var(--text-muted); }
-    .send-btn { background: #3b82f6; border: none; color: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 16px; }
+    .icon-btn { background: rgba(255,255,255,0.06); border: none; color: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; flex-shrink: 0; }
+    .send-btn { background: #3b82f6; border: none; color: white; width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s; font-size: 16px; flex-shrink: 0; }
     .send-btn:hover { background: #2563eb; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #image-preview-bar { display: none; align-items: center; gap: 8px; padding: 8px 12px; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); }
+    #image-preview-bar img { width: 36px; height: 36px; object-fit: cover; border-radius: 6px; }
+    #image-preview-bar button { margin-left: auto; background: none; border: none; color: #f87171; cursor: pointer; font-size: 0.9rem; }
   </style>
 </head>
 <body>
@@ -55,9 +61,17 @@
       <div class="message incoming">Hello! Welcome to Equity Mixed Assets support. How can we help you today?</div>
     </div>
 
+    <div id="image-preview-bar">
+      <img id="preview-thumb" src="" alt="preview">
+      <span>Image ready to send</span>
+      <button onclick="clearPendingImage()">Remove</button>
+    </div>
+
     <div class="chat-input-area">
+      <button class="icon-btn" id="attach-btn" title="Attach image">📎</button>
+      <input type="file" id="file-input" accept="image/*" style="display:none">
       <input type="text" id="user-msg" placeholder="Type your message..." onkeypress="handleKey(event)">
-      <button class="send-btn" onclick="sendMessage()">➤</button>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">➤</button>
     </div>
   </div>
 
@@ -65,6 +79,34 @@
   <script src="config.js"></script>
   <script>
     let currentUserId = null;
+    let pendingImageFile = null;
+
+    // Resolve a STABLE identity for this client.
+    // Priority: logged-in Supabase auth user > explicit ?id= param > a
+    // persisted (never-regenerated-if-present) localStorage UUID.
+    async function resolveUserId() {
+      try {
+        if (typeof client !== 'undefined') {
+          const { data } = await client.auth.getUser();
+          if (data && data.user && data.user.id) {
+            return data.user.id;
+          }
+        }
+      } catch (e) {
+        console.warn('Auth check failed, falling back:', e);
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramId = urlParams.get('id');
+      if (paramId) return paramId;
+
+      let stored = localStorage.getItem('chat_user_id');
+      if (!stored) {
+        stored = generateUUID();
+        localStorage.setItem('chat_user_id', stored);
+      }
+      return stored;
+    }
 
     function generateUUID() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -77,30 +119,27 @@
       const chatBox = document.getElementById('chat-messages');
       const div = document.createElement('div');
       div.className = `message ${m.sender === 'client' ? 'outgoing' : 'incoming'}`;
-      div.innerText = m.message;
+
+      if (m.message) {
+        const textSpan = document.createElement('div');
+        textSpan.innerText = m.message;
+        div.appendChild(textSpan);
+      }
+      if (m.image_url) {
+        const img = document.createElement('img');
+        img.src = m.image_url;
+        img.alt = 'attachment';
+        img.onclick = () => window.open(m.image_url, '_blank');
+        div.appendChild(img);
+      }
+
       chatBox.appendChild(div);
       chatBox.scrollTop = chatBox.scrollHeight;
     }
 
     async function initChat() {
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        currentUserId = urlParams.get('id');
-
-        if (!currentUserId && typeof client !== 'undefined') {
-          const { data } = await client.auth.getUser();
-          if (data && data.user) {
-            currentUserId = data.user.id;
-          }
-        }
-
-        if (!currentUserId) {
-          currentUserId = localStorage.getItem('chat_user_id');
-          if (!currentUserId || currentUserId.startsWith('guest_')) {
-            currentUserId = generateUUID();
-            localStorage.setItem('chat_user_id', currentUserId);
-          }
-        }
+        currentUserId = await resolveUserId();
 
         const { data, error } = await client
           .from('messages')
@@ -115,7 +154,6 @@
           data.forEach(m => appendMessage(m));
         }
 
-        // Live channel subscription without sender filter
         client
           .channel('room-' + currentUserId)
           .on(
@@ -139,23 +177,79 @@
       }
     }
 
+    function clearPendingImage() {
+      pendingImageFile = null;
+      document.getElementById('image-preview-bar').style.display = 'none';
+      document.getElementById('file-input').value = '';
+    }
+
+    document.getElementById('attach-btn').addEventListener('click', () => {
+      document.getElementById('file-input').click();
+    });
+
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      pendingImageFile = file;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        document.getElementById('preview-thumb').src = ev.target.result;
+        document.getElementById('image-preview-bar').style.display = 'flex';
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function uploadImage(file) {
+      const ext = file.name.split('.').pop();
+      const path = `${currentUserId}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await client.storage
+        .from('chat-images')
+        .upload(path, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data } = client.storage.from('chat-images').getPublicUrl(path);
+      return data.publicUrl;
+    }
+
     async function sendMessage() {
       const input = document.getElementById('user-msg');
+      const sendBtn = document.getElementById('send-btn');
       const text = input.value.trim();
-      if (!text || !currentUserId) return;
 
-      input.value = '';
+      if (!text && !pendingImageFile) return;
+      if (!currentUserId) return;
 
-      appendMessage({ sender: 'client', message: text });
+      sendBtn.disabled = true;
+      let imageUrl = null;
 
-      const { error } = await client.from('messages').insert([{
-        user_id: currentUserId,
-        sender: 'client',
-        message: text
-      }]);
+      try {
+        if (pendingImageFile) {
+          imageUrl = await uploadImage(pendingImageFile);
+        }
 
-      if (error) {
-        alert("Failed to send: " + error.message);
+        const row = {
+          user_id: currentUserId,
+          sender: 'client',
+          message: text || null,
+          image_url: imageUrl
+        };
+
+        input.value = '';
+        clearPendingImage();
+        appendMessage(row);
+
+        const { error } = await client.from('messages').insert([row]);
+
+        if (error) {
+          alert("Failed to send: " + error.message);
+        }
+      } catch (err) {
+        alert("Failed to send: " + err.message);
+      } finally {
+        sendBtn.disabled = false;
       }
     }
 
