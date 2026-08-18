@@ -6,6 +6,7 @@
   <title>Equity Mixed Assets - Premium Lucky Spin</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    /* === All styles exactly as before – keep them === */
     :root {
       --bg-main: #030712;
       --card-bg: rgba(15, 23, 42, 0.85);
@@ -39,8 +40,15 @@
     
     .container { width: 100%; max-width: 480px; text-align: center; }
     
-    /* Navigation Bar */
-    .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; gap: 8px; }
+    .nav-bar { 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      margin-bottom: 20px; 
+      margin-top: 10px; 
+      gap: 8px; 
+    }
+    .nav-left { display: flex; gap: 8px; align-items: center; }
     .nav-btn { 
       background: rgba(255,255,255,0.05); 
       border: 1px solid var(--card-border); 
@@ -61,6 +69,12 @@
     }
     .nav-btn:hover { background: rgba(212, 175, 55, 0.15); transform: scale(1.02); }
     .nav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
+    .nav-btn.withdraw-btn { 
+      background: rgba(16, 185, 129, 0.15); 
+      border-color: rgba(16, 185, 129, 0.3); 
+      color: #4ade80; 
+    }
+    .nav-btn.withdraw-btn:hover { background: rgba(16, 185, 129, 0.25); }
     
     .view-title { 
       font-size: 1.2rem; 
@@ -73,7 +87,6 @@
       text-shadow: 0 0 30px rgba(212,175,55,0.3);
     }
     
-    /* Live Balance Display */
     .balance-display {
       background: rgba(212, 175, 55, 0.15);
       border: 1px solid var(--card-border);
@@ -86,7 +99,6 @@
       white-space: nowrap;
     }
 
-    /* Hero Banner */
     .plan-hero {
       background: linear-gradient(135deg, rgba(30, 27, 12, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
       border: 1px solid var(--card-border);
@@ -108,7 +120,6 @@
     }
     .plan-subtitle { font-size: 0.9rem; color: var(--text-muted); font-weight: 500; }
 
-    /* Wheel Card */
     .wheel-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -173,7 +184,6 @@
       transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
 
-    /* Action Button */
     .action-btn {
       width: 100%;
       padding: 18px;
@@ -214,7 +224,6 @@
       box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4); 
     }
 
-    /* Result Popup */
     #result-msg {
       margin-top: 15px;
       font-size: 1.2rem;
@@ -237,11 +246,19 @@
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <!-- Home / Withdraw button -->
-      <a href="dashboard.html" id="home-btn" class="nav-btn" title="Go to Home">
-        <svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
-        <span>Home</span>
-      </a>
+      <div class="nav-left">
+        <!-- Withdraw Button -->
+        <a href="withdraw.html" id="withdraw-btn" class="nav-btn withdraw-btn" title="Withdraw Funds">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2v20M17 7l-5-5-5 5M7 17l5 5 5-5"/>
+            <line x1="2" y1="12" x2="22" y2="12"/>
+          </svg>
+          <span>Withdraw</span>
+        </a>
+        <a href="dashboard.html" id="home-btn" class="nav-btn" title="Go to Dashboard">
+          <svg viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1"/></svg>
+        </a>
+      </div>
       <h2 class="view-title">VIP Lucky Spin</h2>
       <div class="balance-display" id="top-balance-display">$0.00</div>
     </nav>
@@ -262,7 +279,7 @@
       </div>
 
       <button id="spinBtn" class="action-btn" onclick="startSpin()">
-        <span>Spin the Wheel</span>
+        <span>🔄 Spin the Wheel</span>
       </button>
 
       <div id="result-msg"></div>
@@ -290,7 +307,8 @@
 
     // --- Configuration ---
     const FREE_SPINS = 5;
-    const RESET_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 hours
+    // 8 hours 45 minutes = 8*60 + 45 = 525 minutes = 31,500,000 ms
+    const RESET_INTERVAL_MS = (8 * 60 + 45) * 60 * 1000; // 8h 45m
     const COST_FOR_MORE = 150;
     const EXTRA_SPINS = 12;
 
@@ -334,7 +352,7 @@
       balanceDisplay.innerText = `$${bal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     }
 
-    // --- Spin state with 8-hour reset ---
+    // --- Spin state with 8h 45m reset ---
     function getState() {
       let state = JSON.parse(localStorage.getItem(stateKey));
       if (!state) {
@@ -352,6 +370,7 @@
       
       const now = Date.now();
       if (now - lastReset >= RESET_INTERVAL_MS) {
+        // Reset spins
         state.spinsLeft = FREE_SPINS;
         localStorage.setItem(stateKey, JSON.stringify(state));
         localStorage.setItem(lastResetKey, String(now));
@@ -380,14 +399,15 @@
         spinBtn.disabled = false;
       }
       
-      // Update timer badge
+      // Update timer badge (countdown to next free spins)
       const lastReset = localStorage.getItem(lastResetKey);
       if (lastReset) {
         const elapsed = Date.now() - parseInt(lastReset, 10);
         const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
         if (remainingMs > 0) {
-          const hours = Math.floor(remainingMs / (3600 * 1000));
-          const minutes = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000));
+          const totalMinutes = Math.floor(remainingMs / (60 * 1000));
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
           timerBadge.textContent = `⏳ ${hours}h ${minutes}m`;
         } else {
           timerBadge.textContent = '⏳ Reset now!';
@@ -493,9 +513,11 @@
     updateUI();
     drawWheel();
 
-    // Set home button link with user ID if present
+    // Set navigation links with user ID if present
+    const withdrawBtn = document.getElementById('withdraw-btn');
     const homeBtn = document.getElementById('home-btn');
     if (targetUserId) {
+      withdrawBtn.href = `withdraw.html?id=${targetUserId}`;
       homeBtn.href = `dashboard.html?id=${targetUserId}`;
     }
   </script>
