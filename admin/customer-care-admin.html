@@ -181,8 +181,12 @@
       return data.publicUrl;
     }
 
+    let isSending = false;
+
     async function sendChatMessage(e) {
       e.preventDefault();
+      if (isSending) return;
+
       const input = document.getElementById('chat-input');
       const sendBtn = document.getElementById('send-btn');
       const text = input.value.trim();
@@ -190,6 +194,7 @@
       if (!text && !pendingImageFile) return;
       if (!targetUserId) return;
 
+      isSending = true;
       sendBtn.disabled = true;
       let imageUrl = null;
 
@@ -219,6 +224,7 @@
         console.error("Error sending message:", err.message);
         alert("Failed to send: " + err.message);
       } finally {
+        isSending = false;
         sendBtn.disabled = false;
       }
     }
