@@ -310,7 +310,6 @@
     const timerBadge = document.getElementById('timerBadge');
 
     // --- Keys ---
-    // Updated keys to ensure brand new users start at 0 balance strictly
     const balanceKey = `user_balance_${targetUserId}`;
     const spinEarningsKey = `spin_earnings_${targetUserId}`;
     const stateKey = `spin_state_${targetUserId}`; 
@@ -318,7 +317,7 @@
 
     // --- Configuration ---
     const DAILY_SPINS = 5;           
-    const RESET_INTERVAL_MS = 8 * 60 * 60 * 1000; // 8 hours
+    const RESET_INTERVAL_MS = 45 * 60 * 1000; // Updated to 45 minutes timer
     const COST_FOR_MORE = 150;       // $150 for 5 extra spins
     const EXTRA_SPINS = 5;          
 
@@ -343,7 +342,7 @@
     let currentAngle = 0;
     let isSpinning = false;
 
-    // --- Balance Management (Strictly 0.00 for new user accounts) ---
+    // --- Balance Management ---
     function getSpinEarnings() {
       let earnings = localStorage.getItem(spinEarningsKey);
       if (earnings === null) {
@@ -358,12 +357,11 @@
     }
 
     function updateBalanceDisplay() {
-      // Show accumulated spin winnings on screen as requested
       const currentEarnings = getSpinEarnings();
       balanceDisplay.innerText = `$${currentEarnings.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     }
 
-    // --- Spin state with 8-hour automatic reset timer ---
+    // --- Spin state with 45-minute automatic reset timer ---
     function getState() {
       let state = JSON.parse(localStorage.getItem(stateKey));
       if (!state) {
@@ -409,16 +407,15 @@
         spinBtn.disabled = false;
       }
 
-      // Update 8-hour countdown timer badge
+      // Update 45-minute countdown timer badge
       const lastReset = localStorage.getItem(lastResetKey);
       if (lastReset) {
         const elapsed = Date.now() - parseInt(lastReset, 10);
         const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
         if (remainingMs > 0) {
-          const hours = Math.floor(remainingMs / (3600 * 1000));
-          const minutes = Math.floor((remainingMs % (3600 * 1000)) / (60 * 1000));
+          const minutes = Math.floor(remainingMs / (60 * 1000));
           const seconds = Math.floor((remainingMs % (60 * 1000)) / 1000);
-          timerBadge.textContent = `⏳ Refreshes in: ${hours}h ${minutes}m ${seconds}s`;
+          timerBadge.textContent = `⏳ Next free spins in: ${minutes}m ${seconds}s`;
         } else {
           timerBadge.textContent = `⏳ Free spins restored!`;
         }
