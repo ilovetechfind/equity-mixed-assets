@@ -52,7 +52,7 @@
     </div>
 
     <div class="chat-box" id="chat-messages">
-      <div style="color: var(--text-muted); text-align: center; margin: auto; font-size: 0.85rem;">Loading chat history...</div>
+      <div class="message incoming">Hello! Welcome to Equity Mixed Assets support. How can we help you today?</div>
     </div>
 
     <div class="chat-input-area">
@@ -68,12 +68,6 @@
 
     function appendMessage(m) {
       const chatBox = document.getElementById('chat-messages');
-      
-      const loadingText = chatBox.querySelector('div[style*="text-align: center"]');
-      if (loadingText) {
-        chatBox.innerHTML = '';
-      }
-
       const div = document.createElement('div');
       div.className = `message ${m.sender === 'client' ? 'outgoing' : 'incoming'}`;
       div.innerText = m.message;
@@ -82,57 +76,62 @@
     }
 
     async function initChat() {
-      const urlParams = new URLSearchParams(window.location.search);
-      let userId = urlParams.get('id');
+      try {
+        // 1. Check URL query string for id
+        const urlParams = new URLSearchParams(window.location.search);
+        currentUserId = urlParams.get('id');
 
-      if (!userId) {
-        const { data: { user } } = await client.auth.getUser();
-        if (user) {
-          userId = user.id;
-        }
-      }
-
-      const chatBox = document.getElementById('chat-messages');
-
-      if (!userId) {
-        chatBox.innerHTML = `<div class="message incoming">Hello! Welcome to Equity Mixed Assets support. Please log in or refresh to start chatting.</div>`;
-        return;
-      }
-
-      currentUserId = userId;
-
-      const { data, error } = await client
-        .from('messages')
-        .select('*')
-        .eq('user_id', currentUserId)
-        .order('created_at', { ascending: true });
-
-      chatBox.innerHTML = '';
-
-      if (error || !data || data.length === 0) {
-        const welcomeDiv = document.createElement('div');
-        welcomeDiv.className = 'message incoming';
-        welcomeDiv.innerText = "Hello! Welcome to Equity Mixed Assets support. How can we help you today?";
-        chatBox.appendChild(welcomeDiv);
-      } else {
-        data.forEach(m => appendMessage(m));
-      }
-
-      client
-        .channel('client-chat-' + currentUserId)
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'messages',
-            filter: `user_id=eq.${currentUserId}`
-          },
-          (payload) => {
-            appendMessage(payload.new);
+        // 2. If no URL ID, check active Supabase Auth user
+        if (!currentUserId && typeof client !== 'undefined') {
+          const { data } = await client.auth.getUser();
+          if (data && data.user) {
+            currentUserId = data.user.id;
           }
-        )
-        .subscribe();
+        }
+
+        // 3. Fallback: Save or get persistent guest ID in browser
+        if (!currentUserId) {
+          currentUserId = localStorage.getItem('chat_user_id');
+          if (!currentUserId) {
+            currentUserId = 'guest_' + Math.random().toString(36).substring(2, 10);
+            localStorage.setItem('chat_user_id', currentUserId);
+          }
+        }
+
+        // 4. Load messages from Supabase
+        const { data, error } = await client
+          .from('messages')
+          .select('*')
+          .eq('user_id', currentUserId)
+          .order('created_at', { ascending: true });
+
+        const chatBox = document.getElementById('chat-messages');
+
+        if (!error && data && data.length > 0) {
+          chatBox.innerHTML = '';
+          data.forEach(m => appendMessage(m));
+        }
+
+        // 5. Listen for real-time messages
+        client
+          .channel('client-chat-' + currentUserId)
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'messages',
+              filter: `user_id=eq.${currentUserId}`
+            },
+            (payload) => {
+              appendMessage(payload.new);
+            }
+          )
+          .subscribe();
+
+      } catch (err) {
+        console.error("Chat initialization error:", err);
+      }
     }
 
     async function sendMessage() {
@@ -149,7 +148,7 @@
       });
 
       if (error) {
-        console.error("Failed to send message:", error.message);
+        console.error("Error sending message:", error.message);
       }
     }
 
@@ -159,7 +158,7 @@
       }
     }
 
-    initChat();
+    window.addEventListener('DOMContentLoaded', initChat);
   </script>
 </body>
 </html>
