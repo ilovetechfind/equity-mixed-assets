@@ -66,6 +66,13 @@
   <script>
     let currentUserId = null;
 
+    function generateUUID() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
     function appendMessage(m) {
       const chatBox = document.getElementById('chat-messages');
       const div = document.createElement('div');
@@ -77,11 +84,9 @@
 
     async function initChat() {
       try {
-        // 1. Check URL query string for id
         const urlParams = new URLSearchParams(window.location.search);
         currentUserId = urlParams.get('id');
 
-        // 2. If no URL ID, check active Supabase Auth user
         if (!currentUserId && typeof client !== 'undefined') {
           const { data } = await client.auth.getUser();
           if (data && data.user) {
@@ -89,16 +94,14 @@
           }
         }
 
-        // 3. Fallback: Save or get persistent guest ID in browser
         if (!currentUserId) {
           currentUserId = localStorage.getItem('chat_user_id');
-          if (!currentUserId) {
-            currentUserId = 'guest_' + Math.random().toString(36).substring(2, 10);
+          if (!currentUserId || currentUserId.startsWith('guest_')) {
+            currentUserId = generateUUID();
             localStorage.setItem('chat_user_id', currentUserId);
           }
         }
 
-        // 4. Load messages from Supabase
         const { data, error } = await client
           .from('messages')
           .select('*')
@@ -112,9 +115,9 @@
           data.forEach(m => appendMessage(m));
         }
 
-        // 5. Listen for real-time messages
+        // Live channel subscription without sender filter
         client
-          .channel('client-chat-' + currentUserId)
+          .channel('room-' + currentUserId)
           .on(
             'postgres_changes',
             {
@@ -124,13 +127,15 @@
               filter: `user_id=eq.${currentUserId}`
             },
             (payload) => {
-              appendMessage(payload.new);
+              if (payload.new.sender !== 'client') {
+                appendMessage(payload.new);
+              }
             }
           )
           .subscribe();
 
       } catch (err) {
-        console.error("Chat initialization error:", err);
+        console.error("Initialization error:", err);
       }
     }
 
@@ -141,14 +146,16 @@
 
       input.value = '';
 
-      const { error } = await client.from('messages').insert({
+      appendMessage({ sender: 'client', message: text });
+
+      const { error } = await client.from('messages').insert([{
         user_id: currentUserId,
         sender: 'client',
         message: text
-      });
+      }]);
 
       if (error) {
-        console.error("Error sending message:", error.message);
+        alert("Failed to send: " + error.message);
       }
     }
 
