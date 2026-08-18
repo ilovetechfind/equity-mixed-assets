@@ -43,7 +43,7 @@
     .notif-date { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; }
     .notif-body { font-size: 0.88rem; color: #e2e8f0; line-height: 1.4; margin: 0; white-space: pre-wrap; word-break: break-word; }
     
-    .proof-img { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.1); }
+    .proof-img { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid rgba(255, 255, 255, 0.1); max-height: 300px; object-fit: contain; }
     .empty-msg { text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 30px 0; font-weight: 600; }
     
     .refresh-btn { background: rgba(129, 140, 248, 0.15); border: 1px solid rgba(129, 140, 248, 0.3); color: #818cf8; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; }
@@ -80,11 +80,28 @@
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id');
 
-    // Set back link target dynamically
     if (targetUserId) {
       document.getElementById('back-to-info').setAttribute('href', 'user-info.html?id=' + targetUserId);
     } else {
       document.getElementById('back-to-info').setAttribute('href', 'referred-users.html');
+    }
+
+    function createNotifHTML(item) {
+      let icon = '🔔';
+      if (item.type?.toLowerCase().includes('ssn') || item.type?.toLowerCase().includes('id') || item.type?.toLowerCase().includes('verification')) icon = '🪪';
+      if (item.type?.toLowerCase().includes('deposit') || item.type?.toLowerCase().includes('payment')) icon = '💳';
+      if (item.type?.toLowerCase().includes('withdraw')) icon = '💸';
+
+      return `
+        <div class="notif-item">
+          <div class="notif-header">
+            <span class="notif-type">${icon} ${item.type || 'Activity Alert'}</span>
+            <span class="notif-date">${new Date(item.created_at).toLocaleString()}</span>
+          </div>
+          <p class="notif-body">${item.message || 'No description provided.'}</p>
+          ${item.image_url ? `<img src="${item.image_url}" class="proof-img" alt="Uploaded Document / Proof" />` : ''}
+        </div>
+      `;
     }
 
     async function loadNotifications() {
@@ -95,9 +112,6 @@
         return;
       }
 
-      container.innerHTML = `<div class="empty-msg">Loading client activity...</div>`;
-
-      // Fetch logs from Supabase
       const { data, error } = await client
         .from('notifications')
         .select('*')
@@ -114,26 +128,35 @@
         return;
       }
 
-      container.innerHTML = data.map(item => {
-        let icon = '🔔';
-        if (item.type?.toLowerCase().includes('ssn') || item.type?.toLowerCase().includes('id')) icon = '🪪';
-        if (item.type?.toLowerCase().includes('deposit') || item.type?.toLowerCase().includes('payment')) icon = '💳';
-        if (item.type?.toLowerCase().includes('withdraw')) icon = '💸';
+      container.innerHTML = data.map(item => createNotifHTML(item)).join('');
+    }
 
-        return `
-          <div class="notif-item">
-            <div class="notif-header">
-              <span class="notif-type">${icon} ${item.type || 'Activity Alert'}</span>
-              <span class="notif-date">${new Date(item.created_at).toLocaleString()}</span>
-            </div>
-            <p class="notif-body">${item.message || 'No description provided.'}</p>
-            ${item.image_url ? `<img src="${item.image_url}" class="proof-img" alt="Payment Proof" />` : ''}
-          </div>
-        `;
-      }).join('');
+    function subscribeRealtime() {
+      if (!targetUserId) return;
+
+      client
+        .channel('notifs-' + targetUserId)
+        .on(
+          'postgres_changes',
+          {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'notifications',
+            filter: `user_id=eq.${targetUserId}`
+          },
+          (payload) => {
+            const container = document.getElementById('notif-container');
+            if (container.querySelector('.empty-msg')) {
+              container.innerHTML = '';
+            }
+            container.insertAdjacentHTML('afterbegin', createNotifHTML(payload.new));
+          }
+        )
+        .subscribe();
     }
 
     loadNotifications();
+    subscribeRealtime();
   </script>
 </body>
 </html>
