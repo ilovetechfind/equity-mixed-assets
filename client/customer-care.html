@@ -75,7 +75,6 @@
       }
 
       const div = document.createElement('div');
-      // Admin messages appear on the left (incoming), client messages on the right (outgoing)
       div.className = `message ${m.sender === 'client' ? 'outgoing' : 'incoming'}`;
       div.innerText = m.message;
       chatBox.appendChild(div);
@@ -83,31 +82,34 @@
     }
 
     async function initChat() {
-      // 1. Fetch authenticated user session
-      const { data: { user } } = await client.auth.getUser();
-      
-      if (!user) {
-        window.location.href = 'login.html';
+      const urlParams = new URLSearchParams(window.location.search);
+      let userId = urlParams.get('id');
+
+      if (!userId) {
+        const { data: { user } } = await client.auth.getUser();
+        if (user) {
+          userId = user.id;
+        }
+      }
+
+      const chatBox = document.getElementById('chat-messages');
+
+      if (!userId) {
+        chatBox.innerHTML = `<div class="message incoming">Hello! Welcome to Equity Mixed Assets support. Please log in or refresh to start chatting.</div>`;
         return;
       }
-      currentUserId = user.id;
 
-      // 2. Load existing chat history from Supabase
+      currentUserId = userId;
+
       const { data, error } = await client
         .from('messages')
         .select('*')
         .eq('user_id', currentUserId)
         .order('created_at', { ascending: true });
 
-      const chatBox = document.getElementById('chat-messages');
       chatBox.innerHTML = '';
 
-      if (error) {
-        console.error("Error loading chat:", error.message);
-        return;
-      }
-
-      if (!data || data.length === 0) {
+      if (error || !data || data.length === 0) {
         const welcomeDiv = document.createElement('div');
         welcomeDiv.className = 'message incoming';
         welcomeDiv.innerText = "Hello! Welcome to Equity Mixed Assets support. How can we help you today?";
@@ -116,7 +118,6 @@
         data.forEach(m => appendMessage(m));
       }
 
-      // 3. Listen live for incoming responses from Admin
       client
         .channel('client-chat-' + currentUserId)
         .on(
