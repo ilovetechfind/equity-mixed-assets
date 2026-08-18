@@ -130,7 +130,7 @@
       <h2 class="view-title">Investment Plans</h2>
     </div>
 
-    <a href="active-plan.html" class="active-banner-link">
+    <a href="active-plan.html" id="active-banner-link" class="active-banner-link">
       <div class="active-banner">
         <div class="banner-left">
           <span class="banner-subtitle">Current Active Tier</span>
@@ -144,20 +144,19 @@
     </a>
 
     <div class="tier-list">
-      <div class="tier-card tier-1"><div class="tier-content"><div class="tier-icon">🌱</div><div class="tier-info"><h4>Starter Plan</h4></div></div><a href="starter-plan.html" class="select-btn">Select</a></div>
-      <div class="tier-card tier-2"><div class="tier-content"><div class="tier-icon">🥉</div><div class="tier-info"><h4>Bronze Tier</h4></div></div><a href="bronze-plan.html" class="select-btn">Select</a></div>
-      <div class="tier-card tier-3"><div class="tier-content"><div class="tier-icon">🥈</div><div class="tier-info"><h4>Silver Tier</h4></div></div><a href="silver-plan.html" class="select-btn">Select</a></div>
-      <div class="tier-card tier-4"><div class="tier-content"><div class="tier-icon">🥇</div><div class="tier-info"><h4>Gold Tier</h4></div></div><a href="gold-plan.html" class="select-btn">Select</a></div>
-      <div class="tier-card tier-5"><div class="tier-content"><div class="tier-icon">💎</div><div class="tier-info"><h4>Platinum Tier</h4></div></div><a href="platinum-plan.html" class="select-btn">Select</a></div>
-      <div class="tier-card tier-6"><div class="tier-content"><div class="tier-icon">🔮</div><div class="tier-info"><h4>Diamond Tier</h4></div></div><a href="diamond-plan.html" class="select-btn">Select</a></div>
-      <div class="tier-card tier-7"><div class="tier-content"><div class="tier-icon">👑</div><div class="tier-info"><h4>Crown Elite</h4></div></div><a href="crown-plan.html" class="select-btn">Select</a></div>
+      <div class="tier-card tier-1"><div class="tier-content"><div class="tier-icon">🌱</div><div class="tier-info"><h4>Starter Plan</h4></div></div><a href="starter-plan.html" class="select-btn" data-plan="starter-plan.html">Select</a></div>
+      <div class="tier-card tier-2"><div class="tier-content"><div class="tier-icon">🥉</div><div class="tier-info"><h4>Bronze Tier</h4></div></div><a href="bronze-plan.html" class="select-btn" data-plan="bronze-plan.html">Select</a></div>
+      <div class="tier-card tier-3"><div class="tier-content"><div class="tier-icon">🥈</div><div class="tier-info"><h4>Silver Tier</h4></div></div><a href="silver-plan.html" class="select-btn" data-plan="silver-plan.html">Select</a></div>
+      <div class="tier-card tier-4"><div class="tier-content"><div class="tier-icon">🥇</div><div class="tier-info"><h4>Gold Tier</h4></div></div><a href="gold-plan.html" class="select-btn" data-plan="gold-plan.html">Select</a></div>
+      <div class="tier-card tier-5"><div class="tier-content"><div class="tier-icon">💎</div><div class="tier-info"><h4>Platinum Tier</h4></div></div><a href="platinum-plan.html" class="select-btn" data-plan="platinum-plan.html">Select</a></div>
+      <div class="tier-card tier-6"><div class="tier-content"><div class="tier-icon">🔮</div><div class="tier-info"><h4>Diamond Tier</h4></div></div><a href="diamond-plan.html" class="select-btn" data-plan="diamond-plan.html">Select</a></div>
+      <div class="tier-card tier-7"><div class="tier-content"><div class="tier-icon">👑</div><div class="tier-info"><h4>Crown Elite</h4></div></div><a href="crown-plan.html" class="select-btn" data-plan="crown-plan.html">Select</a></div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id') || 'default_user';
-
     const plansMap = {
       'starter': 'Starter Plan',
       'bronze': 'Bronze Tier',
@@ -168,22 +167,56 @@
       'crown': 'Crown Elite'
     };
 
-    const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
-    if (saved) {
+    async function init() {
+      // Resolve the real logged-in user's id from the Supabase session.
+      // Fall back to a ?id= URL param only if present (e.g. admin preview links),
+      // and finally to 'default_user' so the page never hard-fails.
+      let targetUserId = 'default_user';
+
       try {
-        const activeIds = JSON.parse(saved);
-        if (Array.isArray(activeIds) && activeIds.length > 0) {
-          const names = activeIds.map(id => plansMap[id]).filter(Boolean);
-          if (names.length > 0) {
-            document.getElementById('banner-plan-title').innerText = names.join(', ');
-            document.getElementById('banner-status-text').innerText = 'Active Plan Running';
-            document.getElementById('banner-status-dot').style.backgroundColor = '#34d399';
-            document.getElementById('banner-status-container').style.color = '#34d399';
-          }
+        const { data } = await client.auth.getUser();
+        if (data && data.user && data.user.id) {
+          targetUserId = data.user.id;
+        } else {
+          const urlParams = new URLSearchParams(window.location.search);
+          const paramId = urlParams.get('id');
+          if (paramId) targetUserId = paramId;
         }
-      } catch(e) {}
+      } catch (e) {
+        console.warn('Could not resolve auth user, falling back:', e);
+        const urlParams = new URLSearchParams(window.location.search);
+        const paramId = urlParams.get('id');
+        if (paramId) targetUserId = paramId;
+      }
+
+      // Thread the resolved id onto every internal link so the next page
+      // (starter-plan.html, active-plan.html, etc.) can use it too, even
+      // though those pages will also try auth.getUser() themselves first.
+      document.querySelectorAll('.select-btn').forEach(link => {
+        const file = link.getAttribute('data-plan');
+        link.setAttribute('href', `${file}?id=${targetUserId}`);
+      });
+
+      document.getElementById('active-banner-link').setAttribute('href', `active-plan.html?id=${targetUserId}`);
+
+      const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
+      if (saved) {
+        try {
+          const activeIds = JSON.parse(saved);
+          if (Array.isArray(activeIds) && activeIds.length > 0) {
+            const names = activeIds.map(id => plansMap[id]).filter(Boolean);
+            if (names.length > 0) {
+              document.getElementById('banner-plan-title').innerText = names.join(', ');
+              document.getElementById('banner-status-text').innerText = 'Active Plan Running';
+              document.getElementById('banner-status-dot').style.backgroundColor = '#34d399';
+              document.getElementById('banner-status-container').style.color = '#34d399';
+            }
+          }
+        } catch(e) {}
+      }
     }
+
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
-      </html>
-      
+</html>
