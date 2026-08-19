@@ -129,7 +129,8 @@
 
       const userId = data.user.id;
 
-      await client.from('profiles').insert([{
+      // Updated to upsert to prevent silent failures on profile creation conflicts
+      const { error: profileError } = await client.from('profiles').upsert([{
         id: userId,
         full_name: name,
         role: 'client',
@@ -137,6 +138,16 @@
         balance: 0.00,
         volume: 0.00
       }]);
+
+      if (profileError) {
+        alertBox.style.color = '#ef4444';
+        alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        alertBox.innerText = "Profile error: " + profileError.message;
+        alertBox.style.display = 'block';
+        btn.innerText = "Create Account";
+        btn.disabled = false;
+        return;
+      }
 
       alertBox.style.color = '#10b981';
       alertBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
