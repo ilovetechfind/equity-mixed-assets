@@ -129,18 +129,32 @@
 
       const userId = data.user.id;
 
-      await client.from('profiles').insert([{
+      // Generate a referral code for the new user (first 8 chars of UUID)
+      const userReferralCode = userId.substring(0, 8);
+
+      const { error: profileError } = await client.from('profiles').insert([{
         id: userId,
         full_name: name,
         role: 'client',
         referred_by: referralCode || null,
+        referral_code: userReferralCode,   // <-- their own code to share
         balance: 0.00,
         volume: 0.00
       }]);
 
+      if (profileError) {
+        alertBox.style.color = '#ef4444';
+        alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
+        alertBox.innerText = "Failed to create profile: " + profileError.message;
+        alertBox.style.display = 'block';
+        btn.innerText = "Create Account";
+        btn.disabled = false;
+        return;
+      }
+
       alertBox.style.color = '#10b981';
       alertBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-      alertBox.innerText = "Your account have been created you will be logged in now";
+      alertBox.innerText = "Account created! Logging you in...";
       alertBox.style.display = 'block';
 
       setTimeout(async () => {
@@ -149,6 +163,5 @@
       }, 2000);
     }
   </script>
-<
-  /body>
+</body>
 </html>
