@@ -131,11 +131,9 @@
     }
 
     async function loadReferredUsersList(code) {
+      // Calls the safe database RPC function we created to completely avoid RLS loops
       const { data, error } = await client
-        .from('user_profiles_view')
-        .select('*')
-        .eq('referred_by', code)
-        .order('created_at', { ascending: false });
+        .rpc('get_referred_users', { ref_code: code });
 
       const tbody = document.getElementById('referred-users-body');
       const countDisplay = document.getElementById('user-count-display');
@@ -156,7 +154,7 @@
               <button class="copy-btn" onclick="copyId('${user.id}')">Copy</button>
             </div>
           </td>
-          <td><strong>${user.username || 'N/A'}</strong></td>
+          <td><strong>${user.full_name || 'N/A'}</strong></td>
           <td>${user.email || 'N/A'}</td>
           <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
           <td><a href="user-info.html?id=${user.id}" class="view-btn">View Info</a></td>
