@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Premium Lucky Spin</title>
+  <title>Equity Mixed Assets - Premium Luxury Spin</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg-main: #030712;
-      --card-bg: rgba(15, 23, 42, 0.75);
-      --card-border: rgba(212, 175, 55, 0.2);
+      --card-bg: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(30, 27, 12, 0.6));
+      --card-border: rgba(212, 175, 55, 0.35);
       --text-muted: #94a3b8;
       --gold-primary: #d4af37;
       --gold-light: #fef08a;
       --gold-gradient: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #9a7b20 100%);
+      --gold-glow: 0 0 25px rgba(212, 175, 55, 0.35);
       --success: #4ade80;
       --danger: #ef4444;
     }
@@ -23,8 +24,8 @@
     body { 
       background-color: var(--bg-main);
       background-image: 
-        radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.06) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 40%);
+        radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.12) 0%, transparent 45%),
+        radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.06) 0%, transparent 45%);
       background-attachment: fixed; 
       color: white; 
       font-family: 'Plus Jakarta Sans', sans-serif; 
@@ -39,59 +40,120 @@
     .container { width: 100%; max-width: 480px; text-align: center; }
     
     /* Navigation Bar */
-    .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; }
-    .back-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--card-border); backdrop-filter: blur(12px); color: var(--gold-light); padding: 10px 16px; border-radius: 12px; cursor: pointer; font-size: 0.9rem; text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 6px; transition: 0.2s; }
-    .back-btn:hover { background: rgba(212, 175, 55, 0.1); }
-    .view-title { font-size: 1.2rem; font-weight: 700; margin: 0; color: var(--gold-primary); letter-spacing: -0.5px; }
+    .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; gap: 8px; }
+    .nav-btn { 
+      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(212, 175, 55, 0.05)); 
+      border: 1px solid var(--card-border); 
+      backdrop-filter: blur(12px); 
+      color: var(--gold-light); 
+      padding: 10px 14px; 
+      border-radius: 14px; 
+      cursor: pointer; 
+      font-size: 0.85rem; 
+      text-decoration: none; 
+      font-weight: 600; 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+      line-height: 1;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .nav-btn:hover { 
+      background: rgba(212, 175, 55, 0.18); 
+      border-color: var(--gold-light);
+      box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+      transform: translateY(-1px);
+    }
+    .nav-btn:active { transform: translateY(1px) scale(0.97); }
+    .nav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
+    
+    .view-title { 
+      font-size: 1.15rem; 
+      font-weight: 800; 
+      margin: 0; 
+      background: var(--gold-gradient); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      letter-spacing: -0.5px; 
+      filter: drop-shadow(0 2px 10px rgba(212,175,55,0.25));
+    }
     
     /* Live Balance Display */
     .balance-display {
-      background: rgba(212, 175, 55, 0.15);
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(154, 123, 32, 0.1));
       border: 1px solid var(--card-border);
-      padding: 8px 12px;
-      border-radius: 12px;
+      padding: 9px 14px;
+      border-radius: 14px;
       font-weight: 700;
       color: var(--gold-light);
       font-size: 0.9rem;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
+      white-space: nowrap;
+      letter-spacing: 0.3px;
     }
 
     /* Hero Banner */
     .plan-hero {
-      background: linear-gradient(135deg, rgba(30, 27, 12, 0.8) 0%, rgba(15, 23, 42, 0.9) 100%);
+      background: var(--card-bg);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(16px);
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 24px;
       margin-bottom: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
     }
-    .plan-name { font-size: 1.7rem; font-weight: 800; margin: 0 0 4px 0; background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .plan-name { 
+      font-size: 1.7rem; 
+      font-weight: 800; 
+      margin: 0 0 4px 0; 
+      background: var(--gold-gradient); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+      text-shadow: 0 0 30px rgba(212,175,55,0.3); 
+    }
     .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
-    /* Wheel Container */
+    /* Wheel Card */
     .wheel-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
       backdrop-filter: blur(16px);
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 24px 20px;
       margin-bottom: 20px;
-      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
       position: relative;
+    }
+
+    .spins-info-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 18px;
     }
 
     .spins-left-badge {
       font-size: 0.85rem;
       color: var(--gold-light);
-      background: rgba(212, 175, 55, 0.1);
-      padding: 6px 16px;
+      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+      padding: 6px 18px;
       border-radius: 20px;
-      display: inline-block;
-      margin-bottom: 16px;
+      font-weight: 700;
+      border: 1px solid rgba(212, 175, 55, 0.4);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.2);
+    }
+    
+    .timer-badge {
+      font-size: 0.75rem;
+      color: var(--gold-light);
+      background: rgba(0, 0, 0, 0.35);
+      padding: 4px 12px;
+      border-radius: 12px;
       font-weight: 600;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.1);
+      border: 1px solid rgba(212, 175, 55, 0.2);
+      letter-spacing: 0.3px;
     }
 
     .wheel-container {
@@ -103,35 +165,41 @@
 
     .wheel-pointer {
       position: absolute;
-      top: -12px;
+      top: -14px;
       left: 50%;
       transform: translateX(-50%);
       width: 0;
       height: 0;
       border-left: 14px solid transparent;
       border-right: 14px solid transparent;
-      border-top: 28px solid #fef08a;
+      border-top: 30px solid #fef08a;
       z-index: 10;
-      filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.5));
+      filter: drop-shadow(0 4px 10px rgba(212, 175, 55, 0.8));
     }
 
     canvas {
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      box-shadow: 0 0 30px rgba(212, 175, 55, 0.25);
-      border: 4px solid rgba(212, 175, 55, 0.4);
+      box-shadow: 0 0 50px rgba(212, 175, 55, 0.35), inset 0 0 35px rgba(212, 175, 55, 0.15);
+      border: 4px solid rgba(212, 175, 55, 0.6);
       transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
 
-    /* Action Button */
+    /* Action Buttons Area */
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .action-btn {
       width: 100%;
       padding: 16px;
       border-radius: 16px;
       font-size: 1rem;
       font-weight: 700;
-      border: none;
+      border: 1px solid rgba(254, 240, 138, 0.4);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -139,128 +207,223 @@
       gap: 8px;
       background: var(--gold-gradient);
       color: #1a1500;
-      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.3);
-      transition: 0.2s;
+      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       text-decoration: none;
+      letter-spacing: 0.5px;
     }
-    .action-btn:active { transform: scale(0.98); }
-    .action-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .action-btn.buy-mode { background: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%); color: white; box-shadow: 0 10px 25px rgba(56, 189, 248, 0.3); }
+    .action-btn:hover { 
+      filter: brightness(1.08); 
+      box-shadow: 0 12px 35px rgba(212, 175, 55, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.8);
+      transform: translateY(-2px);
+    }
+    .action-btn:active { transform: translateY(1px) scale(0.98); }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+    
+    .action-btn.buy-mode { 
+      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%); 
+      color: white; 
+      border-color: rgba(56, 189, 248, 0.5);
+      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.4); 
+    }
+    .action-btn.buy-mode:hover {
+      box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+    }
 
-    /* Result Popup Message */
+    /* Withdraw to Balance Button Styling */
+    .withdraw-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
+      color: white;
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+    }
+    .withdraw-btn:hover {
+      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+    }
+
+    /* Result Popup */
     #result-msg {
       margin-top: 15px;
       font-size: 1.1rem;
       font-weight: 700;
       min-height: 28px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      text-shadow: 0 2px 10px rgba(0,0,0,0.7);
+      color: var(--gold-light);
     }
   </style>
 </head>
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <a href="investment-plan.html" id="client-back-btn" class="back-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Back
+      <!-- Home button on the left -->
+      <a href="dashboard.html" id="home-btn" class="nav-btn" title="Go to Home">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Home</span>
       </a>
       <h2 class="view-title">VIP Lucky Spin</h2>
       <div class="balance-display" id="top-balance-display">$0.00</div>
     </nav>
 
-    <!-- Hero Banner -->
     <div class="plan-hero">
       <div class="plan-name">Elite Rewards Wheel</div>
-      <div class="plan-subtitle">Spin to claim your exclusive asset bonuses!</div>
+      <div class="plan-subtitle">Spin to claim exclusive asset bonuses up to $300!</div>
     </div>
 
-    <!-- Wheel Game Card -->
     <div class="wheel-card">
-      <div id="spinsCounter" class="spins-left-badge">Spins Remaining: 3</div>
+      <div class="spins-info-wrapper">
+        <div id="spinsCounter" class="spins-left-badge">Spins Remaining: 5</div>
+        <div id="timerBadge" class="timer-badge">⏳ Next free spins in: --:--</div>
+      </div>
 
       <div class="wheel-container">
         <div class="wheel-pointer"></div>
         <canvas id="wheelCanvas" width="320" height="320"></canvas>
       </div>
 
-      <button id="spinBtn" class="action-btn" onclick="startSpin()">
-        <span>Spin the Wheel</span>
-      </button>
+      <div class="button-group">
+        <button id="spinBtn" class="action-btn" onclick="startSpin()">
+          <span>Spin the Wheel</span>
+        </button>
+
+        <!-- Withdraw Winnings Button -->
+        <a href="#" id="withdrawBtn" class="action-btn withdraw-btn" onclick="withdrawWinnings(event)">
+          <span>Withdraw Winnings to Balance</span>
+        </a>
+      </div>
 
       <div id="result-msg"></div>
     </div>
   </div>
 
   <script>
+    // --- URL params and user ID ---
     const urlParams = new URLSearchParams(window.location.search);
     const targetUserId = urlParams.get('id') || '';
 
-    // Bind Back Button URL parameter dynamically
-    document.getElementById('client-back-btn').setAttribute('href', targetUserId ? `investment-plan.html?id=${targetUserId}` : 'investment-plan.html');
-
-    const configKey = `spin_config_${targetUserId}`;
-    const userStateKey = `spin_state_${targetUserId}_${new Date().toDateString()}`;
-    const balanceKey = `user_balance_${targetUserId}`;
-
-    // Default configuration values
-    let config = { dailySpins: 3, costForMore: 150, extraSpinsCount: 3 };
-    const savedConfig = localStorage.getItem(configKey);
-    if(savedConfig) {
-      try { config = JSON.parse(savedConfig); } catch(e){}
-    }
-
-    // Load or initialize daily state
-    let state = JSON.parse(localStorage.getItem(userStateKey)) || { spinsLeft: config.dailySpins };
-    if(state.spinsLeft > config.dailySpins && !state.hasPaid) {
-      state.spinsLeft = config.dailySpins;
-    }
-
+    // --- DOM refs ---
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
     const spinBtn = document.getElementById('spinBtn');
     const resultMsg = document.getElementById('result-msg');
     const spinsCounter = document.getElementById('spinsCounter');
     const balanceDisplay = document.getElementById('top-balance-display');
+    const timerBadge = document.getElementById('timerBadge');
 
-    // Luxurious rich color palette with 12 expansive options (all strictly under $1,000)
+    // --- Keys ---
+    const balanceKey = `user_balance_${targetUserId}`;
+    const spinEarningsKey = `spin_earnings_${targetUserId}`;
+    const stateKey = `spin_state_${targetUserId}`; 
+    const lastResetKey = `spin_last_reset_${targetUserId}`;
+
+    // --- Configuration ---
+    const DAILY_SPINS = 5;           
+    const RESET_INTERVAL_MS = 45 * 60 * 1000; // Updated to 45 minutes timer
+    const COST_FOR_MORE = 150;       // $150 for 5 extra spins
+    const EXTRA_SPINS = 5;          
+
+    // --- Sectors (matching visual order counter-clockwise / matching image orientation: $10 at bottom, right side up, matching reference layout) ---
     const sectors = [
-      { color: '#1e293b', text: '$50', value: 50 },
-      { color: '#0f172a', text: '$150', value: 150 },
-      { color: '#172554', text: '$250', value: 250 },
-      { color: '#1e3a8a', text: '$350', value: 350 },
-      { color: '#1e1b4b', text: '$450', value: 450 },
-      { color: '#312e81', text: '$550', value: 550 },
-      { color: '#581c87', text: '$650', value: 650 },
-      { color: '#701a75', text: '$750', value: 750 },
-      { color: '#831843', text: '$850', value: 850 },
-      { color: '#9f1239', text: '$950', value: 950 },
-      { color: '#713f12', text: '$300', value: 300 },
-      { color: '#365314', text: '$600', value: 600 }
+      { color: '#1e293b', text: '$10', value: 10 },
+      { color: '#0f172a', text: '$25', value: 25 },
+      { color: '#172554', text: '$50', value: 50 },
+      { color: '#1e3a8a', text: '$75', value: 75 },
+      { color: '#1e1b4b', text: '$100', value: 100 },
+      { color: '#312e81', text: '$125', value: 125 },
+      { color: '#581c87', text: '$150', value: 150 },
+      { color: '#701a75', text: '$175', value: 175 },
+      { color: '#831843', text: '$200', value: 200 },
+      { color: '#9f1239', text: '$225', value: 225 },
+      { color: '#713f12', text: '$250', value: 250 },
+      { color: '#365314', text: '$300', value: 300 }
     ];
 
     const arc = Math.PI / (sectors.length / 2);
-    let startAngle = 0;
+    let startAngle = -Math.PI / 2; // Adjusted orientation so sector texts align correctly with top pointer
     let currentAngle = 0;
     let isSpinning = false;
 
-    // Load and format the user's current balance
-    function updateBalanceDisplay() {
-      let currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
-      balanceDisplay.innerText = `$${currentBalance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    // --- Balance Management ---
+    function getSpinEarnings() {
+      let earnings = localStorage.getItem(spinEarningsKey);
+      if (earnings === null) {
+        earnings = '0.00';
+        localStorage.setItem(spinEarningsKey, earnings);
+      }
+      return parseFloat(earnings) || 0;
     }
 
+    function setSpinEarnings(val) {
+      localStorage.setItem(spinEarningsKey, val.toFixed(2));
+    }
+
+    function updateBalanceDisplay() {
+      const currentEarnings = getSpinEarnings();
+      balanceDisplay.innerText = `$${currentEarnings.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    }
+
+    // --- Spin state with 45-minute automatic reset timer ---
+    function getState() {
+      let state = JSON.parse(localStorage.getItem(stateKey));
+      if (!state) {
+        state = { spinsLeft: DAILY_SPINS };
+        localStorage.setItem(stateKey, JSON.stringify(state));
+      }
+      
+      let lastReset = localStorage.getItem(lastResetKey);
+      if (!lastReset) {
+        lastReset = Date.now();
+        localStorage.setItem(lastResetKey, lastReset);
+      } else {
+        lastReset = parseInt(lastReset, 10);
+      }
+      
+      const now = Date.now();
+      if (now - lastReset >= RESET_INTERVAL_MS) {
+        state.spinsLeft = DAILY_SPINS;
+        localStorage.setItem(stateKey, JSON.stringify(state));
+        localStorage.setItem(lastResetKey, String(now));
+      }
+      return state;
+    }
+
+    function saveState(state) {
+      localStorage.setItem(stateKey, JSON.stringify(state));
+    }
+
+    // --- Update UI ---
     function updateUI() {
-      if (state.spinsLeft > 0) {
-        spinsCounter.innerText = `Spins Remaining: ${state.spinsLeft}`;
+      const state = getState();
+      const remaining = state.spinsLeft;
+      
+      if (remaining > 0) {
+        spinsCounter.innerText = `Spins Remaining: ${remaining}`;
         spinBtn.innerHTML = `<span>Spin the Wheel</span>`;
         spinBtn.className = "action-btn";
+        spinBtn.disabled = false;
       } else {
         spinsCounter.innerText = `Spins Remaining: 0`;
-        spinBtn.innerHTML = `<span>Buy ${config.extraSpinsCount} more spins for $${config.costForMore}</span>`;
+        spinBtn.innerHTML = `<span>Buy ${EXTRA_SPINS} More Spins for $${COST_FOR_MORE}</span>`;
         spinBtn.className = "action-btn buy-mode";
+        spinBtn.disabled = false;
       }
+
+      // Update 45-minute countdown timer badge
+      const lastReset = localStorage.getItem(lastResetKey);
+      if (lastReset) {
+        const elapsed = Date.now() - parseInt(lastReset, 10);
+        const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
+        if (remainingMs > 0) {
+          const minutes = Math.floor(remainingMs / (60 * 1000));
+          const seconds = Math.floor((remainingMs % (60 * 1000)) / 1000);
+          timerBadge.textContent = `⏳ Next free spins in: ${minutes}m ${seconds}s`;
+        } else {
+          timerBadge.textContent = `⏳ Free spins restored!`;
+        }
+      }
+      updateBalanceDisplay();
     }
 
+    // --- Draw Wheel ---
     function drawSector(sector, i) {
       const angle = startAngle + i * arc;
       ctx.save();
@@ -270,7 +433,7 @@
       ctx.fillStyle = sector.color;
       ctx.fill();
       ctx.lineWidth = 1.5;
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.3)';
+      ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
       ctx.stroke();
 
       ctx.save();
@@ -279,6 +442,8 @@
       ctx.textAlign = 'right';
       ctx.fillStyle = '#fef08a';
       ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 4;
       ctx.fillText(sector.text, 138, 5);
       ctx.restore();
       ctx.restore();
@@ -291,84 +456,110 @@
       }
     }
 
+    // --- Spin Action ---
     function startSpin() {
       if (isSpinning) return;
 
-      let currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
+      const state = getState();
+      const currentEarnings = getSpinEarnings();
 
-      // If spins run out, process payment from balance directly
+      // If spins run out, directly lead to payment gateway
       if (state.spinsLeft <= 0) {
-        if (currentBalance >= config.costForMore) {
-          // Deduct cost and save new balance
-          currentBalance -= config.costForMore;
-          localStorage.setItem(balanceKey, currentBalance.toFixed(2));
-          updateBalanceDisplay();
-
-          // Add extra spins and save state
-          state.spinsLeft += config.extraSpinsCount;
-          localStorage.setItem(userStateKey, JSON.stringify(state));
-          
-          resultMsg.style.color = "var(--gold-light)";
-          resultMsg.innerText = `Successfully purchased ${config.extraSpinsCount} more spins for $${config.costForMore}!`;
-          updateUI();
-        } else {
-          // Insufficient funds handling
-          resultMsg.style.color = "var(--danger)";
-          resultMsg.innerText = "Insufficient balance. Redirecting to deposit...";
-          setTimeout(() => {
-            const paymentUrl = targetUserId 
-              ? `deposit.html?id=${targetUserId}&amount=${config.costForMore}&type=spins` 
-              : `deposit.html?amount=${config.costForMore}&type=spins`;
-            window.location.href = paymentUrl;
-          }, 2000);
-        }
-        return; // Prevent spin from firing immediately during a purchase click
+        const depositUrl = targetUserId 
+          ? `deposit.html?id=${targetUserId}&amount=${COST_FOR_MORE}&type=spins` 
+          : `deposit.html?amount=${COST_FOR_MORE}&type=spins`;
+        window.location.href = depositUrl;
+        return;
       }
+
+      // Deduct spin count
+      state.spinsLeft--;
+      saveState(state);
 
       isSpinning = true;
       spinBtn.disabled = true;
       resultMsg.innerText = '';
 
-      // Deduct spin count and persist state
-      state.spinsLeft--;
-      localStorage.setItem(userStateKey, JSON.stringify(state));
-      updateUI();
-
-      // Random spin rotation calculation
+      // Random spin calculation matching visual orientation seamlessly
       const randomSpin = Math.floor(Math.random() * 360) + 2160;
       currentAngle += randomSpin;
-
       canvas.style.transform = `rotate(${currentAngle}deg)`;
 
       setTimeout(() => {
         isSpinning = false;
         spinBtn.disabled = false;
 
-        // Calculate winning sector accurately matching pointer location
-        const actualDegree = currentAngle % 360;
+        // Calculate accurate winning sector index based on top pointer alignment
+        const normalizedAngle = (360 - (currentAngle % 360)) % 360;
         const sectorDegree = 360 / sectors.length;
-        const winningIndex = Math.floor((360 - (actualDegree % 360)) / sectorDegree) % sectors.length;
-        
+        const winningIndex = Math.floor(normalizedAngle / sectorDegree) % sectors.length;
         const winningSector = sectors[winningIndex];
-        
-        // Displays exact winning text string on screen
-        resultMsg.style.color = "var(--success)";
-        resultMsg.innerText = `Congratulations! You won ${winningSector.text}!`;
 
-        // Add exact winning prize value directly to client balance storage
-        currentBalance = parseFloat(localStorage.getItem(balanceKey)) || 137142.60;
-        currentBalance += winningSector.value;
-        localStorage.setItem(balanceKey, currentBalance.toFixed(2));
+        // Display exact congratulations win text
+        resultMsg.style.color = "#4ade80";
+        resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`
 
-        updateBalanceDisplay();
+        // Accumulate exact winning amount to spin winnings balance and update display instantly
+        const newEarnings = currentEarnings + winningSector.value;
+        setSpinEarnings(newEarnings);
+
         updateUI();
       }, 4000);
     }
 
-    // Initialize View
-    updateBalanceDisplay();
-    drawWheel();
+    // --- Withdraw Winnings to Main Account Balance ---
+    function withdrawWinnings(e) {
+      e.preventDefault();
+      const spinEarnings = getSpinEarnings();
+
+      if (spinEarnings <= 0) {
+        resultMsg.style.color = "var(--danger)";
+        resultMsg.innerText = "No winnings available to withdraw yet. Spin to win!";
+        return;
+      }
+
+      // Read master user balance or initialize to 0
+      let masterBalance = parseFloat(localStorage.getItem(balanceKey)) || 0.00;
+      masterBalance += spinEarnings;
+
+      // Save to main balance storage
+      localStorage.setItem(balanceKey, masterBalance.toFixed(2));
+
+      // Reset spin earnings back to 0.00 after successful transfer
+      setSpinEarnings(0.00);
+      updateUI();
+
+      resultMsg.style.color = "#4ade80";
+      resultMsg.innerText = `Successfully transferred $${spinEarnings.toFixed(2)} to your main balance!`;
+
+      // Optional redirect to dashboard/home after a short delay
+      setTimeout(() => {
+        const dashboardUrl = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
+        window.location.href = dashboardUrl;
+      }, 1500);
+    }
+
+    // --- Live Tick Loop for timer update ---
+    setInterval(updateUI, 1000);
+
+    // --- Init ---
+    if (!localStorage.getItem(lastResetKey)) {
+      localStorage.setItem(lastResetKey, String(Date.now()));
+    }
+
+    // Ensure completely zero default balance for brand new user accounts if not initialized
+    if (localStorage.getItem(balanceKey) === null) {
+      localStorage.setItem(balanceKey, '0.00');
+    }
+
     updateUI();
+    drawWheel();
+
+    // Set home button link dynamically with user ID if present
+    const homeBtn = document.getElementById('home-btn');
+    if (targetUserId) {
+      homeBtn.href = `dashboard.html?id=${targetUserId}`;
+    }
   </script>
 </body>
 </html>
