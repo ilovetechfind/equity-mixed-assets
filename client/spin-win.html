@@ -352,8 +352,7 @@
         .maybeSingle();
 
       if (error) {
-        console.error('Error loading spin state:', error.message);
-        return;
+        throw new Error('Loading spin state: ' + error.message);
       }
 
       if (!data) {
@@ -363,8 +362,7 @@
           .select()
           .single();
         if (insertError) {
-          console.error('Error creating spin state:', insertError.message);
-          return;
+          throw new Error('Creating spin state: ' + insertError.message);
         }
         stateCache = created;
       } else {
@@ -584,4 +582,5 @@
     setInterval(async () => {
       const lastReset = new Date(stateCache.last_reset).getTime();
       if (Date.now() - lastReset >= RESET_INTERVAL_MS && stateCache.spins_left < DAILY_SPINS) {
-        await saveState({ spins_left: DAILY_SPINS, last_
+        await saveState({ spins_left: DAILY_SPINS, last_reset: new Date().toISOString() });
+  
