@@ -3,25 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Sign Up</title>
+  <title>Client Sign Up</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; }
-    .ticker-bar { width: 100%; background: #1e293b; border-bottom: 1px solid #334155; padding: 10px 0; overflow: hidden; white-space: nowrap; font-size: 13px; color: #94a3b8; }
-    .ticker-content { display: inline-block; animation: marquee 25s linear infinite; }
-    .ticker-item { margin-right: 40px; }
-    .ticker-item span { color: #10b981; font-weight: 600; }
-    @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-    .card-container { display: flex; justify-content: center; align-items: center; flex: 1; width: 100%; padding: 20px; box-sizing: border-box; }
-    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 420px; border: 1px solid #334155; box-sizing: border-box; }
+    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid #334155; box-sizing: border-box; }
     .badge { background: #10b981; color: white; font-size: 11px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; display: inline-block; margin-bottom: 12px; }
-    .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
-    .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
-    .input-group { margin-bottom: 16px; position: relative; }
+    .title { font-size: 22px; font-weight: 700; margin-bottom: 24px; }
+    .input-group { margin-bottom: 16px; }
     .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
     .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
-    .toggle-pass { position: absolute; right: 12px; top: 35px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; }
     .btn { width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
     .btn:disabled { opacity: 0.7; cursor: not-allowed; }
     .links { text-align: center; margin-top: 20px; font-size: 14px; color: #94a3b8; }
@@ -30,46 +21,28 @@
   </style>
 </head>
 <body>
-
-  <div class="ticker-bar">
-    <div class="ticker-content">
-      <span class="ticker-item">Equity Mixed Assets Index: <span>$4,280.50 (+2.4%)</span></span>
-      <span class="ticker-item">Global Tech Blend: <span>$1,412.20 (+3.1%)</span></span>
-      <span class="ticker-item">Commodity Core Fund: <span>$892.40 (+0.9%)</span></span>
-      <span class="ticker-item">Stable Growth Portfolio: <span>$2,150.00 (+1.5%)</span></span>
+  <div class="card">
+    <span class="badge">Client Portal</span>
+    <div class="title" id="page-title">Create Client Account</div>
+    
+    <div class="input-group">
+      <label>Full Name</label>
+      <input type="text" id="name" placeholder="John Doe">
     </div>
-  </div>
+    <div class="input-group">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="client@example.com">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="••••••••">
+    </div>
+    
+    <button class="btn" id="signup-btn" onclick="handleSignUp()">Sign Up</button>
+    <div id="alert-box" class="alert-msg"></div>
 
-  <div class="card-container">
-    <div class="card">
-      <span class="badge">Equity Mixed Assets</span>
-      <div class="title">Create Account</div>
-      <div class="subtitle">Join our institutional portfolio network</div>
-      
-      <div class="input-group">
-        <label>Full Name</label>
-        <input type="text" id="name" placeholder="John Doe">
-      </div>
-      <div class="input-group">
-        <label>Email Address</label>
-        <input type="email" id="email" placeholder="client@example.com">
-      </div>
-      <div class="input-group">
-        <label>Password</label>
-        <input type="password" id="password" placeholder="••••••••">
-        <button type="button" class="toggle-pass" onclick="togglePassword('password', this)">Show</button>
-      </div>
-      <div class="input-group">
-        <label>Referral Code (Optional)</label>
-        <input type="text" id="ref-code" placeholder="e.g. admin1">
-      </div>
-      
-      <button class="btn" id="signup-btn" onclick="handleSignUp()">Create Account</button>
-      <div id="alert-box" class="alert-msg"></div>
-
-      <div class="links">
-        Already have an account? <a href="index.html">Log in here</a>
-      </div>
+    <div class="links">
+      Already have an account? <a href="index.html">Log in here</a>
     </div>
   </div>
 
@@ -80,27 +53,15 @@
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     const urlParams = new URLSearchParams(window.location.search);
-    const refParam = urlParams.get('ref');
-    if (refParam) {
-      document.getElementById('ref-code').value = refParam;
-    }
-
-    function togglePassword(fieldId, btn) {
-      const field = document.getElementById(fieldId);
-      if (field.type === 'password') {
-        field.type = 'text';
-        btn.innerText = 'Hide';
-      } else {
-        field.type = 'password';
-        btn.innerText = 'Show';
-      }
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      document.getElementById('page-title').innerText = `Sign Up (Invited)`;
     }
 
     async function handleSignUp() {
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
-      const referralCode = document.getElementById('ref-code').value.trim();
       const alertBox = document.getElementById('alert-box');
       const btn = document.getElementById('signup-btn');
 
@@ -108,7 +69,7 @@
       if (!name || !email || !password) {
         alertBox.style.color = '#ef4444';
         alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
-        alertBox.innerText = "Please fill in all required fields.";
+        alertBox.innerText = "Please fill in all fields.";
         alertBox.style.display = 'block';
         return;
       }
@@ -122,7 +83,7 @@
         alertBox.style.backgroundColor = 'rgba(239, 68, 68, 0.1)';
         alertBox.innerText = error.message;
         alertBox.style.display = 'block';
-        btn.innerText = "Create Account";
+        btn.innerText = "Sign Up";
         btn.disabled = false;
         return;
       }
@@ -133,22 +94,14 @@
         id: userId,
         full_name: name,
         role: 'client',
-        referred_by: referralCode || null,
+        referred_by: refCode || null,
         balance: 0.00,
         volume: 0.00
       }]);
 
-      alertBox.style.color = '#10b981';
-      alertBox.style.backgroundColor = 'rgba(16, 185, 129, 0.1)';
-      alertBox.innerText = "Your account have been created you will be logged in now";
-      alertBox.style.display = 'block';
-
-      setTimeout(async () => {
-        await client.auth.signInWithPassword({ email, password });
-        window.location.href = 'dashboard.html';
-      }, 2000);
+      await client.auth.signInWithPassword({ email, password });
+      window.location.href = 'dashboard.html';
     }
   </script>
-<
-  /body>
+</body>
 </html>
