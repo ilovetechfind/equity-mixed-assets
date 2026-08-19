@@ -39,7 +39,6 @@
     
     .container { width: 100%; max-width: 480px; text-align: center; }
     
-    /* Navigation Bar */
     .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; gap: 8px; }
     .nav-btn { 
       background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(212, 175, 55, 0.05)); 
@@ -79,7 +78,6 @@
       filter: drop-shadow(0 2px 10px rgba(212,175,55,0.25));
     }
     
-    /* Live Balance Display */
     .balance-display {
       background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(154, 123, 32, 0.1));
       border: 1px solid var(--card-border);
@@ -93,7 +91,6 @@
       letter-spacing: 0.3px;
     }
 
-    /* Hero Banner */
     .plan-hero {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -114,7 +111,6 @@
     }
     .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
 
-    /* Wheel Card */
     .wheel-card {
       background: var(--card-bg);
       border: 1px solid var(--card-border);
@@ -186,7 +182,6 @@
       transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
     }
 
-    /* Action Buttons Area */
     .button-group {
       display: flex;
       flex-direction: column;
@@ -230,7 +225,6 @@
       box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
     }
 
-    /* Withdraw to Balance Button Styling */
     .withdraw-btn {
       background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
       color: white;
@@ -240,8 +234,8 @@
     .withdraw-btn:hover {
       box-shadow: 0 12px 35px rgba(16, 185, 129, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.6);
     }
+    .withdraw-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Result Popup */
     #result-msg {
       margin-top: 15px;
       font-size: 1.1rem;
@@ -255,7 +249,6 @@
 <body>
   <div class="container">
     <nav class="nav-bar">
-      <!-- Home button on the left -->
       <a href="dashboard.html" id="home-btn" class="nav-btn" title="Go to Home">
         <svg viewBox="0 0 24 24" fill="none"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Home</span>
@@ -271,7 +264,7 @@
 
     <div class="wheel-card">
       <div class="spins-info-wrapper">
-        <div id="spinsCounter" class="spins-left-badge">Spins Remaining: 5</div>
+        <div id="spinsCounter" class="spins-left-badge">Spins Remaining: --</div>
         <div id="timerBadge" class="timer-badge">⏳ Next free spins in: --:--</div>
       </div>
 
@@ -281,11 +274,10 @@
       </div>
 
       <div class="button-group">
-        <button id="spinBtn" class="action-btn" onclick="startSpin()">
-          <span>Spin the Wheel</span>
+        <button id="spinBtn" class="action-btn" onclick="startSpin()" disabled>
+          <span>Loading...</span>
         </button>
 
-        <!-- Withdraw Winnings Button -->
         <a href="#" id="withdrawBtn" class="action-btn withdraw-btn" onclick="withdrawWinnings(event)">
           <span>Withdraw Winnings to Balance</span>
         </a>
@@ -295,10 +287,12 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    // --- URL params and user ID ---
+    // --- URL params ---
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id') || '';
+    let targetUserId = urlParams.get('id') || '';
 
     // --- DOM refs ---
     const canvas = document.getElementById('wheelCanvas');
@@ -309,19 +303,13 @@
     const balanceDisplay = document.getElementById('top-balance-display');
     const timerBadge = document.getElementById('timerBadge');
 
-    // --- Keys ---
-    const balanceKey = `user_balance_${targetUserId}`;
-    const spinEarningsKey = `spin_earnings_${targetUserId}`;
-    const stateKey = `spin_state_${targetUserId}`; 
-    const lastResetKey = `spin_last_reset_${targetUserId}`;
-
     // --- Configuration ---
-    const DAILY_SPINS = 5;           
-    const RESET_INTERVAL_MS = 45 * 60 * 1000; // Updated to 45 minutes timer
-    const COST_FOR_MORE = 150;       // $150 for 5 extra spins
-    const EXTRA_SPINS = 5;          
+    const DAILY_SPINS = 5;
+    const RESET_INTERVAL_MS = 45 * 60 * 1000; // 45-minute refill timer
+    const COST_FOR_MORE = 150;
+    const EXTRA_SPINS = 5;
 
-    // --- Sectors (matching visual order counter-clockwise / matching image orientation: $10 at bottom, right side up, matching reference layout) ---
+    // --- Sectors ---
     const sectors = [
       { color: '#1e293b', text: '$10', value: 10 },
       { color: '#0f172a', text: '$25', value: 25 },
@@ -338,63 +326,90 @@
     ];
 
     const arc = Math.PI / (sectors.length / 2);
-    let startAngle = -Math.PI / 2; // Adjusted orientation so sector texts align correctly with top pointer
+    let startAngle = -Math.PI / 2;
     let currentAngle = 0;
     let isSpinning = false;
 
-    // --- Balance Management ---
-    function getSpinEarnings() {
-      let earnings = localStorage.getItem(spinEarningsKey);
-      if (earnings === null) {
-        earnings = '0.00';
-        localStorage.setItem(spinEarningsKey, earnings);
-      }
-      return parseFloat(earnings) || 0;
+    // Local cache of DB state, refreshed on load and after each write
+    let stateCache = { spins_left: DAILY_SPINS, last_reset: new Date().toISOString(), spin_earnings: 0 };
+
+    // --- Resolve real user id: auth session first, then ?id=, then a stable guest fallback ---
+    async function resolveUserId() {
+      if (targetUserId) return targetUserId;
+      try {
+        const { data } = await client.auth.getUser();
+        if (data && data.user && data.user.id) return data.user.id;
+      } catch (e) {}
+      return 'default_user';
     }
 
-    function setSpinEarnings(val) {
-      localStorage.setItem(spinEarningsKey, val.toFixed(2));
+    // --- Load or create spin state row ---
+    async function loadState() {
+      const { data, error } = await client
+        .from('spin_states')
+        .select('*')
+        .eq('user_id', targetUserId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading spin state:', error.message);
+        return;
+      }
+
+      if (!data) {
+        const { data: created, error: insertError } = await client
+          .from('spin_states')
+          .insert({ user_id: targetUserId, spins_left: DAILY_SPINS, last_reset: new Date().toISOString(), spin_earnings: 0 })
+          .select()
+          .single();
+        if (insertError) {
+          console.error('Error creating spin state:', insertError.message);
+          return;
+        }
+        stateCache = created;
+      } else {
+        stateCache = data;
+      }
+
+      // Apply the 45-minute reset if due
+      const lastReset = new Date(stateCache.last_reset).getTime();
+      const now = Date.now();
+      if (now - lastReset >= RESET_INTERVAL_MS) {
+        const { data: reset, error: resetError } = await client
+          .from('spin_states')
+          .update({ spins_left: DAILY_SPINS, last_reset: new Date().toISOString() })
+          .eq('user_id', targetUserId)
+          .select()
+          .single();
+        if (!resetError && reset) stateCache = reset;
+      }
+    }
+
+    async function saveState(patch) {
+      const { data, error } = await client
+        .from('spin_states')
+        .update(patch)
+        .eq('user_id', targetUserId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error saving spin state:', error.message);
+        return false;
+      }
+      stateCache = data;
+      return true;
     }
 
     function updateBalanceDisplay() {
-      const currentEarnings = getSpinEarnings();
-      balanceDisplay.innerText = `$${currentEarnings.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+      const earnings = Number(stateCache.spin_earnings) || 0;
+      balanceDisplay.innerText = `$${earnings.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
     }
 
-    // --- Spin state with 45-minute automatic reset timer ---
-    function getState() {
-      let state = JSON.parse(localStorage.getItem(stateKey));
-      if (!state) {
-        state = { spinsLeft: DAILY_SPINS };
-        localStorage.setItem(stateKey, JSON.stringify(state));
-      }
-      
-      let lastReset = localStorage.getItem(lastResetKey);
-      if (!lastReset) {
-        lastReset = Date.now();
-        localStorage.setItem(lastResetKey, lastReset);
-      } else {
-        lastReset = parseInt(lastReset, 10);
-      }
-      
-      const now = Date.now();
-      if (now - lastReset >= RESET_INTERVAL_MS) {
-        state.spinsLeft = DAILY_SPINS;
-        localStorage.setItem(stateKey, JSON.stringify(state));
-        localStorage.setItem(lastResetKey, String(now));
-      }
-      return state;
-    }
-
-    function saveState(state) {
-      localStorage.setItem(stateKey, JSON.stringify(state));
-    }
-
-    // --- Update UI ---
+    // --- Update UI from cached state ---
     function updateUI() {
-      const state = getState();
-      const remaining = state.spinsLeft;
-      
+      const remaining = stateCache.spins_left;
+
       if (remaining > 0) {
         spinsCounter.innerText = `Spins Remaining: ${remaining}`;
         spinBtn.innerHTML = `<span>Spin the Wheel</span>`;
@@ -407,19 +422,17 @@
         spinBtn.disabled = false;
       }
 
-      // Update 45-minute countdown timer badge
-      const lastReset = localStorage.getItem(lastResetKey);
-      if (lastReset) {
-        const elapsed = Date.now() - parseInt(lastReset, 10);
-        const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
-        if (remainingMs > 0) {
-          const minutes = Math.floor(remainingMs / (60 * 1000));
-          const seconds = Math.floor((remainingMs % (60 * 1000)) / 1000);
-          timerBadge.textContent = `⏳ Next free spins in: ${minutes}m ${seconds}s`;
-        } else {
-          timerBadge.textContent = `⏳ Free spins restored!`;
-        }
+      const lastReset = new Date(stateCache.last_reset).getTime();
+      const elapsed = Date.now() - lastReset;
+      const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
+      if (remainingMs > 0) {
+        const minutes = Math.floor(remainingMs / (60 * 1000));
+        const seconds = Math.floor((remainingMs % (60 * 1000)) / 1000);
+        timerBadge.textContent = `⏳ Next free spins in: ${minutes}m ${seconds}s`;
+      } else {
+        timerBadge.textContent = `⏳ Free spins restored!`;
       }
+
       updateBalanceDisplay();
     }
 
@@ -457,60 +470,61 @@
     }
 
     // --- Spin Action ---
-    function startSpin() {
+    async function startSpin() {
       if (isSpinning) return;
 
-      const state = getState();
-      const currentEarnings = getSpinEarnings();
-
-      // If spins run out, directly lead to payment gateway
-      if (state.spinsLeft <= 0) {
-        const depositUrl = targetUserId 
-          ? `deposit.html?id=${targetUserId}&amount=${COST_FOR_MORE}&type=spins` 
+      if (stateCache.spins_left <= 0) {
+        const depositUrl = targetUserId
+          ? `deposit.html?id=${targetUserId}&amount=${COST_FOR_MORE}&type=spins`
           : `deposit.html?amount=${COST_FOR_MORE}&type=spins`;
         window.location.href = depositUrl;
         return;
       }
 
-      // Deduct spin count
-      state.spinsLeft--;
-      saveState(state);
-
       isSpinning = true;
       spinBtn.disabled = true;
       resultMsg.innerText = '';
 
-      // Random spin calculation matching visual orientation seamlessly
+      // Deduct spin count immediately in DB
+      const newSpinsLeft = stateCache.spins_left - 1;
+      const ok = await saveState({ spins_left: newSpinsLeft });
+      if (!ok) {
+        isSpinning = false;
+        spinBtn.disabled = false;
+        resultMsg.style.color = "var(--danger)";
+        resultMsg.innerText = "Could not start spin. Please try again.";
+        return;
+      }
+      updateUI();
+
       const randomSpin = Math.floor(Math.random() * 360) + 2160;
       currentAngle += randomSpin;
       canvas.style.transform = `rotate(${currentAngle}deg)`;
 
-      setTimeout(() => {
+      setTimeout(async () => {
         isSpinning = false;
         spinBtn.disabled = false;
 
-        // Calculate accurate winning sector index based on top pointer alignment
         const normalizedAngle = (360 - (currentAngle % 360)) % 360;
         const sectorDegree = 360 / sectors.length;
         const winningIndex = Math.floor(normalizedAngle / sectorDegree) % sectors.length;
         const winningSector = sectors[winningIndex];
 
-        // Display exact congratulations win text
         resultMsg.style.color = "#4ade80";
-        resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`
+        resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`;
 
-        // Accumulate exact winning amount to spin winnings balance and update display instantly
-        const newEarnings = currentEarnings + winningSector.value;
-        setSpinEarnings(newEarnings);
+        const newEarnings = (Number(stateCache.spin_earnings) || 0) + winningSector.value;
+        await saveState({ spin_earnings: newEarnings });
 
         updateUI();
       }, 4000);
     }
 
-    // --- Withdraw Winnings to Main Account Balance ---
-    function withdrawWinnings(e) {
+    // --- Withdraw Winnings to real account balance (profiles.balance) ---
+    async function withdrawWinnings(e) {
       e.preventDefault();
-      const spinEarnings = getSpinEarnings();
+
+      const spinEarnings = Number(stateCache.spin_earnings) || 0;
 
       if (spinEarnings <= 0) {
         resultMsg.style.color = "var(--danger)";
@@ -518,48 +532,56 @@
         return;
       }
 
-      // Read master user balance or initialize to 0
-      let masterBalance = parseFloat(localStorage.getItem(balanceKey)) || 0.00;
-      masterBalance += spinEarnings;
+      const withdrawBtn = document.getElementById('withdrawBtn');
+      withdrawBtn.style.pointerEvents = 'none';
+      withdrawBtn.style.opacity = '0.6';
 
-      // Save to main balance storage
-      localStorage.setItem(balanceKey, masterBalance.toFixed(2));
+      // Read current profile balance
+      const { data: profile, error: profileError } = await client
+        .from('profiles')
+        .select('balance')
+        .eq('id', targetUserId)
+        .single();
 
-      // Reset spin earnings back to 0.00 after successful transfer
-      setSpinEarnings(0.00);
+      if (profileError) {
+        resultMsg.style.color = "var(--danger)";
+        resultMsg.innerText = "Could not read your account balance. Try again.";
+        withdrawBtn.style.pointerEvents = 'auto';
+        withdrawBtn.style.opacity = '1';
+        return;
+      }
+
+      const currentBalance = Number(profile.balance) || 0;
+      const newBalance = currentBalance + spinEarnings;
+
+      const { error: updateError } = await client
+        .from('profiles')
+        .update({ balance: newBalance })
+        .eq('id', targetUserId);
+
+      if (updateError) {
+        resultMsg.style.color = "var(--danger)";
+        resultMsg.innerText = "Failed to transfer winnings: " + updateError.message;
+        withdrawBtn.style.pointerEvents = 'auto';
+        withdrawBtn.style.opacity = '1';
+        return;
+      }
+
+      // Reset spin earnings back to 0 after a successful transfer
+      await saveState({ spin_earnings: 0 });
       updateUI();
 
       resultMsg.style.color = "#4ade80";
       resultMsg.innerText = `Successfully transferred $${spinEarnings.toFixed(2)} to your main balance!`;
 
-      // Optional redirect to dashboard/home after a short delay
       setTimeout(() => {
         const dashboardUrl = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
         window.location.href = dashboardUrl;
       }, 1500);
     }
 
-    // --- Live Tick Loop for timer update ---
-    setInterval(updateUI, 1000);
-
-    // --- Init ---
-    if (!localStorage.getItem(lastResetKey)) {
-      localStorage.setItem(lastResetKey, String(Date.now()));
-    }
-
-    // Ensure completely zero default balance for brand new user accounts if not initialized
-    if (localStorage.getItem(balanceKey) === null) {
-      localStorage.setItem(balanceKey, '0.00');
-    }
-
-    updateUI();
-    drawWheel();
-
-    // Set home button link dynamically with user ID if present
-    const homeBtn = document.getElementById('home-btn');
-    if (targetUserId) {
-      homeBtn.href = `dashboard.html?id=${targetUserId}`;
-    }
-  </script>
-</body>
-</html>
+    // --- Live tick loop for timer + auto-refill check ---
+    setInterval(async () => {
+      const lastReset = new Date(stateCache.last_reset).getTime();
+      if (Date.now() - lastReset >= RESET_INTERVAL_MS && stateCache.spins_left < DAILY_SPINS) {
+        await saveState({ spins_left: DAILY_SPINS, last_
