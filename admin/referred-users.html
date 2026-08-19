@@ -12,7 +12,6 @@
       --card-border: rgba(255, 255, 255, 0.08);
       --text-muted: #94a3b8;
       --primary: #6366f1;
-      --primary-hover: #4f46e5;
     }
 
     body { 
@@ -70,14 +69,15 @@
           <thead>
             <tr>
               <th>User ID</th>
-              <th>Username</th>
-              <th>Gmail</th>
+              <th>Full Name</th>
+              <th>Email</th>
               <th>Balance</th>
+              <th>Joined</th>
               <th>Action</th>
             </tr>
           </thead>
           <tbody id="referred-users-body">
-            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading network data...</td></tr>
+            <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Loading network data...</td></tr>
           </tbody>
         </table>
       </div>
@@ -113,17 +113,24 @@
         currentUser = session.user;
       }
 
-      const { data: profile } = await client
+      // Get the admin's referral code
+      const { data: profile, error: profileError } = await client
         .from('profiles')
         .select('referral_code')
         .eq('id', currentUser.id)
         .maybeSingle();
 
+      if (profileError) {
+        console.error('Error fetching profile:', profileError);
+        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171;">Error loading profile.</td></tr>`;
+        return;
+      }
+
       const code = profile?.referral_code;
 
       if (!code || code.trim() === '') {
         document.getElementById('user-count-display').innerText = "Total Users Joined: 0";
-        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Please set up your referral code in the Home dashboard first.</td></tr>`;
+        document.getElementById('referred-users-body').innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">Please set up your referral code in the Home dashboard first.</td></tr>`;
         return;
       }
 
@@ -131,18 +138,26 @@
     }
 
     async function loadReferredUsersList(code) {
+      // Query the profiles table directly – using the correct column names
       const { data, error } = await client
-        .from('user_profiles_view')
-        .select('*')
+        .from('profiles')
+        .select('id, full_name, email, balance, created_at')
         .eq('referred_by', code)
         .order('created_at', { ascending: false });
 
       const tbody = document.getElementById('referred-users-body');
       const countDisplay = document.getElementById('user-count-display');
 
-      if (error || !data || data.length === 0) {
+      if (error) {
+        console.error('Error loading referred users:', error);
         countDisplay.innerText = "Total Users Joined: 0";
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No users have joined with your code yet.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171;">Error loading users: ${error.message}</td></tr>`;
+        return;
+      }
+
+      if (!data || data.length === 0) {
+        countDisplay.innerText = "Total Users Joined: 0";
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No users have joined with your code yet.</td></tr>`;
         return;
       }
 
@@ -156,9 +171,10 @@
               <button class="copy-btn" onclick="copyId('${user.id}')">Copy</button>
             </div>
           </td>
-          <td><strong>${user.username || 'N/A'}</strong></td>
+          <td><strong>${user.full_name || 'N/A'}</strong></td>
           <td>${user.email || 'N/A'}</td>
           <td>$${Number(user.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+          <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</td>
           <td><a href="user-info.html?id=${user.id}" class="view-btn">View Info</a></td>
         </tr>
       `).join('');
@@ -168,6 +184,8 @@
       if(id && id !== 'undefined') {
         navigator.clipboard.writeText(id).then(() => {
           alert('Full User ID copied to clipboard!');
+        }).catch(() => {
+          alert('Could not copy. Select the ID manually.');
         });
       }
     }
