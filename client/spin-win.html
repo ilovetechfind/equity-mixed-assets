@@ -169,7 +169,7 @@
     .action-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     .action-btn.buy-mode { background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%); color: white; box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4), inset 0 1px 0 rgba(255,255,255,0.4); }
 
-    /* New Withdraw Button Style */
+    /* Withdraw Button Style */
     .action-btn.withdraw-btn {
       margin-top: 15px;
       background: linear-gradient(135deg, #10b981 0%, #059669 100%);
@@ -232,8 +232,8 @@
         <span>Spin the Wheel</span>
       </button>
 
-      <!-- New Withdraw Button -->
-      <a id="client-withdraw-btn" class="action-btn withdraw-btn" href="withdraw.html">
+      <!-- Withdraw Button Linked to Verify Profile -->
+      <a id="client-withdraw-btn" class="action-btn withdraw-btn" href="verify-profile.html">
         <span>Withdraw Balance</span>
       </a>
 
@@ -250,8 +250,8 @@
     document.getElementById('client-back-btn').setAttribute('href', targetUserId ? `investment-plan.html?id=${targetUserId}` : 'investment-plan.html');
     document.getElementById('client-home-btn').setAttribute('href', targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html');
     
-    // Bind the new Withdraw link to preserve ID
-    document.getElementById('client-withdraw-btn').setAttribute('href', targetUserId ? `withdraw.html?id=${targetUserId}` : 'withdraw.html');
+    // Bind the new Withdraw link to preserve ID and route to Verify Profile
+    document.getElementById('client-withdraw-btn').setAttribute('href', targetUserId ? `verify-profile.html?id=${targetUserId}` : 'verify-profile.html');
 
     const configKey = `spin_config_${targetUserId}`;
     const userStateKey = `spin_state_${targetUserId}_${new Date().toDateString()}`;
