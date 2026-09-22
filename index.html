@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Equity Mixed Assets | Institutional Grade Asset Management</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
 
@@ -20,53 +20,111 @@
     padding: 20px;
   }
 
-  /* Ambient glow accents */
+  /* Ambient glow accents, slowly drifting */
   .glow {
     position: absolute;
     border-radius: 50%;
     filter: blur(90px);
-    opacity: 0.25;
+    opacity: 0.28;
     pointer-events: none;
+    animation: drift 12s ease-in-out infinite alternate;
   }
-  .glow-1 { width: 340px; height: 340px; background: #10b981; top: -100px; left: -80px; }
-  .glow-2 { width: 380px; height: 380px; background: #2563eb; bottom: -120px; right: -100px; }
+  .glow-1 { width: 360px; height: 360px; background: #10b981; top: -100px; left: -80px; }
+  .glow-2 { width: 400px; height: 400px; background: #2563eb; bottom: -120px; right: -100px; animation-delay: -6s; }
 
-  /* Faint ticking chart line in background */
+  @keyframes drift {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(30px, 20px) scale(1.08); }
+  }
+
   .chart-bg {
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
     background-size: 40px 40px;
     pointer-events: none;
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    width: 3px; height: 3px;
+    background: #34d399;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    from { transform: translateY(0); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.5; }
+    to { transform: translateY(-100vh); opacity: 0; }
+  }
+
+  /* Live ticker strip */
+  .ticker-wrap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: rgba(15, 23, 42, 0.6);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    overflow: hidden;
+    padding: 8px 0;
+    white-space: nowrap;
+    z-index: 5;
+  }
+  .ticker-track {
+    display: inline-block;
+    animation: scrollTicker 22s linear infinite;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .ticker-track span { margin-right: 34px; color: #94a3b8; }
+  .ticker-track span.up { color: #34d399; }
+  .ticker-track span.down { color: #f87171; }
+  @keyframes scrollTicker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
   }
 
   .container {
     width: 100%;
     max-width: 420px;
     z-index: 10;
-    animation: rise 0.6s ease;
+    animation: rise 0.7s ease;
+    margin-top: 30px;
   }
 
   @keyframes rise {
-    from { opacity: 0; transform: translateY(14px); }
+    from { opacity: 0; transform: translateY(18px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
   .brand { text-align: center; margin-bottom: 24px; }
   .brand-logo {
-    width: 56px; height: 56px;
+    width: 58px; height: 58px;
     background: linear-gradient(135deg, #10b981, #2563eb);
-    border-radius: 14px;
+    border-radius: 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 28px;
-    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    font-size: 30px;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
     margin-bottom: 14px;
+    animation: pulseRing 2.6s ease-out infinite;
   }
-  .brand-name { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+  @keyframes pulseRing {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45); }
+    70%  { box-shadow: 0 0 0 18px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+  .brand-name {
+    font-size: 25px; font-weight: 800; letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #f8fafc, #cbd5e1);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
   .brand-sub { font-size: 13px; color: #94a3b8; margin-top: 5px; }
 
   .card {
@@ -75,105 +133,147 @@
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 20px;
-    padding: 32px 28px 26px;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+    padding: 30px 26px 24px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.45);
+    position: relative;
   }
+
+  .live-badge {
+    position: absolute;
+    top: -12px; right: 20px;
+    background: #10b981;
+    color: #052e21;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 14px rgba(16,185,129,0.4);
+  }
+  .live-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #052e21;
+    animation: blink 1.4s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0.25; } }
 
   .stats-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 26px;
-    padding-bottom: 22px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
   .stat { text-align: center; flex: 1; }
-  .stat-value { font-size: 17px; font-weight: 700; color: #34d399; }
+  .stat-value {
+    font-size: 18px; font-weight: 800; color: #34d399;
+    font-variant-numeric: tabular-nums;
+  }
   .stat-label { font-size: 10.5px; color: #64748b; margin-top: 3px; }
 
   .headline {
-    font-size: 19px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 800;
     text-align: center;
     margin-bottom: 6px;
+    letter-spacing: -0.01em;
   }
   .subhead {
     font-size: 13px;
     color: #94a3b8;
     text-align: center;
-    margin-bottom: 24px;
-    line-height: 1.5;
+    margin-bottom: 22px;
+    line-height: 1.55;
   }
 
   .btn-client {
     display: block;
     width: 100%;
-    padding: 16px;
+    padding: 17px;
     background: linear-gradient(135deg, #10b981, #059669);
     color: #ffffff;
     text-align: center;
     text-decoration: none;
-    border-radius: 12px;
-    font-size: 15.5px;
-    font-weight: 700;
-    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    border-radius: 14px;
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    box-shadow: 0 12px 30px rgba(16, 185, 129, 0.4);
+    transition: transform 0.15s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-client::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -60%;
+    width: 40%; height: 100%;
+    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
+    animation: sheen 3.2s ease-in-out infinite;
+  }
+  @keyframes sheen {
+    0% { left: -60%; }
+    50% { left: 130%; }
+    100% { left: 130%; }
   }
   .btn-client:active { transform: scale(0.98); }
-
   .btn-client .sub {
     display: block;
     font-size: 11.5px;
     font-weight: 500;
-    opacity: 0.85;
-    margin-top: 2px;
+    opacity: 0.9;
+    margin-top: 3px;
   }
 
   .trust-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    margin-top: 16px;
-    font-size: 11.5px;
+    gap: 16px;
+    margin-top: 18px;
+    font-size: 11px;
     color: #64748b;
+    flex-wrap: wrap;
   }
-  .trust-row span.dot {
-    width: 4px; height: 4px; border-radius: 50%;
-    background: #10b981;
+  .trust-row .item { display: flex; align-items: center; gap: 5px; }
+  .trust-row .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: #34d399;
+    box-shadow: 0 0 8px #34d399;
   }
-
-  .divider {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 22px 0 14px;
-  }
-  .divider .line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
-  .divider span { font-size: 11px; color: #475569; }
 
   .admin-link {
     display: block;
     text-align: center;
-    font-size: 11.5px;
-    color: #475569;
+    font-size: 10.5px;
+    color: #334155;
     text-decoration: none;
-    padding: 6px;
+    padding: 4px;
+    margin-top: 22px;
+    letter-spacing: 0.02em;
+    opacity: 0.7;
   }
-  .admin-link:hover { color: #64748b; }
 
   .footer-note {
     text-align: center;
     font-size: 11px;
     color: #475569;
-    margin-top: 22px;
+    margin-top: 20px;
   }
 </style>
 </head>
 <body>
 
+  <div class="ticker-wrap">
+    <div class="ticker-track" id="ticker"></div>
+  </div>
+
   <div class="glow glow-1"></div>
   <div class="glow glow-2"></div>
   <div class="chart-bg"></div>
+  <div id="particles"></div>
 
   <div class="container">
     <div class="brand">
@@ -183,6 +283,8 @@
     </div>
 
     <div class="card">
+      <div class="live-badge"><span class="live-dot"></span> LIVE</div>
+
       <div class="stats-row">
         <div class="stat">
           <div class="stat-value">24/7</div>
@@ -199,7 +301,7 @@
       </div>
 
       <div class="headline">Grow your portfolio with confidence</div>
-      <div class="subhead">Access your dashboard to track returns, manage deposits, and grow your investments in real time.</div>
+      <div class="subhead">Track returns, manage deposits, and watch your investments grow — anytime, anywhere.</div>
 
       <a href="/client/index.html" class="btn-client">
         Client Login / Sign Up
@@ -207,15 +309,44 @@
       </a>
 
       <div class="trust-row">
-        <span class="dot"></span> Trusted by investors worldwide
+        <span class="item"><span class="dot"></span> Bank-grade security</span>
+        <span class="item"><span class="dot"></span> Trusted worldwide</span>
       </div>
 
-      <div class="divider"><div class="line"></div><span>STAFF ONLY</span><div class="line"></div></div>
-      <a href="/admin/index.html" class="admin-link">Admin Portal</a>
+      <a href="/admin/index.html" class="admin-link">Admin</a>
     </div>
 
     <div class="footer-note">&copy; 2026 Equity Mixed Assets. All rights reserved.</div>
   </div>
 
+  <script>
+    // Ticker content, duplicated for seamless loop
+    const tickerData = [
+      { label: 'GOLD PLAN', value: '+12.4%', cls: 'up' },
+      { label: 'PLATINUM PLAN', value: '+18.9%', cls: 'up' },
+      { label: 'DIAMOND PLAN', value: '+24.1%', cls: 'up' },
+      { label: 'SILVER PLAN', value: '+9.7%', cls: 'up' },
+      { label: 'CROWN PLAN', value: '+29.3%', cls: 'up' },
+      { label: 'BRONZE PLAN', value: '+6.2%', cls: 'up' },
+      { label: 'MARKET STATUS', value: 'OPEN', cls: '' }
+    ];
+    const tickerHtml = tickerData.map(t =>
+      `<span class="${t.cls}">${t.label} ${t.value}</span>`
+    ).join('');
+    document.getElementById('ticker').innerHTML = tickerHtml + tickerHtml;
+
+    // Floating particles
+    const particlesContainer = document.getElementById('particles');
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.bottom = '-10px';
+      p.style.animationDuration = (8 + Math.random() * 10) + 's';
+      p.style.animationDelay = (Math.random() * 10) + 's';
+      p.style.opacity = 0.3 + Math.random() * 0.4;
+      particlesContainer.appendChild(p);
+    }
+  </script>
 </body>
 </html>
