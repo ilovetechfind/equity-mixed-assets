@@ -2,52 +2,220 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Equity Mixed Assets</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Equity Mixed Assets | Institutional Grade Asset Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+
   body {
-    margin: 0;
-    height: 100vh;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at 20% 20%, #132038 0%, #0f172a 45%, #0a0f1c 100%);
+    color: #f8fafc;
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+  }
+
+  /* Ambient glow accents */
+  .glow {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.25;
+    pointer-events: none;
+  }
+  .glow-1 { width: 340px; height: 340px; background: #10b981; top: -100px; left: -80px; }
+  .glow-2 { width: 380px; height: 380px; background: #2563eb; bottom: -120px; right: -100px; }
+
+  /* Faint ticking chart line in background */
+  .chart-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 420px;
+    z-index: 10;
+    animation: rise 0.6s ease;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .brand { text-align: center; margin-bottom: 24px; }
+  .brand-logo {
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #10b981, #2563eb);
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    box-shadow: 0 8px 30px rgba(16, 185, 129, 0.35);
+    margin-bottom: 14px;
+  }
+  .brand-name { font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+  .brand-sub { font-size: 13px; color: #94a3b8; margin-top: 5px; }
+
+  .card {
+    background: rgba(30, 41, 59, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 20px;
+    padding: 32px 28px 26px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 26px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .stat { text-align: center; flex: 1; }
+  .stat-value { font-size: 17px; font-weight: 700; color: #34d399; }
+  .stat-label { font-size: 10.5px; color: #64748b; margin-top: 3px; }
+
+  .headline {
+    font-size: 19px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+  .subhead {
+    font-size: 13px;
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .btn-client {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 12px;
+    font-size: 15.5px;
+    font-weight: 700;
+    box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn-client:active { transform: scale(0.98); }
+
+  .btn-client .sub {
+    display: block;
+    font-size: 11.5px;
+    font-weight: 500;
+    opacity: 0.85;
+    margin-top: 2px;
+  }
+
+  .trust-row {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #0f172a;
-    font-family: system-ui, sans-serif;
+    gap: 6px;
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: #64748b;
   }
-  .card {
-    background: #1e293b;
-    padding: 40px;
-    border-radius: 16px;
-    text-align: center;
-    color: white;
-    width: 320px;
+  .trust-row span.dot {
+    width: 4px; height: 4px; border-radius: 50%;
+    background: #10b981;
   }
-  h1 {
-    font-size: 22px;
-    margin-bottom: 30px;
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 22px 0 14px;
   }
-  a {
+  .divider .line { flex: 1; height: 1px; background: rgba(255,255,255,0.08); }
+  .divider span { font-size: 11px; color: #475569; }
+
+  .admin-link {
     display: block;
-    padding: 14px;
-    margin: 12px 0;
-    border-radius: 10px;
+    text-align: center;
+    font-size: 11.5px;
+    color: #475569;
     text-decoration: none;
-    font-weight: 600;
+    padding: 6px;
   }
-  .client {
-    background: #22c55e;
-    color: #0f172a;
-  }
-  .admin {
-    background: #3b82f6;
-    color: white;
+  .admin-link:hover { color: #64748b; }
+
+  .footer-note {
+    text-align: center;
+    font-size: 11px;
+    color: #475569;
+    margin-top: 22px;
   }
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Equity Mixed Assets</h1>
-    <a class="client" href="/client/index.html">Client Login</a>
-    <a class="admin" href="/admin/index.html">Admin Login</a>
+
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  <div class="chart-bg"></div>
+
+  <div class="container">
+    <div class="brand">
+      <div class="brand-logo">📈</div>
+      <div class="brand-name">Equity Mixed Assets</div>
+      <div class="brand-sub">Institutional Grade Asset Management</div>
+    </div>
+
+    <div class="card">
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-value">24/7</div>
+          <div class="stat-label">Portfolio Access</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">Secure</div>
+          <div class="stat-label">Encrypted Ledger</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">Global</div>
+          <div class="stat-label">Multi-Asset Reach</div>
+        </div>
+      </div>
+
+      <div class="headline">Grow your portfolio with confidence</div>
+      <div class="subhead">Access your dashboard to track returns, manage deposits, and grow your investments in real time.</div>
+
+      <a href="/client/index.html" class="btn-client">
+        Client Login / Sign Up
+        <span class="sub">Access your investment dashboard</span>
+      </a>
+
+      <div class="trust-row">
+        <span class="dot"></span> Trusted by investors worldwide
+      </div>
+
+      <div class="divider"><div class="line"></div><span>STAFF ONLY</span><div class="line"></div></div>
+      <a href="/admin/index.html" class="admin-link">Admin Portal</a>
+    </div>
+
+    <div class="footer-note">&copy; 2026 Equity Mixed Assets. All rights reserved.</div>
   </div>
+
 </body>
 </html>
