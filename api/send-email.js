@@ -9,7 +9,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'RESEND_API_KEY is missing from Vercel environment variables.' });
     }
 
-    // Safely parse body if it arrives as a string or object
     let body = req.body;
     if (typeof body === 'string') {
       try {
@@ -19,14 +18,14 @@ export default async function handler(req, res) {
       }
     }
 
-    // Accept flexible key names matching whatever the frontend script sends
-    const to = body?.to || body?.email || body?.recipient;
+    // Direct mapping to match your frontend form inputs
+    const to = body?.email || body?.to;
     const subject = body?.subject;
-    const html = body?.html || body?.message || body?.content;
+    const html = body?.html || body?.message;
 
     if (!to || !subject || !html) {
       return res.status(400).json({ 
-        error: `Missing required fields. Received: recipient=${to ? 'OK' : 'missing'}, subject=${subject ? 'OK' : 'missing'}, body=${html ? 'OK' : 'missing'}` 
+        error: `Missing required fields. email: ${to ? 'OK' : 'missing'}, subject: ${subject ? 'OK' : 'missing'}, html: ${html ? 'OK' : 'missing'}` 
       });
     }
 
@@ -38,7 +37,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: 'Equity Mixed Assets <support@equitymixedasset.cc>',
-        to: Array.isArray(to) ? to : [to],
+        to: [to],
         subject: subject,
         html: html
       })
@@ -54,4 +53,4 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
-                                               }
+}
