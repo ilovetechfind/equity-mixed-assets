@@ -92,7 +92,7 @@
         </div>
 
         <div class="form-group">
-          <label>Email Address</label>
+          <label>Email Address (Supabase Auth)</label>
           <input type="email" id="user-email" disabled placeholder="Loading email...">
         </div>
 
@@ -164,14 +164,12 @@
     function toggleEditMode() {
       isEditing = !isEditing;
       const usernameInput = document.getElementById('user-username');
-      const emailInput = document.getElementById('user-email');
       const balanceInput = document.getElementById('user-balance');
       const volumeInput = document.getElementById('user-volume');
       const saveBtn = document.getElementById('save-btn');
       const toggleBtn = document.getElementById('toggle-edit-btn');
 
       usernameInput.disabled = !isEditing;
-      emailInput.disabled = !isEditing;
       balanceInput.disabled = !isEditing;
       volumeInput.disabled = !isEditing;
 
@@ -195,6 +193,7 @@
         return;
       }
 
+      // Load profile data
       const { data, error } = await client
         .from('profiles')
         .select('*')
@@ -207,8 +206,16 @@
       }
 
       document.getElementById('user-username').value = data.username || data.full_name || data.name || '';
-      document.getElementById('user-email').value = data.email || data.user_email || 'Not available';
       document.getElementById('user-balance').value = data.balance || 0;
+
+      // Pull email directly using our newly created Supabase function
+      const { data: emailData, error: emailError } = await client.rpc('get_user_email', { user_id: targetUserId });
+      
+      if (!emailError && emailData) {
+        document.getElementById('user-email').value = emailData;
+      } else {
+        document.getElementById('user-email').value = data.email || data.user_email || 'Not available';
+      }
       
       const vol = data.volume_percentage || 0;
       document.getElementById('user-volume').value = vol;
@@ -218,7 +225,6 @@
     async function updateUserData(e) {
       e.preventDefault();
       const newUsername = document.getElementById('user-username').value.trim();
-      const newEmail = document.getElementById('user-email').value.trim();
       const newBalance = parseFloat(document.getElementById('user-balance').value) || 0;
       const newVolume = parseInt(document.getElementById('user-volume').value) || 0;
       const statusEl = document.getElementById('form-status');
@@ -233,7 +239,6 @@
         .from('profiles')
         .update({ 
           username: newUsername,
-          email: newEmail,
           balance: newBalance,
           volume_percentage: newVolume
         })
