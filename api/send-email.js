@@ -18,10 +18,10 @@ export default async function handler(req, res) {
       }
     }
 
-    // Direct mapping to match your frontend form inputs
-    const to = body?.email || body?.to;
-    const subject = body?.subject;
-    const html = body?.html || body?.message;
+    // Capture every possible key combination from the frontend
+    const to = body?.email || body?.to || body?.recipient;
+    const subject = body?.subject || body?.title;
+    const html = body?.html || body?.message || body?.content || body?.body;
 
     if (!to || !subject || !html) {
       return res.status(400).json({ 
