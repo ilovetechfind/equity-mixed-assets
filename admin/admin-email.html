@@ -39,6 +39,11 @@
     </div>
 
     <div class="input-group">
+      <label>Transaction Amount (Optional)</label>
+      <input type="text" id="email-amount" placeholder="e.g. $5,000.00">
+    </div>
+
+    <div class="input-group">
       <label>Email Subject</label>
       <input type="text" id="email-subject" placeholder="Important update regarding your portfolio">
     </div>
@@ -74,12 +79,13 @@
       const email = document.getElementById('client-email').value.trim();
       const subject = document.getElementById('email-subject').value.trim();
       const htmlContent = document.getElementById('email-body').value.trim();
+      const amount = document.getElementById('email-amount').value.trim();
       const statusMsg = document.getElementById('status-msg');
       const btn = document.getElementById('send-btn');
 
       if (!email || !subject || !htmlContent) {
         statusMsg.style.color = '#ef4444';
-        statusMsg.innerText = "Please fill in all fields.";
+        statusMsg.innerText = "Please fill in all required fields.";
         statusMsg.style.display = 'block';
         return;
       }
@@ -92,7 +98,7 @@
         const response = await fetch('/api/send-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ to: email, subject, htmlContent })
+          body: JSON.stringify({ to: email, subject, htmlContent, amount })
         });
 
         const result = await response.json();
