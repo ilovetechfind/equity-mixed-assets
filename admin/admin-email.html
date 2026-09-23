@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Send Client Email</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; padding: 20px; display: flex; justify-content: center; }
+    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 600px; border: 1px solid #334155; }
+    .title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #38bdf8; }
+    .input-group { margin-bottom: 16px; }
+    .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
+    .input-group textarea { height: 150px; resize: vertical; }
+    .btn { width: 100%; padding: 12px; background-color: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 15px; }
+    .btn:hover { background-color: #0ea5e9; }
+    .status { margin-top: 15px; font-size: 13px; text-align: center; display: none; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="title">Send Branded Client Notification</div>
+    
+    <div class="input-group">
+      <label>Client Email Address</label>
+      <input type="email" id="client-email" placeholder="client@example.com">
+    </div>
+
+    <div class="input-group">
+      <label>Quick Templates</label>
+      <select id="template-select" onchange="applyTemplate()">
+        <option value="">-- Choose Template or Write Custom --</option>
+        <option value="payment">Payment Confirmation</option>
+        <option value="withdrawal">Withdrawal Approved</option>
+        <option value="security">Security Alert</option>
+      </select>
+    </div>
+
+    <div class="input-group">
+      <label>Email Subject</label>
+      <input type="text" id="email-subject" placeholder="Important update regarding your portfolio">
+    </div>
+
+    <div class="input-group">
+      <label>Email HTML Content / Message</label>
+      <textarea id="email-body" placeholder="<h1>Hello,</h1><p>Your transaction has been processed successfully.</p>"></textarea>
+    </div>
+
+    <button class="btn" id="send-btn" onclick="sendEmail()">Send Notification</button>
+    <div id="status-msg" class="status"></div>
+  </div>
+
+  <script>
+    function applyTemplate() {
+      const type = document.getElementById('template-select').value;
+      const subjectInput = document.getElementById('email-subject');
+      const bodyInput = document.getElementById('email-body');
+
+      if (type === 'payment') {
+        subjectInput.value = 'Payment Confirmed - Equity Mixed Assets';
+        bodyInput.value = '<h2>Payment Successful</h2><p>We have successfully received your funds and credited them to your portfolio balance.</p>';
+      } else if (type === 'withdrawal') {
+        subjectInput.value = 'Withdrawal Processed Successfully';
+        bodyInput.value = '<h2>Withdrawal Update</h2><p>Your recent withdrawal request has been processed and sent to your designated destination.</p>';
+      } else if (type === 'security') {
+        subjectInput.value = 'Security Notification';
+        bodyInput.value = '<h2>Security Notice</h2><p>There was a recent update or login associated with your institutional account.</p>';
+      }
+    }
+
+    async function sendEmail() {
+      const email = document.getElementById('client-email').value.trim();
+      const subject = document.getElementById('email-subject').value.trim();
+      const htmlContent = document.getElementById('email-body').value.trim();
+      const statusMsg = document.getElementById('status-msg');
+      const btn = document.getElementById('send-btn');
+
+      if (!email || !subject || !htmlContent) {
+        statusMsg.style.color = '#ef4444';
+        statusMsg.innerText = "Please fill in all fields.";
+        statusMsg.style.display = 'block';
+        return;
+      }
+
+      btn.innerText = "Sending via Resend...";
+      btn.disabled = true;
+      statusMsg.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ to: email, subject, htmlContent })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to send');
+        }
+
+        statusMsg.style.color = '#10b981';
+        statusMsg.innerText = "Email sent successfully through Resend!";
+        statusMsg.style.display = 'block';
+      } catch (err) {
+        statusMsg.style.color = '#ef4444';
+        statusMsg.innerText = "Error: " + err.message;
+        statusMsg.style.display = 'block';
+      } finally {
+        btn.innerText = "Send Notification";
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
