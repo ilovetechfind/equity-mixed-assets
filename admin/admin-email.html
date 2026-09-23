@@ -11,17 +11,9 @@
     .title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #38bdf8; }
     .input-group { margin-bottom: 18px; }
     .input-group label { display: block; margin-bottom: 6px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
-    .input-group input, .input-group textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
+    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
+    .input-group select { cursor: pointer; }
     .input-group textarea { height: 130px; resize: vertical; }
-    
-    /* Sleek Interactive Template Cards Grid */
-    .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
-    .tpl-card { background-color: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease; text-align: left; }
-    .tpl-card:hover { border-color: #38bdf8; background-color: #111c30; }
-    .tpl-card.active { border-color: #38bdf8; background-color: #1e3a8a40; box-shadow: 0 0 0 1px #38bdf8; }
-    .tpl-card h4 { margin: 0 0 4px 0; font-size: 13px; color: #f8fafc; font-weight: 600; }
-    .tpl-card p { margin: 0; font-size: 11px; color: #94a3b8; }
-
     .btn { width: 100%; padding: 14px; background-color: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 15px; transition: background 0.2s; }
     .btn:hover { background-color: #0ea5e9; }
     .status { margin-top: 15px; font-size: 13px; text-align: center; display: none; }
@@ -37,33 +29,31 @@
       <input type="email" id="client-email" placeholder="client@example.com">
     </div>
 
-    <!-- Interactive Grid Selection -->
-    <label style="display: block; margin-bottom: 8px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Choose Professional Template</label>
-    <div class="template-grid">
-      <div class="tpl-card" onclick="selectTemplate('deposit', this)">
-        <h4>💰 Deposit Confirmed</h4>
-        <p>Funds added to portfolio</p>
-      </div>
-      <div class="tpl-card" onclick="selectTemplate('withdrawal', this)">
-        <h4>💸 Withdrawal Approved</h4>
-        <p>Payout sent to destination</p>
-      </div>
-      <div class="tpl-card" onclick="selectTemplate('kyc', this)">
-        <h4>🛡️ KYC Verified</h4>
-        <p>Account status fully verified</p>
-      </div>
-      <div class="tpl-card" onclick="selectTemplate('security', this)">
-        <h4>🔒 Security Notice</h4>
-        <p>Important account login alert</p>
-      </div>
-      <div class="tpl-card" onclick="selectTemplate('margin', this)">
-        <h4>⚠️ Margin Call</h4>
-        <p>Portfolio equity requirement</p>
-      </div>
-      <div class="tpl-card" onclick="selectTemplate('upgrade', this)">
-        <h4>⭐ Tier Upgrade</h4>
-        <p>VIP status unlocked</p>
-      </div>
+    <div class="input-group">
+      <label>Select Professional Template (20 Options)</label>
+      <select id="template-select" onchange="applyTemplate()">
+        <option value="">-- Choose Template or Write Custom --</option>
+        <option value="deposit_conf">1. Deposit Confirmation</option>
+        <option value="withdrawal_app">2. Withdrawal Approved</option>
+        <option value="withdrawal_pend">3. Withdrawal Pending Review</option>
+        <option value="withdrawal_rej">4. Withdrawal Action Required / Failed</option>
+        <option value="kyc_pass">5. KYC Verification Passed</option>
+        <option value="kyc_req">6. KYC Documentation Requested</option>
+        <option value="sec_alert">7. Security Alert / New Login</option>
+        <option value="pass_change">8. Password Changed Successfully</option>
+        <option value="margin_call">9. Urgent Margin Call Notice</option>
+        <option value="tier_upgrade">10. VIP Tier Account Upgrade</option>
+        <option value="bonus_cred">11. Promotional Bonus Credited</option>
+        <option value="fee_notice">12. Account Maintenance Fee Statement</option>
+        <option value="div_payout">13. Dividend Payout Notification</option>
+        <option value="trade_exec">14. Position Execution Summary</option>
+        <option value="acc_suspend">15. Temporary Account Restriction Notice</option>
+        <option value="acc_react">16. Account Reactivated Successfully</option>
+        <option value="tax_doc">17. Annual Tax Statement Available</option>
+        <option value="ref_bonus">18. Referral Commission Credited</option>
+        <option value="support_res">19. Support Ticket Resolution</option>
+        <option value="welcome_inst">20. Welcome to Institutional Services</option>
+      </select>
     </div>
 
     <div class="input-group">
@@ -73,12 +63,12 @@
 
     <div class="input-group">
       <label>Email Subject Line</label>
-      <input type="text" id="email-subject" placeholder="Important update regarding your account">
+      <input type="text" id="email-subject" placeholder="Important update regarding your portfolio">
     </div>
 
     <div class="input-group">
       <label>Message Content (Plain Text - No HTML needed)</label>
-      <textarea id="email-body" placeholder="Type your message here naturally. No code required..."></textarea>
+      <textarea id="email-body" placeholder="Type your message naturally here..."></textarea>
     </div>
 
     <button class="btn" id="send-btn" onclick="sendEmail()">Send Professional Notification</button>
@@ -86,31 +76,97 @@
   </div>
 
   <script>
-    function selectTemplate(type, element) {
-      document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('active'));
-      element.classList.add('active');
-
+    function applyTemplate() {
+      const type = document.getElementById('template-select').value;
       const subjectInput = document.getElementById('email-subject');
       const bodyInput = document.getElementById('email-body');
 
-      if (type === 'deposit') {
-        subjectInput.value = 'Deposit Confirmation - Equity Mixed Assets';
-        bodyInput.value = 'We are pleased to confirm that your recent deposit has been successfully cleared and credited to your primary portfolio balance.';
-      } else if (type === 'withdrawal') {
-        subjectInput.value = 'Withdrawal Disbursement Successful';
-        bodyInput.value = 'Your requested withdrawal has been processed through our secure clearing gateway and routed to your designated destination account.';
-      } else if (type === 'kyc') {
-        subjectInput.value = 'Account Verification Completed (KYC)';
-        bodyInput.value = 'Your identity and compliance documentation have been successfully reviewed and verified. All institutional trading limits are now fully unlocked.';
-      } else if (type === 'security') {
-        subjectInput.value = 'Security Notification: New Access Event';
-        bodyInput.value = 'We detected a recent access event associated with your secure institutional dashboard. If this was authorized by you, no further action is required.';
-      } else if (type === 'margin') {
-        subjectInput.value = 'Urgent Portfolio Margin Notice';
-        bodyInput.value = 'Your current open positions require attention regarding your maintenance margin level. Please review your dashboard immediately to avoid automated liquidation.';
-      } else if (type === 'upgrade') {
-        subjectInput.value = 'Congratulations: VIP Account Tier Unlocked';
-        bodyInput.value = 'Due to your consistent portfolio activity, your account has been upgraded to our exclusive VIP tier, granting you access to lower fees and priority processing.';
+      const templates = {
+        deposit_conf: {
+          sub: 'Deposit Confirmation - Equity Mixed Assets',
+          msg: 'We are pleased to confirm that your recent deposit has been successfully cleared and credited to your primary portfolio balance.'
+        },
+        withdrawal_app: {
+          sub: 'Withdrawal Disbursement Successful',
+          msg: 'Your requested withdrawal has been processed through our secure clearing gateway and routed to your designated destination account.'
+        },
+        withdrawal_pend: {
+          sub: 'Withdrawal Request Under Review',
+          msg: 'Your withdrawal request has been received and is currently undergoing standard compliance verification. Funds will be dispatched shortly.'
+        },
+        withdrawal_rej: {
+          sub: 'Action Required Regarding Withdrawal Request',
+          msg: 'Your recent withdrawal request requires updated verification details. Please contact your account representative or submit updated compliance info.'
+        },
+        kyc_pass: {
+          sub: 'Account Verification Completed (KYC)',
+          msg: 'Your identity and compliance documentation have been successfully reviewed and verified. All institutional trading limits are now fully unlocked.'
+        },
+        kyc_req: {
+          sub: 'Action Required: Compliance Documentation (KYC)',
+          msg: 'To comply with regulatory standards, please update your account records by uploading your valid identification documents to your dashboard.'
+        },
+        sec_alert: {
+          sub: 'Security Notification: New Access Event',
+          msg: 'We detected a recent access event associated with your secure institutional dashboard from a new device or location. If this was you, ignore this message.'
+        },
+        pass_change: {
+          sub: 'Security Notice: Password Updated',
+          msg: 'The security password for your institutional portfolio was successfully updated. If you did not perform this change, contact support immediately.'
+        },
+        margin_call: {
+          sub: 'Urgent Portfolio Margin Notice',
+          msg: 'Your current open positions require immediate attention regarding your maintenance margin level. Please review your dashboard to prevent automated liquidation.'
+        },
+        tier_upgrade: {
+          sub: 'Congratulations: VIP Account Tier Unlocked',
+          msg: 'Due to your consistent portfolio activity, your account has been upgraded to our exclusive VIP tier, granting you lower transaction fees and priority routing.'
+        },
+        bonus_cred: {
+          sub: 'Promotional Portfolio Bonus Credited',
+          msg: 'A special institutional incentive bonus has been successfully credited to your trading account equity. Check your dashboard for details.'
+        },
+        fee_notice: {
+          sub: 'Account Maintenance Statement Available',
+          msg: 'Your periodic institutional account administration statement has been generated and is now available for review within your portal records.'
+        },
+        div_payout: {
+          sub: 'Dividend Payout Successfully Credited',
+          msg: 'Your scheduled asset dividend earnings have been calculated, cleared, and successfully deposited directly into your portfolio balance.'
+        },
+        trade_exec: {
+          sub: 'Position Execution Summary',
+          msg: 'Your recent market position order has been successfully executed and settled across our institutional liquidity networks.'
+        },
+        acc_suspend: {
+          sub: 'Notice: Temporary Account Security Restriction',
+          msg: 'Your account has been placed under a temporary security safeguard pending routine compliance review. Our team will restore full access shortly.'
+        },
+        acc_react: {
+          sub: 'Account Restrictions Lifted - Fully Active',
+          msg: 'All temporary security holds on your account have been successfully resolved. Your portal is fully active for trading and transfers.'
+        },
+        tax_doc: {
+          sub: 'Annual Tax Statement & Summary Available',
+          msg: 'Your official annual tax and asset performance documentation for the financial year is now ready for download in your portal document center.'
+        },
+        ref_bonus: {
+          sub: 'Referral Commission Successfully Paid',
+          msg: 'A new client referral commission has been credited to your account balance following a successful network registration under your referral link.'
+        },
+        support_res: {
+          sub: 'Support Inquiry Resolution Notice',
+          msg: 'Your recent support ticket inquiry has been addressed and marked as resolved by our technical operations desk.'
+        },
+        welcome_inst: {
+          sub: 'Welcome to Equity Mixed Assets Institutional',
+          msg: 'Welcome to your professional asset management portal. Your account is fully set up, secured, and ready for institutional deployment.'
+        }
+      };
+
+      if (templates[type]) {
+        subjectInput.value = templates[type].sub;
+        bodyInput.value = templates[type].msg;
       }
     }
 
