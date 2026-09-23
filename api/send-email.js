@@ -18,15 +18,12 @@ export default async function handler(req, res) {
       }
     }
 
-    // Mapped precisely to match what your frontend sends: [to, subject, htmlContent]
     const to = body?.email || body?.to || body?.recipient;
     const subject = body?.subject || body?.title;
     const html = body?.htmlContent || body?.html || body?.message || body?.content;
 
     if (!to || !subject || !html) {
-      return res.status(400).json({ 
-        error: `Missing required fields. email: ${to ? 'OK' : 'missing'}, subject: ${subject ? 'OK' : 'missing'}, htmlContent: ${html ? 'OK' : 'missing'}` 
-      });
+      return res.status(400).json({ error: 'Missing required fields: to, subject, or html' });
     }
 
     const response = await fetch('https://api.resend.com/emails', {
