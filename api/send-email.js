@@ -6,13 +6,28 @@ export default async function handler(req, res) {
   try {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
-      return res.status(500).json({ error: 'RESEND_API_KEY is missing from Vercel settings.' });
+      return res.status(500).json({ error: 'RESEND_API_KEY is missing from Vercel environment variables.' });
     }
 
-    const { to, subject, html } = req.body;
+    // Safely parse body if it arrives as a string or object
+    let body = req.body;
+    if (typeof body === 'string') {
+      try {
+        body = JSON.parse(body);
+      } catch (e) {
+        body = {};
+      }
+    }
+
+    // Accept flexible key names matching whatever the frontend script sends
+    const to = body?.to || body?.email || body?.recipient;
+    const subject = body?.subject;
+    const html = body?.html || body?.message || body?.content;
 
     if (!to || !subject || !html) {
-      return res.status(400).json({ error: 'Missing required fields: to, subject, or html' });
+      return res.status(400).json({ 
+        error: `Missing required fields. Received: recipient=${to ? 'OK' : 'missing'}, subject=${subject ? 'OK' : 'missing'}, body=${html ? 'OK' : 'missing'}` 
+      });
     }
 
     const response = await fetch('https://api.resend.com/emails', {
@@ -23,7 +38,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         from: 'Equity Mixed Assets <support@equitymixedasset.cc>',
-        to: [to],
+        to: Array.isArray(to) ? to : [to],
         subject: subject,
         html: html
       })
@@ -39,4 +54,4 @@ export default async function handler(req, res) {
   } catch (error) {
     return res.status(500).json({ error: error.message || 'Internal server error' });
   }
-}
+                                               }
