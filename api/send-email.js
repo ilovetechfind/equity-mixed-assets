@@ -4,11 +4,6 @@ export default async function handler(req, res) {
   }
 
   try {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ error: 'RESEND_API_KEY is missing from Vercel environment variables.' });
-    }
-
     let body = req.body;
     if (typeof body === 'string') {
       try {
@@ -18,17 +13,20 @@ export default async function handler(req, res) {
       }
     }
 
-    // Capture every possible key combination from the frontend
-    const to = body?.email || body?.to || body?.recipient;
-    const subject = body?.subject || body?.title;
+    // This will show us the exact keys your frontend form is sending
+    const receivedKeys = Object.keys(body).join(', ');
+
+    const to = body?.email || body?.to;
+    const subject = body?.subject;
     const html = body?.html || body?.message || body?.content || body?.body;
 
     if (!to || !subject || !html) {
       return res.status(400).json({ 
-        error: `Missing required fields. email: ${to ? 'OK' : 'missing'}, subject: ${subject ? 'OK' : 'missing'}, html: ${html ? 'OK' : 'missing'}` 
+        error: `DEBUG - Received keys from frontend: [${receivedKeys}]` 
       });
     }
 
+    const apiKey = process.env.RESEND_API_KEY;
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -44,7 +42,6 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-
     if (!response.ok) {
       return res.status(response.status).json({ error: data.message || 'Failed to send email' });
     }
