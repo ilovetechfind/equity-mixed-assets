@@ -7,13 +7,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; padding: 20px; display: flex; justify-content: center; }
-    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 600px; border: 1px solid #334155; }
+    .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 650px; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3); }
     .title { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #38bdf8; }
-    .input-group { margin-bottom: 16px; }
-    .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-    .input-group input, .input-group select, .input-group textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
-    .input-group textarea { height: 150px; resize: vertical; }
-    .btn { width: 100%; padding: 12px; background-color: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 15px; }
+    .input-group { margin-bottom: 18px; }
+    .input-group label { display: block; margin-bottom: 6px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+    .input-group input, .input-group textarea { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
+    .input-group textarea { height: 130px; resize: vertical; }
+    
+    /* Sleek Interactive Template Cards Grid */
+    .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px; }
+    .tpl-card { background-color: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s ease; text-align: left; }
+    .tpl-card:hover { border-color: #38bdf8; background-color: #111c30; }
+    .tpl-card.active { border-color: #38bdf8; background-color: #1e3a8a40; box-shadow: 0 0 0 1px #38bdf8; }
+    .tpl-card h4 { margin: 0 0 4px 0; font-size: 13px; color: #f8fafc; font-weight: 600; }
+    .tpl-card p { margin: 0; font-size: 11px; color: #94a3b8; }
+
+    .btn { width: 100%; padding: 14px; background-color: #38bdf8; color: #0f172a; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; font-size: 15px; transition: background 0.2s; }
     .btn:hover { background-color: #0ea5e9; }
     .status { margin-top: 15px; font-size: 13px; text-align: center; display: none; }
   </style>
@@ -28,50 +37,80 @@
       <input type="email" id="client-email" placeholder="client@example.com">
     </div>
 
-    <div class="input-group">
-      <label>Quick Templates</label>
-      <select id="template-select" onchange="applyTemplate()">
-        <option value="">-- Choose Template or Write Custom --</option>
-        <option value="payment">Payment Confirmation</option>
-        <option value="withdrawal">Withdrawal Approved</option>
-        <option value="security">Security Alert</option>
-      </select>
+    <!-- Interactive Grid Selection -->
+    <label style="display: block; margin-bottom: 8px; font-size: 11px; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Choose Professional Template</label>
+    <div class="template-grid">
+      <div class="tpl-card" onclick="selectTemplate('deposit', this)">
+        <h4>💰 Deposit Confirmed</h4>
+        <p>Funds added to portfolio</p>
+      </div>
+      <div class="tpl-card" onclick="selectTemplate('withdrawal', this)">
+        <h4>💸 Withdrawal Approved</h4>
+        <p>Payout sent to destination</p>
+      </div>
+      <div class="tpl-card" onclick="selectTemplate('kyc', this)">
+        <h4>🛡️ KYC Verified</h4>
+        <p>Account status fully verified</p>
+      </div>
+      <div class="tpl-card" onclick="selectTemplate('security', this)">
+        <h4>🔒 Security Notice</h4>
+        <p>Important account login alert</p>
+      </div>
+      <div class="tpl-card" onclick="selectTemplate('margin', this)">
+        <h4>⚠️ Margin Call</h4>
+        <p>Portfolio equity requirement</p>
+      </div>
+      <div class="tpl-card" onclick="selectTemplate('upgrade', this)">
+        <h4>⭐ Tier Upgrade</h4>
+        <p>VIP status unlocked</p>
+      </div>
     </div>
 
     <div class="input-group">
-      <label>Transaction Amount (Optional)</label>
-      <input type="text" id="email-amount" placeholder="e.g. $5,000.00">
+      <label>Transaction Amount / Value (Optional)</label>
+      <input type="text" id="email-amount" placeholder="e.g. $12,500.00">
     </div>
 
     <div class="input-group">
-      <label>Email Subject</label>
-      <input type="text" id="email-subject" placeholder="Important update regarding your portfolio">
+      <label>Email Subject Line</label>
+      <input type="text" id="email-subject" placeholder="Important update regarding your account">
     </div>
 
     <div class="input-group">
-      <label>Email HTML Content / Message</label>
-      <textarea id="email-body" placeholder="<h1>Hello,</h1><p>Your transaction has been processed successfully.</p>"></textarea>
+      <label>Message Content (Plain Text - No HTML needed)</label>
+      <textarea id="email-body" placeholder="Type your message here naturally. No code required..."></textarea>
     </div>
 
-    <button class="btn" id="send-btn" onclick="sendEmail()">Send Notification</button>
+    <button class="btn" id="send-btn" onclick="sendEmail()">Send Professional Notification</button>
     <div id="status-msg" class="status"></div>
   </div>
 
   <script>
-    function applyTemplate() {
-      const type = document.getElementById('template-select').value;
+    function selectTemplate(type, element) {
+      document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('active'));
+      element.classList.add('active');
+
       const subjectInput = document.getElementById('email-subject');
       const bodyInput = document.getElementById('email-body');
 
-      if (type === 'payment') {
-        subjectInput.value = 'Payment Confirmed - Equity Mixed Assets';
-        bodyInput.value = '<h2>Payment Successful</h2><p>We have successfully received your funds and credited them to your portfolio balance.</p>';
+      if (type === 'deposit') {
+        subjectInput.value = 'Deposit Confirmation - Equity Mixed Assets';
+        bodyInput.value = 'We are pleased to confirm that your recent deposit has been successfully cleared and credited to your primary portfolio balance.';
       } else if (type === 'withdrawal') {
-        subjectInput.value = 'Withdrawal Processed Successfully';
-        bodyInput.value = '<h2>Withdrawal Update</h2><p>Your recent withdrawal request has been processed and sent to your designated destination.</p>';
+        subjectInput.value = 'Withdrawal Disbursement Successful';
+        bodyInput.value = 'Your requested withdrawal has been processed through our secure clearing gateway and routed to your designated destination account.';
+      } else if (type === 'kyc') {
+        subjectInput.value = 'Account Verification Completed (KYC)';
+        bodyInput.value = 'Your identity and compliance documentation have been successfully reviewed and verified. All institutional trading limits are now fully unlocked.';
       } else if (type === 'security') {
-        subjectInput.value = 'Security Notification';
-        bodyInput.value = '<h2>Security Notice</h2><p>There was a recent update or login associated with your institutional account.</p>';
+        subjectInput.value = 'Security Notification: New Access Event';
+        bodyInput.value = 'We detected a recent access event associated with your secure institutional dashboard. If this was authorized by you, no further action is required.';
+      } else if (type === 'margin') {
+        subjectInput.value = 'Urgent Portfolio Margin Notice';
+        bodyInput.value = 'Your current open positions require attention regarding your maintenance margin level. Please review your dashboard immediately to avoid automated liquidation.';
+      } else if (type === 'upgrade') {
+        subjectInput.value = 'Congratulations: VIP Account Tier Unlocked';
+        bodyInput.value = 'Due to your consistent portfolio activity, your account has been upgraded to our exclusive VIP tier, granting you access to lower fees and priority processing.';
       }
     }
 
@@ -85,7 +124,7 @@
 
       if (!email || !subject || !htmlContent) {
         statusMsg.style.color = '#ef4444';
-        statusMsg.innerText = "Please fill in all required fields.";
+        statusMsg.innerText = "Please fill in recipient email, subject, and message.";
         statusMsg.style.display = 'block';
         return;
       }
@@ -108,14 +147,14 @@
         }
 
         statusMsg.style.color = '#10b981';
-        statusMsg.innerText = "Email sent successfully through Resend!";
+        statusMsg.innerText = "Professional email sent successfully!";
         statusMsg.style.display = 'block';
       } catch (err) {
         statusMsg.style.color = '#ef4444';
         statusMsg.innerText = "Error: " + err.message;
         statusMsg.style.display = 'block';
       } finally {
-        btn.innerText = "Send Notification";
+        btn.innerText = "Send Professional Notification";
         btn.disabled = false;
       }
     }
