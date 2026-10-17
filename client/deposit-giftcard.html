@@ -73,7 +73,7 @@
             <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Details copied!');">Copy Details</button>
           ` : ''}
           ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
-          <a href="deposit-proof.html" class="proof-btn">I made the payment proof of payment</a>
+          <a href="deposit-proof.html?method=giftcard" class="proof-btn">I made the payment proof of payment</a>
         `;
       } catch (err) {
         area.innerHTML = `<p style="color: var(--text-muted);">Gift card deposit details have not been configured by your account manager yet.</p>`;
@@ -82,4 +82,4 @@
     loadGiftcard();
   </script>
 </body>
-
+</html>
