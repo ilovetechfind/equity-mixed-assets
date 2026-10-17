@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Equity Mixed Assets - Red / Black</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --card: rgba(18, 24, 38, 0.9);
+      --border: rgba(255,255,255,0.08);
+      --muted: #8b9bb4;
+      --green: #10b981;
+      --red: #ef4444;
+      --black: #1e293b;
+      --blue: #3b82f6;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 12px; padding-bottom: 40px;
+      background: radial-gradient(circle at top, #1a1025 0%, var(--bg) 55%);
+      color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
+    }
+    .wrap { max-width: 480px; margin: 0 auto; }
+    .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .back {
+      background: var(--card); border: 1px solid var(--border); color: #fff;
+      padding: 8px 14px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.85rem;
+    }
+    .title { font-size: 1.15rem; font-weight: 800; margin: 0; }
+
+    .bal-card {
+      background: linear-gradient(135deg, rgba(239,68,68,0.18), rgba(30,41,59,0.5));
+      border: 1px solid rgba(239,68,68,0.25); border-radius: 18px; padding: 16px; margin-bottom: 14px;
+    }
+    .bal-label { font-size: 0.7rem; color: var(--muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+    .bal-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 6px; gap: 10px; }
+    .bal-amount { font-size: 1.8rem; font-weight: 800; margin: 0; letter-spacing: -1px; }
+    .main-bal { font-size: 0.8rem; color: var(--muted); text-align: right; }
+    .main-bal strong { color: #e2e8f0; }
+    .fund-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+    .fund-btn {
+      border: none; border-radius: 12px; padding: 11px; font-weight: 700; font-size: 0.85rem; cursor: pointer;
+    }
+    .fund-in { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; }
+    .fund-out { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); color: #34d399; }
+
+    .wheel-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 20px;
+      margin-bottom: 14px; text-align: center;
+    }
+    .result-ring {
+      width: 160px; height: 160px; margin: 0 auto 16px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 6px solid rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.35);
+      transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+      position: relative;
+    }
+    .result-ring.red {
+      border-color: #ef4444;
+      box-shadow: 0 0 30px rgba(239,68,68,0.45);
+      background: radial-gradient(circle, rgba(239,68,68,0.35), rgba(0,0,0,0.4));
+    }
+    .result-ring.black {
+      border-color: #94a3b8;
+      box-shadow: 0 0 30px rgba(148,163,184,0.35);
+      background: radial-gradient(circle, rgba(30,41,59,0.9), rgba(0,0,0,0.5));
+    }
+    .result-ring.spinning {
+      animation: pulse 0.4s ease-in-out infinite alternate;
+    }
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.04); }
+    }
+    .result-text {
+      font-size: 1.4rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .status-line { font-size: 0.85rem; color: var(--muted); min-height: 1.2em; margin-bottom: 8px; }
+    .status-line.win { color: var(--green); font-weight: 700; }
+    .status-line.lose { color: var(--red); font-weight: 700; }
+
+    .pick-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .pick {
+      padding: 18px; border-radius: 16px; font-weight: 800; font-size: 1.1rem; cursor: pointer;
+      border: 3px solid transparent; color: #fff;
+    }
+    .pick-red { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+    .pick-black { background: linear-gradient(135deg, #334155, #0f172a); border-color: rgba(255,255,255,0.1); }
+    .pick.active-red { border-color: #fca5a5; box-shadow: 0 0 16px rgba(239,68,68,0.5); }
+    .pick.active-black { border-color: #cbd5e1; box-shadow: 0 0 16px rgba(148,163,184,0.4); }
+
+    .bet-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 14px;
+    }
+    label { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    input[type=number] {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff;
+      padding: 12px 14px; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 10px;
+    }
+    input:focus { border-color: var(--blue); }
+    .quick { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+    .q {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #cbd5e1;
+      padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    }
+    .play-btn {
+      width: 100%; border: none; border-radius: 14px; padding: 15px; font-weight: 800; font-size: 1.05rem;
+      cursor: pointer; color: #fff;
+      background: linear-gradient(135deg, #ef4444, #7f1d1d);
+    }
+    .play-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .payout-note {
+      text-align: center; font-size: 0.78rem; color: var(--muted); margin-top: 10px;
+    }
+    .payout-note strong { color: #fbbf24; }
+
+    .recent {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 14px;
+    }
+    .recent-title { font-size: 0.7rem; color: var(--muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; }
+    .chip-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip {
+      width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.65rem; font-weight: 800; border: 2px solid rgba(255,255,255,0.15);
+    }
+    .chip.red { background: #ef4444; }
+    .chip.black { background: #1e293b; color: #e2e8f0; }
+
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-bg.show { display: flex; }
+    .modal {
+      background: #0f172a; border: 1px solid var(--border); border-radius: 18px; padding: 20px; width: 100%; max-width: 360px;
+    }
+    .modal h3 { margin: 0 0 8px; font-size: 1.1rem; }
+    .modal p { color: var(--muted); font-size: 0.85rem; margin: 0 0 14px; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+    .modal-cancel {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff;
+      padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer;
+    }
+    .modal-ok {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff;
+      padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer;
+    }
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; border: 1px solid var(--green); color: #34d399;
+      padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.85rem;
+      display: none; z-index: 100; max-width: 90%;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="dashboard.html" class="back">← Back</a>
+      <h1 class="title">Red / Black</h1>
+    </div>
+
+    <div class="bal-card">
+      <div class="bal-label">Game Balance</div>
+      <div class="bal-row">
+        <h2 class="bal-amount" id="game-bal">$0.00</h2>
+        <div class="main-bal">Main: <strong id="main-bal">$0.00</strong></div>
+      </div>
+      <div class="fund-btns">
+        <button class="fund-btn fund-in" onclick="openFundModal('deposit')">↓ From Main</button>
+        <button class="fund-btn fund-out" onclick="openFundModal('withdraw')">↑ To Main</button>
+      </div>
+    </div>
+
+    <div class="wheel-card">
+      <div class="status-line" id="status">Pick a color and place your bet</div>
+      <div class="result-ring" id="ring">
+        <div class="result-text" id="result-text">?</div>
+      </div>
+
+      <div class="pick-row">
+        <button class="pick pick-red" id="pick-red" onclick="setPick('red')">RED</button>
+        <button class="pick pick-black" id="pick-black" onclick="setPick('black')">BLACK</button>
+      </div>
+
+      <div class="bet-card" style="text-align:left; margin:0;">
+        <label>Bet Amount (USD)</label>
+        <input type="number" id="bet-amount" placeholder="10.00" min="1" step="0.01" value="10">
+        <div class="quick">
+          <button class="q" onclick="setAmt(5)">$5</button>
+          <button class="q" onclick="setAmt(10)">$10</button>
+          <button class="q" onclick="setAmt(25)">$25</button>
+          <button class="q" onclick="setAmt(50)">$50</button>
+          <button class="q" onclick="setAmt(100)">$100</button>
+          <button class="q" onclick="setAmt('all')">Max</button>
+        </div>
+        <button class="play-btn" id="play-btn" onclick="play()">SPIN</button>
+        <div class="payout-note">Win pays <strong>1.95×</strong> your bet · Fair 50/50 odds</div>
+      </div>
+    </div>
+
+    <div class="recent">
+      <div class="recent-title">RECENT RESULTS</div>
+      <div class="chip-row" id="recent-chips"></div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="fund-modal">
+    <div class="modal">
+      <h3 id="modal-title">Transfer</h3>
+      <p id="modal-desc">Move funds between accounts</p>
+      <label>Amount (USD)</label>
+      <input type="number" id="fund-amount" placeholder="0.00" min="1" step="0.01">
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeFundModal()">Cancel</button>
+        <button class="modal-ok" onclick="confirmFund()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    const PAYOUT = 1.95; // slightly under 2x like real casinos
+    let userId = null;
+    let mainBalance = 0;
+    let gameBalance = 0;
+    let pick = null;
+    let spinning = false;
+    let fundMode = 'deposit';
+    let recent = [];
+    let history = [];
+
+    async function init() {
+      let user = null;
+      try {
+        const { data: { session } } = await client.auth.getSession();
+        user = session && session.user;
+        if (!user) {
+          const res = await client.auth.getUser();
+          user = res.data && res.data.user;
+        }
+      } catch (e) {}
+      if (!user) { window.location.href = 'index.html'; return; }
+      userId = user.id;
+
+      const { data: profile } = await client.from('profiles')
+        .select('balance, redblack_balance')
+        .eq('id', userId).maybeSingle();
+
+      mainBalance = Number(profile?.balance || 0);
+      gameBalance = Number(profile?.redblack_balance || 0);
+
+      if (!profile || profile.redblack_balance == null) {
+        const ls = localStorage.getItem('redblack_balance_' + userId);
+        if (ls) gameBalance = Number(ls) || 0;
+      }
+
+      history = JSON.parse(localStorage.getItem('redblack_history_' + userId) || '[]');
+      recent = JSON.parse(localStorage.getItem('redblack_recent_' + userId) || '[]');
+
+      renderBalances();
+      renderRecent();
+    }
+
+    function fmt(n) {
+      return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderBalances() {
+      document.getElementById('game-bal').textContent = '$' + fmt(gameBalance);
+      document.getElementById('main-bal').textContent = '$' + fmt(mainBalance);
+    }
+
+    function renderRecent() {
+      const el = document.getElementById('recent-chips');
+      if (!recent.length) {
+        el.innerHTML = '<span style="color:var(--muted);font-size:0.8rem">No spins yet</span>';
+        return;
+      }
+      el.innerHTML = recent.slice(0, 14).map(c =>
+        `<div class="chip ${c}">${c === 'red' ? 'R' : 'B'}</div>`
+      ).join('');
+    }
+
+    function setPick(color) {
+      if (spinning) return;
+      pick = color;
+      document.getElementById('pick-red').classList.toggle('active-red', color === 'red');
+      document.getElementById('pick-black').classList.toggle('active-black', color === 'black');
+      document.getElementById('status').textContent = 'Betting on ' + color.toUpperCase();
+      document.getElementById('status').className = 'status-line';
+    }
+
+    function setAmt(v) {
+      if (v === 'all') {
+        document.getElementById('bet-amount').value = Math.max(0, Math.floor(gameBalance * 100) / 100);
+      } else {
+        document.getElementById('bet-amount').value = v;
+      }
+    }
+
+    async function play() {
+      if (spinning) return;
+      if (!pick) return toast('Pick RED or BLACK first', true);
+
+      const amt = parseFloat(document.getElementById('bet-amount').value);
+      if (!amt || amt <= 0) return toast('Enter a valid bet', true);
+      if (amt > gameBalance) return toast('Not enough game balance', true);
+
+      spinning = true;
+      document.getElementById('play-btn').disabled = true;
+      gameBalance -= amt;
+      renderBalances();
+
+      const ring = document.getElementById('ring');
+      const resultText = document.getElementById('result-text');
+      const status = document.getElementById('status');
+      ring.className = 'result-ring spinning';
+      resultText.textContent = '…';
+      status.className = 'status-line';
+      status.textContent = 'Spinning…';
+
+      // Visual flicker between red/black
+      let ticks = 0;
+      const flicker = setInterval(() => {
+        const c = Math.random() < 0.5 ? 'red' : 'black';
+        ring.className = 'result-ring spinning ' + c;
+        resultText.textContent = c.toUpperCase();
+        ticks++;
+      }, 120);
+
+      await sleep(1800 + Math.random() * 800);
+      clearInterval(flicker);
+
+      // Fair 50/50 result
+      const outcome = Math.random() < 0.5 ? 'red' : 'black';
+      const won = outcome === pick;
+      let pnl = -amt;
+
+      ring.className = 'result-ring ' + outcome;
+      resultText.textContent = outcome.toUpperCase();
+
+      if (won) {
+        const payout = Math.round(amt * PAYOUT * 100) / 100;
+        gameBalance += payout;
+        pnl = payout - amt;
+        status.className = 'status-line win';
+        status.textContent = 'You won +$' + fmt(pnl) + '!';
+        toast('Won $' + fmt(pnl));
+      } else {
+        status.className = 'status-line lose';
+        status.textContent = 'You lost $' + fmt(amt);
+        toast('Lost $' + fmt(amt), true);
+      }
+
+      recent.unshift(outcome);
+      if (recent.length > 20) recent.pop();
+
+      history.unshift({
+        title: (pick || '').toUpperCase() + ' → ' + outcome.toUpperCase(),
+        detail: won ? 'Win ×' + PAYOUT : 'Loss',
+        pnl,
+        ts: Date.now()
+      });
+      if (history.length > 100) history = history.slice(0, 100);
+
+      await saveState();
+      renderBalances();
+      renderRecent();
+
+      spinning = false;
+      document.getElementById('play-btn').disabled = false;
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    function openFundModal(mode) {
+      fundMode = mode;
+      document.getElementById('modal-title').textContent = mode === 'deposit' ? 'Deposit to Game' : 'Withdraw to Main';
+      document.getElementById('modal-desc').textContent = mode === 'deposit'
+        ? 'Move funds from your main balance into Red / Black.'
+        : 'Move game winnings back to your main balance.';
+      document.getElementById('fund-amount').value = '';
+      document.getElementById('fund-modal').classList.add('show');
+    }
+    function closeFundModal() {
+      document.getElementById('fund-modal').classList.remove('show');
+    }
+
+    async function confirmFund() {
+      const amt = parseFloat(document.getElementById('fund-amount').value);
+      if (!amt || amt <= 0) return toast('Enter a valid amount', true);
+
+      if (fundMode === 'deposit') {
+        if (amt > mainBalance) return toast('Not enough main balance', true);
+        mainBalance -= amt;
+        gameBalance += amt;
+      } else {
+        if (amt > gameBalance) return toast('Not enough game balance', true);
+        gameBalance -= amt;
+        mainBalance += amt;
+      }
+
+      const { error } = await client.from('profiles').update({
+        balance: mainBalance,
+        redblack_balance: gameBalance
+      }).eq('id', userId);
+
+      if (error) {
+        localStorage.setItem('redblack_balance_' + userId, String(gameBalance));
+        await client.from('profiles').update({ balance: mainBalance }).eq('id', userId);
+      }
+
+      localStorage.setItem('redblack_balance_' + userId, String(gameBalance));
+      closeFundModal();
+      renderBalances();
+      toast(fundMode === 'deposit' ? 'Deposited $' + fmt(amt) : 'Withdrew $' + fmt(amt) + ' to main');
+    }
+
+    async function saveState() {
+      localStorage.setItem('redblack_balance_' + userId, String(gameBalance));
+      localStorage.setItem('redblack_history_' + userId, JSON.stringify(history));
+      localStorage.setItem('redblack_recent_' + userId, JSON.stringify(recent));
+      try {
+        await client.from('profiles').update({ redblack_balance: gameBalance }).eq('id', userId);
+      } catch (e) {}
+    }
+
+    function toast(msg, isErr) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.borderColor = isErr ? '#ef4444' : '#10b981';
+      t.style.color = isErr ? '#fca5a5' : '#34d399';
+      t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 2500);
+    }
+
+    init();
+  </script>
+</body>
+</html>
