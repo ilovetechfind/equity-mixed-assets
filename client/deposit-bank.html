@@ -89,7 +89,7 @@
             <button class="btn" onclick="navigator.clipboard.writeText('${parsed.wallet}'); alert('Bank details copied!');">Copy Bank Details</button>
           ` : ''}
           ${parsed.instructions ? `<div class="instructions-box"><strong>Instructions:</strong><br>${parsed.instructions}</div>` : ''}
-          <a href="deposit-proof.html" class="proof-btn">I made the payment proof of payment</a>
+          <a href="deposit-proof.html?method=bank" class="proof-btn">I made the payment proof of payment</a>
         `;
       } catch (err) {
         area.innerHTML = `<p style="color: var(--text-muted);">Bank transfer details have not been configured by your account manager yet.</p>`;
