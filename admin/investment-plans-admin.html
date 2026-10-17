@@ -41,6 +41,13 @@
 
     .edit-btn { background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: #818cf8; padding: 10px 14px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; text-decoration: none; text-align: center; cursor: pointer; transition: 0.2s; width: 100%; box-sizing: border-box; display: block; }
     .edit-btn:hover { background: var(--primary); color: white; }
+
+    .status-toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; border: 1px solid #34d399; color: #34d399;
+      padding: 10px 20px; border-radius: 12px; font-weight: 600; font-size: 0.85rem;
+      display: none; z-index: 999;
+    }
   </style>
 </head>
 <body>
@@ -57,12 +64,15 @@
 
     <div class="card">
       <h2 class="card-title">Manage Seven Investment Tiers</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 16px 0;">Toggle a plan ON to make it active on the client's Investment Plans page. Multiple plans can be active.</p>
       
       <div id="plans-container">
         <!-- Rendered dynamically via script -->
       </div>
     </div>
   </div>
+
+  <div class="status-toast" id="status-toast">Saved</div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -84,7 +94,33 @@
       { id: 'crown', name: 'Crown Elite', icon: '👑', file: 'crown-plan-edit.html' }
     ];
 
-    function getActivePlans() {
+    function showToast(msg) {
+      const t = document.getElementById('status-toast');
+      t.innerText = msg;
+      t.style.display = 'block';
+      setTimeout(() => { t.style.display = 'none'; }, 2000);
+    }
+
+    async function getActivePlans() {
+      // Prefer Supabase (shared across devices)
+      try {
+        const { data, error } = await client
+          .from('profiles')
+          .select('active_plans')
+          .eq('id', targetUserId)
+          .maybeSingle();
+
+        if (!error && data && data.active_plans) {
+          if (Array.isArray(data.active_plans)) return data.active_plans;
+          if (typeof data.active_plans === 'string') {
+            try { return JSON.parse(data.active_plans); } catch(e) {}
+          }
+        }
+      } catch (e) {
+        console.warn('Supabase active_plans read failed, falling back to localStorage', e);
+      }
+
+      // Fallback localStorage
       const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
       if (saved) {
         try { return JSON.parse(saved); } catch(e) {}
@@ -92,11 +128,52 @@
       return [];
     }
 
-    function renderPlans() {
-      const container = document.getElementById('plans-container');
-      container.innerHTML = '';
+    async function saveActivePlans(activePlans) {
+      // Always write localStorage for same-browser preview
+      localStorage.setItem(`user_active_plans_list_${targetUserId}`, JSON.stringify(activePlans));
 
-      const activePlans = getActivePlans();
+      // Write to Supabase so client device can see it
+      try {
+        const { error } = await client
+          .from('profiles')
+          .update({ active_plans: activePlans })
+          .eq('id', targetUserId);
+
+        if (error) {
+          console.error('Supabase save error:', error);
+          // Column might not exist yet - try as text
+          await client
+            .from('profiles')
+            .update({ active_plans: JSON.stringify(activePlans) })
+            .eq('id', targetUserId);
+        }
+        showToast('Active plans saved');
+      } catch (e) {
+        console.error(e);
+        showToast('Saved locally (Supabase may need active_plans column)');
+      }
+
+      // Backward compat single-plan keys
+      if (activePlans.length > 0) {
+        const firstActive = plansList.find(p => p.id === activePlans[0]);
+        if (firstActive) {
+          localStorage.setItem(`user_active_plan_${targetUserId}`, firstActive.id);
+          localStorage.setItem(`user_active_plan_name_${targetUserId}`, firstActive.name);
+          localStorage.setItem(`user_active_plan_icon_${targetUserId}`, firstActive.icon);
+        }
+      } else {
+        localStorage.removeItem(`user_active_plan_${targetUserId}`);
+        localStorage.removeItem(`user_active_plan_name_${targetUserId}`);
+        localStorage.removeItem(`user_active_plan_icon_${targetUserId}`);
+      }
+    }
+
+    async function renderPlans() {
+      const container = document.getElementById('plans-container');
+      container.innerHTML = '<p style="color:#94a3b8;font-size:0.9rem;">Loading...</p>';
+
+      const activePlans = await getActivePlans();
+      container.innerHTML = '';
 
       plansList.forEach(plan => {
         const isActive = activePlans.includes(plan.id);
@@ -118,8 +195,8 @@
       });
     }
 
-    function updatePlanStatus(planId, isActive) {
-      let activePlans = getActivePlans();
+    async function updatePlanStatus(planId, isActive) {
+      let activePlans = await getActivePlans();
 
       if (isActive) {
         if (!activePlans.includes(planId)) {
@@ -129,22 +206,7 @@
         activePlans = activePlans.filter(id => id !== planId);
       }
 
-      localStorage.setItem(`user_active_plans_list_${targetUserId}`, JSON.stringify(activePlans));
-
-      // For backward compatibility with single-plan pages if needed
-      if (activePlans.length > 0) {
-        const firstActive = plansList.find(p => p.id === activePlans[0]);
-        if (firstActive) {
-          localStorage.setItem(`user_active_plan_${targetUserId}`, firstActive.id);
-          localStorage.setItem(`user_active_plan_name_${targetUserId}`, firstActive.name);
-          localStorage.setItem(`user_active_plan_icon_${targetUserId}`, firstActive.icon);
-        }
-      } else {
-        localStorage.removeItem(`user_active_plan_${targetUserId}`);
-        localStorage.removeItem(`user_active_plan_name_${targetUserId}`);
-        localStorage.removeItem(`user_active_plan_icon_${targetUserId}`);
-      }
-
+      await saveActivePlans(activePlans);
       updateToggleVisuals(planId, isActive);
     }
 
