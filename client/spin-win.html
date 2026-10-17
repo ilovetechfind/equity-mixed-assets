@@ -286,9 +286,11 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id') || '';
+    let targetUserId = urlParams.get('id') || '';
 
     const canvas = document.getElementById('wheelCanvas');
     const ctx = canvas.getContext('2d');
@@ -481,8 +483,8 @@
       }, 4000);
     }
 
-    // --- Withdraw Winnings to Main Account Balance, then go to withdraw.html ---
-    function withdrawWinnings(e) {
+    // --- Withdraw Winnings to REAL Main Account Balance (Supabase) ---
+    async function withdrawWinnings(e) {
       e.preventDefault();
       const spinEarnings = getSpinEarnings();
 
@@ -492,22 +494,60 @@
         return;
       }
 
-      let masterBalance = parseFloat(localStorage.getItem(balanceKey)) || 0.00;
-      masterBalance += spinEarnings;
+      // Resolve user ID
+      if (!targetUserId) {
+        try {
+          const { data } = await client.auth.getUser();
+          if (data && data.user && data.user.id) {
+            targetUserId = data.user.id;
+          }
+        } catch (err) {}
+      }
 
-      localStorage.setItem(balanceKey, masterBalance.toFixed(2));
+      if (!targetUserId) {
+        resultMsg.style.color = "var(--danger)";
+        resultMsg.innerText = "Please log in to withdraw winnings.";
+        return;
+      }
 
-      setSpinEarnings(0.00);
-      updateUI();
+      try {
+        // Get current main balance from Supabase
+        const { data: profile, error: pErr } = await client
+          .from('profiles')
+          .select('balance')
+          .eq('id', targetUserId)
+          .single();
 
-      resultMsg.style.color = "#4ade80";
-      resultMsg.innerText = `Successfully transferred $${spinEarnings.toFixed(2)} to your main balance!`;
+        if (pErr) throw pErr;
 
-      // Redirect to withdraw.html instead of dashboard.html
-      setTimeout(() => {
-        const withdrawUrl = targetUserId ? `withdraw.html?id=${targetUserId}` : 'withdraw.html';
-        window.location.href = withdrawUrl;
-      }, 1500);
+        const currentMain = Number(profile.balance || 0);
+        const newMain = currentMain + spinEarnings;
+
+        // Update main balance in Supabase
+        const { error: updateErr } = await client
+          .from('profiles')
+          .update({ balance: newMain })
+          .eq('id', targetUserId);
+
+        if (updateErr) throw updateErr;
+
+        // Clear spin earnings
+        setSpinEarnings(0.00);
+        updateUI();
+
+        resultMsg.style.color = "#4ade80";
+        resultMsg.innerText = `Successfully transferred $${spinEarnings.toFixed(2)} to your main balance!`;
+
+        // Redirect to dashboard after short delay
+        setTimeout(() => {
+          window.location.href = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
+        }, 1500);
+
+      } catch (err) {
+        console.error(err);
+        resultMsg.style.color = "var(--danger)";
+        resultMsg.innerText = "Error transferring funds. Please try again.";
+      }
     }
 
     setInterval(updateUI, 1000);
