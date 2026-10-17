@@ -121,7 +121,6 @@
 </head>
 <body>
 
-  <!-- Slide-out Menu Overlay -->
   <div id="side-menu" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: flex-end;">
     <div style="width: 280px; background: #0f172a; height: 100%; padding: 24px; box-sizing: border-box; display: flex; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.1);">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -191,11 +190,10 @@
   <a href="customer-care.html" class="support-bubble" id="support-link" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const client = window.client;
 
     let isBalanceHidden = false;
     let currentRawBalance = 0;
@@ -224,7 +222,15 @@
       let targetUserId = urlParams.get('id');
 
       if (!targetUserId) {
-        const { data: { user } } = await client.auth.getUser();
+        let user = null;
+        try {
+          const { data: { session } } = await client.auth.getSession();
+          user = session && session.user ? session.user : null;
+          if (!user) {
+            const res = await client.auth.getUser();
+            user = res.data && res.data.user ? res.data.user : null;
+          }
+        } catch (e) {}
         if (!user) { window.location.href = 'index.html'; return; }
         targetUserId = user.id;
       } else {
@@ -293,51 +299,6 @@
     }
 
     checkUser();
-  </script> 
-  
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script> 
-  
-  <script>
-    async function fetchUserDashboardData() {
-      const { data: { user }, error: authError } = await client.auth.getUser();
-      
-      if (!user) {
-        console.log("No user logged in. Redirecting...");
-        window.location.replace('login.html');
-        return;
-      }
-
-      const { data, error } = await client
-        .from('profiles')
-        .select('balance, volume_percentage')
-        .eq('id', user.id)
-        .single();
-
-      if (error) {
-        console.error("Error fetching data:", error);
-        return;
-      }
-
-      if (data) {
-        const balanceEl = document.getElementById('user-balance-display');
-        if (balanceEl) {
-          balanceEl.innerText = '$' + data.balance.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        }
-
-        const volumeText = document.getElementById('volume-text');
-        const volumeFill = document.getElementById('volume-fill');
-        
-        if (volumeText) {
-          volumeText.innerText = data.volume_percentage + '% Full';
-        }
-        if (volumeFill) {
-          volumeFill.style.width = data.volume_percentage + '%';
-        }
-      }
-    }
-
-    fetchUserDashboardData();
   </script>
 
   <script>
