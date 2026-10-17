@@ -23,7 +23,7 @@
     .view-title { font-size: 1.4rem; font-weight: 800; margin: 0; }
     .empty-state { background: var(--card-bg); border: 1px dashed rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 40px 24px; text-align: center; }
     .plans-list { display: flex; flex-direction: column; gap: 16px; }
-    .plan-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .plan-card { background: var(--card-bg); border: 1px solid rgba(52, 211, 153, 0.35); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 0 20px rgba(52, 211, 153, 0.12); }
     .plan-card-header { display: flex; justify-content: space-between; align-items: center; }
     .plan-title-wrapper { display: flex; align-items: center; gap: 12px; }
     .plan-name { font-size: 1.1rem; font-weight: 700; margin: 0; }
@@ -33,7 +33,7 @@
 <body>
   <div class="container">
     <div class="nav-bar">
-      <a href="investment-plan.html" class="back-btn">Back</a>
+      <a href="investment-plan.html" id="back-btn" class="back-btn">Back</a>
       <h2 class="view-title">Active Investment</h2>
     </div>
     <div id="active-plans-container">
@@ -41,39 +41,73 @@
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    try {
+    const plansDictionary = {
+      'starter': { name: 'Starter Plan', icon: '🌱' },
+      'bronze': { name: 'Bronze Tier', icon: '🥉' },
+      'silver': { name: 'Silver Tier', icon: '🥈' },
+      'gold': { name: 'Gold Tier', icon: '🥇' },
+      'platinum': { name: 'Platinum Tier', icon: '💎' },
+      'diamond': { name: 'Diamond Tier', icon: '🔮' },
+      'crown': { name: 'Crown Elite', icon: '👑' }
+    };
+
+    async function resolveUserId() {
       const urlParams = new URLSearchParams(window.location.search);
-      const targetUserId = urlParams.get('id') || 'default_user';
+      let targetUserId = urlParams.get('id');
+      if (!targetUserId) {
+        try {
+          const { data } = await client.auth.getUser();
+          if (data && data.user && data.user.id) targetUserId = data.user.id;
+        } catch (e) {}
+      }
+      return targetUserId || 'default_user';
+    }
 
-      const plansDictionary = {
-        'starter': { name: 'Starter Plan', icon: '🌱' },
-        'bronze': { name: 'Bronze Tier', icon: '🥉' },
-        'silver': { name: 'Silver Tier', icon: '🥈' },
-        'gold': { name: 'Gold Tier', icon: '🥇' },
-        'platinum': { name: 'Platinum Tier', icon: '💎' },
-        'diamond': { name: 'Diamond Tier', icon: '🔮' },
-        'crown': { name: 'Crown Elite', icon: '👑' }
-      };
+    async function loadActivePlans(userId) {
+      try {
+        const { data, error } = await client
+          .from('profiles')
+          .select('active_plans')
+          .eq('id', userId)
+          .maybeSingle();
 
-      const container = document.getElementById('active-plans-container');
-      
-      let saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
-      if (!saved && targetUserId !== 'default_user') {
+        if (!error && data && data.active_plans != null) {
+          if (Array.isArray(data.active_plans)) return data.active_plans;
+          if (typeof data.active_plans === 'string') {
+            try {
+              const parsed = JSON.parse(data.active_plans);
+              if (Array.isArray(parsed)) return parsed;
+            } catch (e) {}
+          }
+        }
+      } catch (e) {}
+
+      let saved = localStorage.getItem(`user_active_plans_list_${userId}`);
+      if (!saved && userId !== 'default_user') {
         saved = localStorage.getItem(`user_active_plans_list_default_user`);
       }
-
-      let activeIds = [];
       if (saved) {
-        try { activeIds = JSON.parse(saved); } catch(e) {}
+        try { return JSON.parse(saved); } catch (e) {}
       }
+      return [];
+    }
+
+    async function init() {
+      const targetUserId = await resolveUserId();
+      document.getElementById('back-btn').href = `investment-plan.html?id=${targetUserId}`;
+
+      const container = document.getElementById('active-plans-container');
+      const activeIds = await loadActivePlans(targetUserId);
 
       if (!activeIds || activeIds.length === 0) {
         container.innerHTML = `
           <div class="empty-state">
             <h3 style="margin-top:0;">No Active Plans</h3>
             <p style="color: var(--text-muted); font-size: 0.95rem;">You currently do not have any active investments running.</p>
-            <a href="investment-plan.html${urlParams.get('id') ? '?id=' + targetUserId : ''}" style="color: #34d399; font-weight: bold; text-decoration: none;">Browse Plans</a>
+            <a href="investment-plan.html?id=${targetUserId}" style="color: #34d399; font-weight: bold; text-decoration: none;">Browse Plans</a>
           </div>
         `;
       } else {
@@ -97,11 +131,9 @@
         html += '</div>';
         container.innerHTML = html;
       }
-    } catch (err) {
-      console.error(err);
-      document.getElementById('active-plans-container').innerHTML = '<div class="empty-state"><h3>Error loading plans</h3></div>';
     }
+
+    document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
-</h
-  tml>
+</html>
