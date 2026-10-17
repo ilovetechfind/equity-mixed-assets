@@ -38,15 +38,26 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const client = window.client || window.supabase.createClient(
+      "https://rrdddtmqojyheshznrwl.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ",
+      { auth: { persistSession: true, autoRefreshToken: true, storage: window.localStorage } }
+    );
 
     async function loadGiftcard() {
       const area = document.getElementById('content-area');
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { window.location.href = 'login.html'; return; }
+      let user = null;
+      try {
+        const { data: { session } } = await client.auth.getSession();
+        user = session && session.user ? session.user : null;
+        if (!user) {
+          const res = await client.auth.getUser();
+          user = res.data && res.data.user ? res.data.user : null;
+        }
+      } catch (e) {}
+      if (!user) { window.location.href = 'index.html'; return; }
 
       const { data: profile } = await client.from('profiles').select('referred_by, id').eq('id', user.id).maybeSingle();
 
