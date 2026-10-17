@@ -129,7 +129,7 @@
 
     document.getElementById('client-back-btn').setAttribute('href', targetUserId ? `investment-plan.html?id=${targetUserId}` : 'investment-plan.html');
     document.getElementById('client-btn-invest').setAttribute('href', targetUserId ? `deposit.html?id=${targetUserId}` : 'deposit.html');
-    document.getElementById('client-btn-withdraw').setAttribute('href', targetUserId ? `withdraw-to-balance.html?id=${targetUserId}` : 'withdraw-to-balance.html');
+    document.getElementById('client-btn-withdraw').setAttribute('href', targetUserId ? `withdraw-to-balance.html?id=${targetUserId}&plan=silver` : 'withdraw-to-balance.html?plan=silver');
 
     async function loadPlanData() {
       let lookupId = targetUserId;
