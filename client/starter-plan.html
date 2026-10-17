@@ -277,7 +277,12 @@
     investBtn.setAttribute('href', targetUserId ? `deposit.html?id=${targetUserId}` : 'deposit.html');
 
     const withdrawBtn = document.getElementById('client-btn-withdraw');
-    withdrawBtn.setAttribute('href', targetUserId ? `withdraw-to-balance.html?id=${targetUserId}` : 'withdraw-to-balance.html');
+    // IMPORTANT: pass plan=starter so the withdraw page knows which plan balance to use
+    if (targetUserId) {
+      withdrawBtn.setAttribute('href', `withdraw-to-balance.html?id=${targetUserId}&plan=starter`);
+    } else {
+      withdrawBtn.setAttribute('href', 'withdraw-to-balance.html?plan=starter');
+    }
 
     document.addEventListener("DOMContentLoaded", loadPlanData);
 
@@ -326,5 +331,4 @@
     }
   </script>
 </body>
-        </html>
-        
+</html>
