@@ -44,14 +44,23 @@
 
     .submit-btn { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 16px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; text-align: center; font-size: 1rem; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transition: 0.2s; }
     .submit-btn:hover { opacity: 0.9; }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Success Modal Styling */
+    .plan-label {
+      font-size: 0.85rem;
+      color: #38bdf8;
+      font-weight: 600;
+      margin-top: 6px;
+    }
+
     #success-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(6px); z-index: 1000; display: none; align-items: center; justify-content: center; padding: 20px; }
     .modal-card { background: #0f172a; border: 1px solid rgba(255,255,255,0.1); width: 100%; max-width: 380px; border-radius: 24px; padding: 30px 20px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
     .success-icon { width: 64px; height: 64px; background: rgba(16, 185, 129, 0.15); border: 2px solid #10b981; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 20px auto; color: #10b981; }
     .modal-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 10px; color: white; }
     .modal-desc { font-size: 0.9rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
     .modal-btn { background: var(--primary-glow); color: white; border: none; padding: 14px; width: 100%; border-radius: 14px; font-weight: 700; cursor: pointer; font-size: 0.95rem; }
+
+    .error-text { color: #f87171; font-size: 0.85rem; margin-top: 8px; display: none; }
   </style>
 </head>
 <body>
@@ -63,17 +72,19 @@
     </header>
 
     <div class="card">
-      <span class="card-title">AVAILABLE PORTFOLIO VALUE</span>
-      <h2 style="font-size: 2rem; font-weight: 800; margin: 10px 0 0 0;" id="current-value">$274,285.20</h2>
+      <span class="card-title">AVAILABLE PLAN BALANCE</span>
+      <h2 style="font-size: 2rem; font-weight: 800; margin: 10px 0 0 0;" id="current-value">$0.00</h2>
+      <div class="plan-label" id="plan-name-label">Loading plan...</div>
     </div>
 
     <div class="card">
       <span class="card-title">WITHDRAW TO MAIN BALANCE</span>
       <div class="input-group">
         <label class="input-label" for="withdraw-amount">Enter Amount ($)</label>
-        <input type="number" id="withdraw-amount" placeholder="0.00">
+        <input type="number" id="withdraw-amount" placeholder="0.00" min="0.01" step="0.01">
+        <div class="error-text" id="error-msg"></div>
       </div>
-      <button class="submit-btn" onclick="handleWithdraw()">Withdraw Funds</button>
+      <button class="submit-btn" id="withdraw-btn" onclick="handleWithdraw()">Withdraw Funds</button>
     </div>
   </div>
 
@@ -81,54 +92,194 @@
   <div id="success-modal">
     <div class="modal-card">
       <div class="success-icon">✓</div>
-      <div class="modal-title">Withdraw Successfully</div>
-      <div class="modal-desc">The money will reflect in your account very soon.</div>
+      <div class="modal-title">Withdraw Successful</div>
+      <div class="modal-desc" id="success-desc">The amount has been moved to your main account balance.</div>
       <button class="modal-btn" onclick="closeModal()">Got It</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    // Carry over user ID query parameter if present (for admin previews)
     const urlParams = new URLSearchParams(window.location.search);
-    const targetUserId = urlParams.get('id');
+    let targetUserId = urlParams.get('id') || '';
+    const planId = urlParams.get('plan') || '';
+
+    const planNames = {
+      starter: 'Starter Plan',
+      bronze: 'Bronze Plan',
+      silver: 'Silver Plan',
+      gold: 'Gold Plan',
+      platinum: 'Platinum Plan',
+      diamond: 'Diamond Plan',
+      crown: 'Crown Plan'
+    };
+
+    let availablePlanBalance = 0;
+    let planConfigRow = null;
+
+    // Set back link
     if (targetUserId) {
       document.getElementById('back-link').setAttribute('href', `dashboard.html?id=${targetUserId}`);
     } else {
       document.getElementById('back-link').setAttribute('href', 'dashboard.html');
     }
 
-    async function loadPortfolioData() {
-      if (!targetUserId) return;
-      const { data: profile } = await client.from('profiles').select('balance').eq('id', targetUserId).single();
-      if (profile && profile.balance !== undefined) {
-        document.getElementById('current-value').innerText = `$${Number(profile.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
-      }
+    function parseMoney(str) {
+      if (typeof str === 'number') return str;
+      if (!str) return 0;
+      return parseFloat(String(str).replace(/[^0-9.-]/g, '')) || 0;
     }
 
-    loadPortfolioData();
+    function formatMoney(num) {
+      return '$' + Number(num || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
 
-    function handleWithdraw() {
-      const amountInput = document.getElementById('withdraw-amount');
-      const val = parseFloat(amountInput.value);
+    async function resolveUserId() {
+      if (targetUserId) return targetUserId;
+      try {
+        const { data } = await client.auth.getUser();
+        if (data && data.user && data.user.id) {
+          targetUserId = data.user.id;
+          return targetUserId;
+        }
+      } catch (e) {}
+      return null;
+    }
 
-      if (!val || val <= 0) {
-        alert('Please enter a valid withdrawal amount.');
+    async function loadData() {
+      const userId = await resolveUserId();
+      if (!userId) {
+        document.getElementById('current-value').innerText = '$0.00';
+        document.getElementById('plan-name-label').innerText = 'Please log in';
         return;
       }
 
-      // Show success modal as requested
-      document.getElementById('success-modal').style.display = 'flex';
+      if (!planId) {
+        // Fallback: show main balance if no plan specified
+        const { data: profile } = await client.from('profiles').select('balance').eq('id', userId).single();
+        availablePlanBalance = profile ? (profile.balance || 0) : 0;
+        document.getElementById('current-value').innerText = formatMoney(availablePlanBalance);
+        document.getElementById('plan-name-label').innerText = 'Main Account Balance';
+        return;
+      }
+
+      document.getElementById('plan-name-label').innerText = planNames[planId] || planId;
+
+      const { data: planData, error } = await client
+        .from('plan_configs')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('plan_id', planId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error loading plan:', error);
+        document.getElementById('current-value').innerText = '$0.00';
+        return;
+      }
+
+      if (!planData) {
+        document.getElementById('current-value').innerText = '$0.00';
+        document.getElementById('plan-name-label').innerText = (planNames[planId] || planId) + ' (no data yet)';
+        return;
+      }
+
+      planConfigRow = planData;
+      availablePlanBalance = parseMoney(planData.current_value);
+      document.getElementById('current-value').innerText = formatMoney(availablePlanBalance);
+    }
+
+    async function handleWithdraw() {
+      const amountInput = document.getElementById('withdraw-amount');
+      const errorEl = document.getElementById('error-msg');
+      const btn = document.getElementById('withdraw-btn');
+
+      errorEl.style.display = 'none';
+      const val = parseFloat(amountInput.value);
+
+      if (!val || val <= 0) {
+        errorEl.innerText = 'Please enter a valid amount greater than 0.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      if (val > availablePlanBalance + 0.001) {
+        errorEl.innerText = `Insufficient plan balance. Available: ${formatMoney(availablePlanBalance)}`;
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const userId = await resolveUserId();
+      if (!userId) {
+        errorEl.innerText = 'You must be logged in.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerText = 'Processing...';
+
+      try {
+        // 1. Get current main balance
+        const { data: profile, error: pErr } = await client
+          .from('profiles')
+          .select('balance')
+          .eq('id', userId)
+          .single();
+
+        if (pErr) throw pErr;
+
+        const currentMain = Number(profile.balance || 0);
+        const newMain = currentMain + val;
+
+        // 2. Update main balance
+        const { error: updateMainErr } = await client
+          .from('profiles')
+          .update({ balance: newMain })
+          .eq('id', userId);
+
+        if (updateMainErr) throw updateMainErr;
+
+        // 3. Reduce plan balance if a plan was specified
+        if (planId && planConfigRow) {
+          const newPlanBalance = Math.max(0, availablePlanBalance - val);
+          const formatted = formatMoney(newPlanBalance);
+
+          const { error: updatePlanErr } = await client
+            .from('plan_configs')
+            .update({ current_value: formatted })
+            .eq('user_id', userId)
+            .eq('plan_id', planId);
+
+          if (updatePlanErr) {
+            console.error('Plan update error (main balance was still credited):', updatePlanErr);
+          }
+
+          availablePlanBalance = newPlanBalance;
+          document.getElementById('current-value').innerText = formatMoney(newPlanBalance);
+        }
+
+        // Success
+        document.getElementById('success-desc').innerText =
+          `$${val.toLocaleString(undefined, {minimumFractionDigits: 2})} has been moved to your main account balance.`;
+        document.getElementById('success-modal').style.display = 'flex';
+
+      } catch (err) {
+        console.error(err);
+        errorEl.innerText = 'Error: ' + (err.message || 'Something went wrong');
+        errorEl.style.display = 'block';
+        btn.disabled = false;
+        btn.innerText = 'Withdraw Funds';
+      }
     }
 
     function closeModal() {
       document.getElementById('success-modal').style.display = 'none';
       window.location.href = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
     }
+
+    loadData();
   </script>
 </body>
-  </html>
+</html>
