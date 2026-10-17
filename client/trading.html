@@ -29,10 +29,10 @@
       padding: 8px 14px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.85rem;
     }
     .title { font-size: 1.15rem; font-weight: 800; margin: 0; letter-spacing: -0.3px; }
-    .badge-demo {
+    .badge-live {
       margin-left: auto; font-size: 0.65rem; font-weight: 800; letter-spacing: 1px;
-      background: rgba(245, 158, 11, 0.15); color: var(--gold);
-      border: 1px solid rgba(245, 158, 11, 0.35); padding: 4px 8px; border-radius: 20px;
+      background: rgba(16, 185, 129, 0.15); color: var(--green);
+      border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 8px; border-radius: 20px;
     }
 
     .bal-card {
@@ -164,7 +164,7 @@
     <div class="topbar">
       <a href="dashboard.html" class="back" id="back-link">← Back</a>
       <h1 class="title">Trading</h1>
-      <span class="badge-demo">DEMO</span>
+      <span class="badge-live">LIVE</span>
     </div>
 
     <div class="bal-card">
@@ -192,7 +192,7 @@
     <div class="chart-card">
       <div class="chart-head">
         <span class="chart-sym" id="chart-sym">BTC/USD</span>
-        <span class="chart-live"><span>●</span> Live demo</span>
+        <span class="chart-live"><span>●</span> Live</span>
       </div>
       <canvas id="chart" width="400" height="140"></canvas>
     </div>
@@ -263,7 +263,6 @@
     let chartHistory = [];
     let catFilter = 'all';
 
-    // seed prices with slight random change tracking
     INSTRUMENTS.forEach(i => {
       i.base = i.price;
       i.chg = 0;
@@ -281,7 +280,6 @@
       mainBalance = Number(profile?.balance || 0);
       tradeBalance = Number(profile?.trading_balance || 0);
 
-      // fallback localStorage if column missing
       if (!profile || profile.trading_balance == null) {
         const ls = localStorage.getItem('trading_balance_' + userId);
         if (ls) tradeBalance = Number(ls) || 0;
@@ -414,7 +412,6 @@
       });
       ctx.stroke();
 
-      // fill
       ctx.lineTo(w - 5, h - 5);
       ctx.lineTo(5, h - 5);
       ctx.closePath();
@@ -520,16 +517,13 @@
         mainBalance += amt;
       }
 
-      // persist to Supabase
       const { error } = await client.from('profiles').update({
         balance: mainBalance,
         trading_balance: tradeBalance
       }).eq('id', userId);
 
       if (error) {
-        // column may not exist — still keep local
         localStorage.setItem('trading_balance_' + userId, String(tradeBalance));
-        // try balance only
         await client.from('profiles').update({ balance: mainBalance }).eq('id', userId);
       }
 
