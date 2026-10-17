@@ -58,6 +58,10 @@
       justify-content: space-between;
       align-items: center;
     }
+    .active-banner.has-active {
+      border-color: rgba(52, 211, 153, 0.4);
+      box-shadow: 0 0 20px rgba(52, 211, 153, 0.15);
+    }
     .banner-left { display: flex; flex-direction: column; gap: 6px; }
     .banner-subtitle { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
     .banner-title { font-size: 1.3rem; font-weight: 800; margin: 0; color: white; letter-spacing: -0.5px; }
@@ -77,6 +81,7 @@
       justify-content: space-between; 
       position: relative;
       overflow: hidden;
+      transition: box-shadow 0.3s, border-color 0.3s, transform 0.2s;
     }
     .tier-card::before {
       content: '';
@@ -86,6 +91,35 @@
       background: var(--tier-color);
       opacity: 0.7;
     }
+    /* ACTIVE / GLOWING plan */
+    .tier-card.is-active {
+      border-color: var(--tier-color);
+      box-shadow: 0 0 24px color-mix(in srgb, var(--tier-color) 35%, transparent),
+                  0 0 8px color-mix(in srgb, var(--tier-color) 20%, transparent),
+                  inset 0 0 20px color-mix(in srgb, var(--tier-color) 8%, transparent);
+      background: linear-gradient(135deg, color-mix(in srgb, var(--tier-color) 12%, transparent), var(--card-bg));
+    }
+    .tier-card.is-active::before {
+      opacity: 1;
+      width: 5px;
+      box-shadow: 0 0 12px var(--tier-color);
+    }
+    .active-badge {
+      display: none;
+      font-size: 0.65rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      background: color-mix(in srgb, var(--tier-color) 25%, transparent);
+      color: var(--tier-color);
+      border: 1px solid color-mix(in srgb, var(--tier-color) 40%, transparent);
+      margin-left: 8px;
+    }
+    .tier-card.is-active .active-badge {
+      display: inline-block;
+    }
     .tier-content { display: flex; align-items: center; gap: 16px; }
     .tier-icon {
       width: 44px; height: 44px; border-radius: 12px;
@@ -93,12 +127,22 @@
       background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
       border: 1px solid rgba(255,255,255,0.05); color: var(--tier-color);
     }
-    .tier-info h4 { font-size: 1.1rem; font-weight: 700; margin: 0; color: white; }
+    .tier-card.is-active .tier-icon {
+      box-shadow: 0 0 14px color-mix(in srgb, var(--tier-color) 40%, transparent);
+      border-color: color-mix(in srgb, var(--tier-color) 50%, transparent);
+    }
+    .tier-info h4 { font-size: 1.1rem; font-weight: 700; margin: 0; color: white; display: flex; align-items: center; flex-wrap: wrap; }
     .select-btn { 
       background: rgba(255,255,255,0.03); color: white; border: 1px solid rgba(255,255,255,0.1);
       padding: 10px 20px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; text-decoration: none; 
     }
     .select-btn:hover { background: var(--tier-color); color: #000; }
+    .tier-card.is-active .select-btn {
+      background: var(--tier-color);
+      color: #000;
+      border-color: var(--tier-color);
+      box-shadow: 0 4px 15px color-mix(in srgb, var(--tier-color) 40%, transparent);
+    }
 
     .tier-1 { --tier-color: var(--tier-starter); }
     .tier-2 { --tier-color: var(--tier-bronze); }
@@ -131,7 +175,7 @@
     </div>
 
     <a href="active-plan.html" id="active-banner-link" class="active-banner-link">
-      <div class="active-banner">
+      <div class="active-banner" id="active-banner">
         <div class="banner-left">
           <span class="banner-subtitle">Current Active Tier</span>
           <h3 class="banner-title" id="banner-plan-title">None</h3>
@@ -144,13 +188,55 @@
     </a>
 
     <div class="tier-list">
-      <div class="tier-card tier-1"><div class="tier-content"><div class="tier-icon">🌱</div><div class="tier-info"><h4>Starter Plan</h4></div></div><a href="starter-plan.html" class="select-btn" data-plan="starter-plan.html">Select</a></div>
-      <div class="tier-card tier-2"><div class="tier-content"><div class="tier-icon">🥉</div><div class="tier-info"><h4>Bronze Tier</h4></div></div><a href="bronze-plan.html" class="select-btn" data-plan="bronze-plan.html">Select</a></div>
-      <div class="tier-card tier-3"><div class="tier-content"><div class="tier-icon">🥈</div><div class="tier-info"><h4>Silver Tier</h4></div></div><a href="silver-plan.html" class="select-btn" data-plan="silver-plan.html">Select</a></div>
-      <div class="tier-card tier-4"><div class="tier-content"><div class="tier-icon">🥇</div><div class="tier-info"><h4>Gold Tier</h4></div></div><a href="gold-plan.html" class="select-btn" data-plan="gold-plan.html">Select</a></div>
-      <div class="tier-card tier-5"><div class="tier-content"><div class="tier-icon">💎</div><div class="tier-info"><h4>Platinum Tier</h4></div></div><a href="platinum-plan.html" class="select-btn" data-plan="platinum-plan.html">Select</a></div>
-      <div class="tier-card tier-6"><div class="tier-content"><div class="tier-icon">🔮</div><div class="tier-info"><h4>Diamond Tier</h4></div></div><a href="diamond-plan.html" class="select-btn" data-plan="diamond-plan.html">Select</a></div>
-      <div class="tier-card tier-7"><div class="tier-content"><div class="tier-icon">👑</div><div class="tier-info"><h4>Crown Elite</h4></div></div><a href="crown-plan.html" class="select-btn" data-plan="crown-plan.html">Select</a></div>
+      <div class="tier-card tier-1" data-plan-id="starter">
+        <div class="tier-content">
+          <div class="tier-icon">🌱</div>
+          <div class="tier-info"><h4>Starter Plan <span class="active-badge">Active</span></h4></div>
+        </div>
+        <a href="starter-plan.html" class="select-btn" data-plan="starter-plan.html">Select</a>
+      </div>
+      <div class="tier-card tier-2" data-plan-id="bronze">
+        <div class="tier-content">
+          <div class="tier-icon">🥉</div>
+          <div class="tier-info"><h4>Bronze Tier <span class="active-badge">Active</span></h4></div>
+        </div>
+        <a href="bronze-plan.html" class="select-btn" data-plan="bronze-plan.html">Select</a>
+      </div>
+      <div class="tier-card tier-3" data-plan-id="silver">
+        <div class="tier-content">
+          <div class="tier-icon">🥈</div>
+          <div class="tier-info"><h4>Silver Tier <span class="active-badge">Active</span></h4></div>
+        </div>
+        <a href="silver-plan.html" class="select-btn" data-plan="silver-plan.html">Select</a>
+      </div>
+      <div class="tier-card tier-4" data-plan-id="gold">
+        <div class="tier-content">
+          <div class="tier-icon">🥇</div>
+          <div class="tier-info"><h4>Gold Tier <span class="active-badge">Active</span></h4></div>
+        </div>
+        <a href="gold-plan.html" class="select-btn" data-plan="gold-plan.html">Select</a>
+      </div>
+      <div class="tier-card tier-5" data-plan-id="platinum">
+        <div class="tier-content">
+          <div class="tier-icon">💎</div>
+          <div class="tier-info"><h4>Platinum Tier <span class="active-badge">Active</span></h4></div>
+        </div>
+        <a href="platinum-plan.html" class="select-btn" data-plan="platinum-plan.html">Select</a>
+      </div>
+      <div class="tier-card tier-6" data-plan-id="diamond">
+        <div class="tier-content">
+          <div class="tier-icon">🔮</div>
+          <div class="tier-info"><h4>Diamond Tier <span class="active-badge">Active</span></h4></div>
+        </div>
+        <a href="diamond-plan.html" class="select-btn" data-plan="diamond-plan.html">Select</a>
+      </div>
+      <div class="tier-card tier-7" data-plan-id="crown">
+        <div class="tier-content">
+          <div class="tier-icon">👑</div>
+          <div class="tier-info"><h4>Crown Elite <span class="active-badge">Active</span></h4></div>
+        </div>
+        <a href="crown-plan.html" class="select-btn" data-plan="crown-plan.html">Select</a>
+      </div>
     </div>
   </div>
 
@@ -167,12 +253,8 @@
       'crown': 'Crown Elite'
     };
 
-    async function init() {
-      // Resolve the real logged-in user's id from the Supabase session.
-      // Fall back to a ?id= URL param only if present (e.g. admin preview links),
-      // and finally to 'default_user' so the page never hard-fails.
+    async function resolveUserId() {
       let targetUserId = 'default_user';
-
       try {
         const { data } = await client.auth.getUser();
         if (data && data.user && data.user.id) {
@@ -183,15 +265,77 @@
           if (paramId) targetUserId = paramId;
         }
       } catch (e) {
-        console.warn('Could not resolve auth user, falling back:', e);
         const urlParams = new URLSearchParams(window.location.search);
         const paramId = urlParams.get('id');
         if (paramId) targetUserId = paramId;
       }
+      return targetUserId;
+    }
 
-      // Thread the resolved id onto every internal link so the next page
-      // (starter-plan.html, active-plan.html, etc.) can use it too, even
-      // though those pages will also try auth.getUser() themselves first.
+    async function loadActivePlans(userId) {
+      // 1. Try Supabase first (shared across devices)
+      try {
+        const { data, error } = await client
+          .from('profiles')
+          .select('active_plans')
+          .eq('id', userId)
+          .maybeSingle();
+
+        if (!error && data && data.active_plans != null) {
+          if (Array.isArray(data.active_plans)) return data.active_plans;
+          if (typeof data.active_plans === 'string') {
+            try {
+              const parsed = JSON.parse(data.active_plans);
+              if (Array.isArray(parsed)) return parsed;
+            } catch (e) {}
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load active_plans from Supabase', e);
+      }
+
+      // 2. Fallback localStorage
+      const saved = localStorage.getItem(`user_active_plans_list_${userId}`);
+      if (saved) {
+        try {
+          const arr = JSON.parse(saved);
+          if (Array.isArray(arr)) return arr;
+        } catch (e) {}
+      }
+      return [];
+    }
+
+    function applyActiveUI(activeIds) {
+      // Banner
+      if (activeIds.length > 0) {
+        const names = activeIds.map(id => plansMap[id]).filter(Boolean);
+        document.getElementById('banner-plan-title').innerText = names.join(', ');
+        document.getElementById('banner-status-text').innerText = activeIds.length === 1 ? 'Active Plan Running' : 'Active Plans Running';
+        document.getElementById('banner-status-dot').style.backgroundColor = '#34d399';
+        document.getElementById('banner-status-container').style.color = '#34d399';
+        document.getElementById('active-banner').classList.add('has-active');
+      } else {
+        document.getElementById('banner-plan-title').innerText = 'None';
+        document.getElementById('banner-status-text').innerText = 'No Active Plan';
+        document.getElementById('banner-status-dot').style.backgroundColor = '#ef4444';
+        document.getElementById('banner-status-container').style.color = '#ef4444';
+        document.getElementById('active-banner').classList.remove('has-active');
+      }
+
+      // Glow / highlight cards
+      document.querySelectorAll('.tier-card').forEach(card => {
+        const planId = card.getAttribute('data-plan-id');
+        if (activeIds.includes(planId)) {
+          card.classList.add('is-active');
+        } else {
+          card.classList.remove('is-active');
+        }
+      });
+    }
+
+    async function init() {
+      const targetUserId = await resolveUserId();
+
       document.querySelectorAll('.select-btn').forEach(link => {
         const file = link.getAttribute('data-plan');
         link.setAttribute('href', `${file}?id=${targetUserId}`);
@@ -199,21 +343,8 @@
 
       document.getElementById('active-banner-link').setAttribute('href', `active-plan.html?id=${targetUserId}`);
 
-      const saved = localStorage.getItem(`user_active_plans_list_${targetUserId}`);
-      if (saved) {
-        try {
-          const activeIds = JSON.parse(saved);
-          if (Array.isArray(activeIds) && activeIds.length > 0) {
-            const names = activeIds.map(id => plansMap[id]).filter(Boolean);
-            if (names.length > 0) {
-              document.getElementById('banner-plan-title').innerText = names.join(', ');
-              document.getElementById('banner-status-text').innerText = 'Active Plan Running';
-              document.getElementById('banner-status-dot').style.backgroundColor = '#34d399';
-              document.getElementById('banner-status-container').style.color = '#34d399';
-            }
-          }
-        } catch(e) {}
-      }
+      const activeIds = await loadActivePlans(targetUserId);
+      applyActiveUI(activeIds);
     }
 
     document.addEventListener('DOMContentLoaded', init);
