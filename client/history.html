@@ -54,6 +54,7 @@
     .badge.trade { color: #93c5fd; background: rgba(59,130,246,0.15); }
     .badge.bet { color: #fca5a5; background: rgba(239,68,68,0.15); }
     .badge.transfer { color: #6ee7b7; background: rgba(16,185,129,0.15); }
+    .badge.race { color: #4ade80; background: rgba(34,197,94,0.15); }
   </style>
 </head>
 <body>
@@ -68,6 +69,7 @@
       <button type="button" class="tab" data-filter="trade">Trading</button>
       <button type="button" class="tab" data-filter="bet">Red / Black</button>
       <button type="button" class="tab" data-filter="transfer">Transfers</button>
+      <button type="button" class="tab" data-filter="race">Horse Race</button>
     </div>
 
     <div class="list" id="list">
@@ -128,6 +130,8 @@
       var betHist = [];
       try { tradeHist = JSON.parse(localStorage.getItem('trading_history_' + userId) || '[]'); } catch (e) {}
       try { betHist = JSON.parse(localStorage.getItem('redblack_history_' + userId) || '[]'); } catch (e) {}
+      var raceHist = [];
+      try { raceHist = JSON.parse(localStorage.getItem('horse_race_history_' + userId) || '[]'); } catch (e) {}
 
       allItems = [];
       tradeHist.forEach(function (h) {
@@ -148,8 +152,16 @@
           ts: h.ts || 0
         });
       });
+      raceHist.forEach(function (h) {
+        allItems.push({
+          kind: 'race',
+          title: h.title || 'Horse Race',
+          detail: h.detail || '',
+          pnl: Number(h.pnl || 0),
+          ts: h.ts || 0
+        });
+      });
 
-      // Transfers from notifications
       try {
         var { data } = await client.from('notifications')
           .select('type, message, created_at')
@@ -165,7 +177,6 @@
         }
       } catch (e) {}
 
-      // Local transfer backup
       try {
         var local = JSON.parse(localStorage.getItem('transfers_' + userId) || '[]');
         local.forEach(function (h) {
@@ -209,6 +220,7 @@
         if (filter === 'transfer') emptyMsg = 'No transfers yet. Send or receive money to see them here.';
         else if (filter === 'trade') emptyMsg = 'No trades yet.';
         else if (filter === 'bet') emptyMsg = 'No Red / Black bets yet.';
+        else if (filter === 'race') emptyMsg = 'No horse races yet.';
         else emptyMsg = 'No history yet. Place trades, bets, or transfers to see them here.';
         list.innerHTML = '<div class="empty">' + emptyMsg + '</div>';
         return;
@@ -218,8 +230,8 @@
         var cls = pnl >= 0 ? 'up' : 'down';
         var sign = pnl >= 0 ? '+' : '';
         var when = i.ts ? new Date(i.ts).toLocaleString() : '';
-        var badge = i.kind === 'trade' ? 'trade' : (i.kind === 'bet' ? 'bet' : 'transfer');
-        var label = i.kind === 'trade' ? 'TRADE' : (i.kind === 'bet' ? 'BET' : 'TRANSFER');
+        var badge = i.kind === 'trade' ? 'trade' : (i.kind === 'bet' ? 'bet' : (i.kind === 'race' ? 'race' : 'transfer'));
+        var label = i.kind === 'trade' ? 'TRADE' : (i.kind === 'bet' ? 'BET' : (i.kind === 'race' ? 'RACE' : 'TRANSFER'));
         return '<div class="item">' +
           '<div class="item-top">' +
             '<div><span class="badge ' + badge + '">' + label + '</span> ' +
