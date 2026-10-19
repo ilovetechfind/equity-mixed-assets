@@ -2,571 +2,507 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Equity Mixed Assets - Premium Luxury Spin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Equity Mixed Assets - Spin & Win</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-main: #030712;
-      --card-bg: linear-gradient(145deg, rgba(15, 23, 42, 0.85), rgba(30, 27, 12, 0.6));
-      --card-border: rgba(212, 175, 55, 0.35);
-      --text-muted: #94a3b8;
-      --gold-primary: #d4af37;
-      --gold-light: #fef08a;
-      --gold-gradient: linear-gradient(135deg, #fef08a 0%, #d4af37 50%, #9a7b20 100%);
-      --gold-glow: 0 0 25px rgba(212, 175, 55, 0.35);
-      --success: #4ade80;
-      --danger: #ef4444;
+      --bg: #070b14;
+      --card: rgba(18, 24, 38, 0.92);
+      --border: rgba(255,255,255,0.08);
+      --muted: #8b9bb4;
+      --gold: #fbbf24;
+      --green: #10b981;
+      --red: #ef4444;
     }
-
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0; padding: 14px; padding-bottom: 40px;
+      background: radial-gradient(circle at top, #1a1428 0%, var(--bg) 55%);
+      color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
+    }
+    .wrap { max-width: 420px; margin: 0 auto; }
+    .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .back {
+      background: var(--card); border: 1px solid var(--border); color: #fff;
+      padding: 8px 14px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.85rem;
+    }
+    .title { font-size: 1.15rem; font-weight: 800; margin: 0; }
 
-    body { 
-      background-color: var(--bg-main);
-      background-image: 
-        radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.12) 0%, transparent 45%),
-        radial-gradient(circle at 85% 85%, rgba(56, 189, 248, 0.06) 0%, transparent 45%);
-      background-attachment: fixed; 
-      color: white; 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
-      margin: 0; 
-      padding: 16px; 
-      padding-bottom: 50px;
-      display: flex; 
-      justify-content: center; 
-      min-height: 100vh;
+    .hero {
+      text-align: center; margin-bottom: 14px;
+      background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(0,0,0,0.2));
+      border: 1px solid rgba(251,191,36,0.25); border-radius: 16px; padding: 14px;
     }
-    
-    .container { width: 100%; max-width: 480px; text-align: center; }
-    
-    .nav-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; margin-top: 10px; gap: 8px; }
-    .nav-btn { 
-      background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(212, 175, 55, 0.05)); 
-      border: 1px solid var(--card-border); 
-      backdrop-filter: blur(12px); 
-      color: var(--gold-light); 
-      padding: 10px 14px; 
-      border-radius: 14px; 
-      cursor: pointer; 
-      font-size: 0.85rem; 
-      text-decoration: none; 
-      font-weight: 600; 
-      display: flex; 
-      align-items: center; 
-      gap: 6px; 
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-      line-height: 1;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    .hero h2 {
+      margin: 0 0 4px; font-size: 1.15rem; font-weight: 800;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-    .nav-btn:hover { 
-      background: rgba(212, 175, 55, 0.18); 
-      border-color: var(--gold-light);
-      box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
-      transform: translateY(-1px);
+    .hero p { margin: 0; font-size: 0.8rem; color: var(--muted); }
+
+    .bal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .bal-box {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px;
     }
-    .nav-btn:active { transform: translateY(1px) scale(0.97); }
-    .nav-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.5; }
-    
-    .view-title { 
-      font-size: 1.15rem; 
-      font-weight: 800; 
-      margin: 0; 
-      background: var(--gold-gradient); 
-      -webkit-background-clip: text; 
-      -webkit-text-fill-color: transparent; 
-      letter-spacing: -0.5px; 
-      filter: drop-shadow(0 2px 10px rgba(212,175,55,0.25));
+    .bal-box .lbl { font-size: 0.65rem; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+    .bal-box .val { font-size: 1.2rem; font-weight: 800; margin-top: 4px; }
+    .bal-box.spin .val { color: var(--gold); }
+    .bal-box.main .val { color: #93c5fd; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 16px; margin-bottom: 14px;
     }
-    
-    .balance-display {
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.2), rgba(154, 123, 32, 0.1));
-      border: 1px solid var(--card-border);
-      padding: 9px 14px;
-      border-radius: 14px;
-      font-weight: 700;
-      color: var(--gold-light);
-      font-size: 0.9rem;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.2);
-      white-space: nowrap;
-      letter-spacing: 0.3px;
+    label {
+      display: block; font-size: 0.72rem; color: var(--muted); font-weight: 700;
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    input[type=number] {
+      width: 100%; background: rgba(0,0,0,0.35); border: 1px solid var(--border); color: #fff;
+      padding: 12px 14px; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 10px;
+    }
+    input:focus { border-color: var(--gold); }
+    .quick { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .q {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #cbd5e1;
+      padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
     }
 
-    .plan-hero {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      border-radius: 26px;
-      padding: 24px;
-      margin-bottom: 20px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.15);
+    .fund-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 4px; }
+    .fund-btn {
+      border: none; border-radius: 12px; padding: 11px; font-weight: 700; font-size: 0.82rem; cursor: pointer;
     }
-    .plan-name { 
-      font-size: 1.7rem; 
-      font-weight: 800; 
-      margin: 0 0 4px 0; 
-      background: var(--gold-gradient); 
-      -webkit-background-clip: text; 
-      -webkit-text-fill-color: transparent; 
-      text-shadow: 0 0 30px rgba(212,175,55,0.3); 
-    }
-    .plan-subtitle { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+    .fund-in { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; }
+    .fund-out { background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.4); color: #34d399; }
 
-    .wheel-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      backdrop-filter: blur(16px);
-      border-radius: 26px;
-      padding: 24px 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 20px 45px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
-      position: relative;
+    .wheel-wrap { position: relative; width: 300px; height: 300px; margin: 8px auto 16px; }
+    .pointer {
+      position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+      width: 0; height: 0;
+      border-left: 12px solid transparent; border-right: 12px solid transparent;
+      border-top: 22px solid var(--gold);
+      z-index: 5; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+    canvas { width: 300px; height: 300px; border-radius: 50%; display: block;
+      box-shadow: 0 0 0 6px rgba(251,191,36,0.25), 0 10px 40px rgba(0,0,0,0.5);
     }
 
-    .spins-info-wrapper {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      margin-bottom: 18px;
+    .spin-btn {
+      width: 100%; border: none; border-radius: 14px; padding: 15px; font-weight: 800; font-size: 1.05rem;
+      cursor: pointer; color: #0f172a;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      box-shadow: 0 6px 20px rgba(251,191,36,0.35);
     }
+    .spin-btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
 
-    .spins-left-badge {
-      font-size: 0.85rem;
-      color: var(--gold-light);
-      background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-weight: 700;
-      border: 1px solid rgba(212, 175, 55, 0.4);
-      box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.2);
+    .result-line {
+      text-align: center; min-height: 1.4em; margin-top: 12px; font-weight: 700; font-size: 0.95rem;
     }
-    
-    .timer-badge {
-      font-size: 0.75rem;
-      color: var(--gold-light);
-      background: rgba(0, 0, 0, 0.35);
-      padding: 4px 12px;
-      border-radius: 12px;
-      font-weight: 600;
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      letter-spacing: 0.3px;
-    }
+    .result-line.win { color: var(--green); }
+    .result-line.lose { color: var(--red); }
 
-    .wheel-container {
-      position: relative;
-      width: 290px;
-      height: 290px;
-      margin: 0 auto 20px auto;
-    }
+    .note { font-size: 0.75rem; color: var(--muted); text-align: center; margin-top: 10px; line-height: 1.4; }
 
-    .wheel-pointer {
-      position: absolute;
-      top: -14px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-top: 30px solid #fef08a;
-      z-index: 10;
-      filter: drop-shadow(0 4px 10px rgba(212, 175, 55, 0.8));
+    .modal-bg {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50;
+      align-items: center; justify-content: center; padding: 20px;
     }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      box-shadow: 0 0 50px rgba(212, 175, 55, 0.35), inset 0 0 35px rgba(212, 175, 55, 0.15);
-      border: 4px solid rgba(212, 175, 55, 0.6);
-      transition: transform 4s cubic-bezier(0.15, 0.85, 0.15, 1);
+    .modal-bg.show { display: flex; }
+    .modal {
+      background: #0f172a; border: 1px solid var(--border); border-radius: 18px; padding: 20px; width: 100%; max-width: 360px;
     }
-
-    .button-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+    .modal h3 { margin: 0 0 6px; font-size: 1.1rem; }
+    .modal p { color: var(--muted); font-size: 0.85rem; margin: 0 0 14px; }
+    .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+    .modal-cancel {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff;
+      padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer;
     }
-
-    .action-btn {
-      width: 100%;
-      padding: 16px;
-      border-radius: 16px;
-      font-size: 1rem;
-      font-weight: 700;
-      border: 1px solid rgba(254, 240, 138, 0.4);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: var(--gold-gradient);
-      color: #1a1500;
-      box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.6);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      text-decoration: none;
-      letter-spacing: 0.5px;
+    .modal-ok {
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff;
+      padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer;
     }
-    .action-btn:hover { 
-      filter: brightness(1.08); 
-      box-shadow: 0 12px 35px rgba(212, 175, 55, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.8);
-      transform: translateY(-2px);
-    }
-    .action-btn:active { transform: translateY(1px) scale(0.98); }
-    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-    
-    .action-btn.buy-mode { 
-      background: linear-gradient(135deg, #38bdf8 0%, #0284c7 50%, #0369a1 100%); 
-      color: white; 
-      border-color: rgba(56, 189, 248, 0.5);
-      box-shadow: 0 10px 30px rgba(56, 189, 248, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.4); 
-    }
-    .action-btn.buy-mode:hover {
-      box-shadow: 0 12px 35px rgba(56, 189, 248, 0.55), inset 0 1px 2px rgba(255, 255, 255, 0.6);
-    }
-
-    .withdraw-btn {
-      background: linear-gradient(135deg, #10b981 0%, #059669 50%, #047857 100%);
-      color: white;
-      border-color: rgba(16, 185, 129, 0.5);
-      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.4);
-    }
-    .withdraw-btn:hover {
-      box-shadow: 0 12px 35px rgba(16, 185, 129, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.6);
-    }
-
-    #result-msg {
-      margin-top: 15px;
-      font-size: 1.1rem;
-      font-weight: 700;
-      min-height: 28px;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.7);
-      color: var(--gold-light);
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1e293b; border: 1px solid var(--green); color: #34d399;
+      padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.85rem;
+      display: none; z-index: 100; max-width: 90%; text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <nav class="nav-bar">
-      <a href="dashboard.html" id="home-btn" class="nav-btn" title="Go to Home">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>Home</span>
-      </a>
-      <h2 class="view-title">VIP Lucky Spin</h2>
-      <div class="balance-display" id="top-balance-display">$0.00</div>
-    </nav>
-
-    <div class="plan-hero">
-      <div class="plan-name">Elite Rewards Wheel</div>
-      <div class="plan-subtitle">Spin to claim exclusive asset bonuses up to $300!</div>
+  <div class="wrap">
+    <div class="topbar">
+      <a href="dashboard.html" class="back">← Back</a>
+      <h1 class="title">Spin & Win</h1>
     </div>
 
-    <div class="wheel-card">
-      <div class="spins-info-wrapper">
-        <div id="spinsCounter" class="spins-left-badge">Spins Remaining: 5</div>
-        <div id="timerBadge" class="timer-badge">⏳ Next free spins in: --:--</div>
+    <div class="hero">
+      <h2>Multiplier Wheel</h2>
+      <p>Wager any amount · Hit a multiplier · Cash out to main balance</p>
+    </div>
+
+    <div class="bal-grid">
+      <div class="bal-box main">
+        <div class="lbl">Main Balance</div>
+        <div class="val" id="main-bal">$0.00</div>
+      </div>
+      <div class="bal-box spin">
+        <div class="lbl">Spin Balance</div>
+        <div class="val" id="spin-bal">$0.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <label>Move funds</label>
+      <div class="fund-row">
+        <button type="button" class="fund-btn fund-in" id="btn-deposit">↓ From Main</button>
+        <button type="button" class="fund-btn fund-out" id="btn-withdraw">↑ To Main</button>
+      </div>
+      <p class="note" style="margin:8px 0 0">Deposit to spin · Withdraw any amount of winnings</p>
+    </div>
+
+    <div class="card">
+      <label>Wager amount (from spin balance)</label>
+      <input type="number" id="wager" placeholder="10.00" min="1" step="0.01" value="10">
+      <div class="quick">
+        <button type="button" class="q" data-amt="5">$5</button>
+        <button type="button" class="q" data-amt="10">$10</button>
+        <button type="button" class="q" data-amt="25">$25</button>
+        <button type="button" class="q" data-amt="50">$50</button>
+        <button type="button" class="q" data-amt="100">$100</button>
+        <button type="button" class="q" data-amt="all">Max</button>
       </div>
 
-      <div class="wheel-container">
-        <div class="wheel-pointer"></div>
-        <canvas id="wheelCanvas" width="320" height="320"></canvas>
+      <div class="wheel-wrap">
+        <div class="pointer"></div>
+        <canvas id="wheel" width="300" height="300"></canvas>
       </div>
 
-      <div class="button-group">
-        <button id="spinBtn" class="action-btn" onclick="startSpin()">
-          <span>Spin the Wheel</span>
-        </button>
-
-        <a href="#" id="withdrawBtn" class="action-btn withdraw-btn" onclick="withdrawWinnings(event)">
-          <span>Withdraw Winnings to Balance</span>
-        </a>
-      </div>
-
-      <div id="result-msg"></div>
+      <button type="button" class="spin-btn" id="spin-btn">Spin the Wheel</button>
+      <div class="result-line" id="result"></div>
+      <p class="note">Wheel shows multipliers. Win = wager × multiplier. Many zeros — play smart.</p>
     </div>
   </div>
+
+  <div class="modal-bg" id="fund-modal">
+    <div class="modal">
+      <h3 id="modal-title">Transfer</h3>
+      <p id="modal-desc">Move funds</p>
+      <label>Amount (USD)</label>
+      <input type="number" id="fund-amount" placeholder="0.00" min="1" step="0.01">
+      <div class="quick" id="modal-quick"></div>
+      <div class="modal-actions">
+        <button type="button" class="modal-cancel" id="modal-cancel">Cancel</button>
+        <button type="button" class="modal-ok" id="modal-ok">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    let targetUserId = urlParams.get('id') || '';
-
-    const canvas = document.getElementById('wheelCanvas');
-    const ctx = canvas.getContext('2d');
-    const spinBtn = document.getElementById('spinBtn');
-    const resultMsg = document.getElementById('result-msg');
-    const spinsCounter = document.getElementById('spinsCounter');
-    const balanceDisplay = document.getElementById('top-balance-display');
-    const timerBadge = document.getElementById('timerBadge');
-
-    const balanceKey = `user_balance_${targetUserId}`;
-    const spinEarningsKey = `spin_earnings_${targetUserId}`;
-    const stateKey = `spin_state_${targetUserId}`; 
-    const lastResetKey = `spin_last_reset_${targetUserId}`;
-
-    const DAILY_SPINS = 5;           
-    const RESET_INTERVAL_MS = 45 * 60 * 1000;
-    const COST_FOR_MORE = 150;
-    const EXTRA_SPINS = 5;          
-
-    const sectors = [
-      { color: '#1e293b', text: '$10', value: 10 },
-      { color: '#0f172a', text: '$25', value: 25 },
-      { color: '#172554', text: '$50', value: 50 },
-      { color: '#1e3a8a', text: '$75', value: 75 },
-      { color: '#1e1b4b', text: '$100', value: 100 },
-      { color: '#312e81', text: '$125', value: 125 },
-      { color: '#581c87', text: '$150', value: 150 },
-      { color: '#701a75', text: '$175', value: 175 },
-      { color: '#831843', text: '$200', value: 200 },
-      { color: '#9f1239', text: '$225', value: 225 },
-      { color: '#713f12', text: '$250', value: 250 },
-      { color: '#365314', text: '$300', value: 300 }
+    // Multipliers — weighted with many zeros so house has edge, but wins exist
+    // 16 segments for a clean wheel
+    var SEGMENTS = [
+      { m: 0,    color: '#1e293b', label: '0×' },
+      { m: 0,    color: '#334155', label: '0×' },
+      { m: 1.02, color: '#0f766e', label: '1.02×' },
+      { m: 0,    color: '#1e293b', label: '0×' },
+      { m: 1.2,  color: '#1d4ed8', label: '1.2×' },
+      { m: 0,    color: '#334155', label: '0×' },
+      { m: 1.5,  color: '#7c3aed', label: '1.5×' },
+      { m: 0,    color: '#1e293b', label: '0×' },
+      { m: 2,    color: '#b45309', label: '2×' },
+      { m: 0,    color: '#334155', label: '0×' },
+      { m: 1,    color: '#0369a1', label: '1×' },
+      { m: 0,    color: '#1e293b', label: '0×' },
+      { m: 3,    color: '#be123c', label: '3×' },
+      { m: 0,    color: '#334155', label: '0×' },
+      { m: 5,    color: '#a16207', label: '5×' },
+      { m: 10,   color: '#fbbf24', label: '10×' }
     ];
+    // 8 zeros out of 16 = 50% lose; rest return 1x–10x
 
-    const arc = Math.PI / (sectors.length / 2);
-    let startAngle = -Math.PI / 2;
-    let currentAngle = 0;
-    let isSpinning = false;
+    var userId = null;
+    var mainBalance = 0;
+    var spinBalance = 0;
+    var spinning = false;
+    var rotation = 0;
+    var fundMode = 'deposit';
 
-    function getSpinEarnings() {
-      let earnings = localStorage.getItem(spinEarningsKey);
-      if (earnings === null) {
-        earnings = '0.00';
-        localStorage.setItem(spinEarningsKey, earnings);
-      }
-      return parseFloat(earnings) || 0;
+    var canvas = document.getElementById('wheel');
+    var ctx = canvas.getContext('2d');
+    var segAngle = (Math.PI * 2) / SEGMENTS.length;
+
+    function fmt(n) {
+      return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    function setSpinEarnings(val) {
-      localStorage.setItem(spinEarningsKey, val.toFixed(2));
+    function spinKey() {
+      return 'spin_balance_' + userId;
     }
 
-    function updateBalanceDisplay() {
-      const currentEarnings = getSpinEarnings();
-      balanceDisplay.innerText = `$${currentEarnings.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+    function renderBalances() {
+      document.getElementById('main-bal').textContent = '$' + fmt(mainBalance);
+      document.getElementById('spin-bal').textContent = '$' + fmt(spinBalance);
     }
 
-    function getState() {
-      let state = JSON.parse(localStorage.getItem(stateKey));
-      if (!state) {
-        state = { spinsLeft: DAILY_SPINS };
-        localStorage.setItem(stateKey, JSON.stringify(state));
-      }
-      
-      let lastReset = localStorage.getItem(lastResetKey);
-      if (!lastReset) {
-        lastReset = Date.now();
-        localStorage.setItem(lastResetKey, lastReset);
-      } else {
-        lastReset = parseInt(lastReset, 10);
-      }
-      
-      const now = Date.now();
-      if (now - lastReset >= RESET_INTERVAL_MS) {
-        state.spinsLeft = DAILY_SPINS;
-        localStorage.setItem(stateKey, JSON.stringify(state));
-        localStorage.setItem(lastResetKey, String(now));
-      }
-      return state;
-    }
+    function drawWheel(rot) {
+      var cx = canvas.width / 2;
+      var cy = canvas.height / 2;
+      var r = canvas.width / 2 - 4;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    function saveState(state) {
-      localStorage.setItem(stateKey, JSON.stringify(state));
-    }
+      for (var i = 0; i < SEGMENTS.length; i++) {
+        var start = rot + i * segAngle - Math.PI / 2;
+        var end = start + segAngle;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, r, start, end);
+        ctx.closePath();
+        ctx.fillStyle = SEGMENTS[i].color;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
 
-    function updateUI() {
-      const state = getState();
-      const remaining = state.spinsLeft;
-      
-      if (remaining > 0) {
-        spinsCounter.innerText = `Spins Remaining: ${remaining}`;
-        spinBtn.innerHTML = `<span>Spin the Wheel</span>`;
-        spinBtn.className = "action-btn";
-        spinBtn.disabled = false;
-      } else {
-        spinsCounter.innerText = `Spins Remaining: 0`;
-        spinBtn.innerHTML = `<span>Buy ${EXTRA_SPINS} More Spins for $${COST_FOR_MORE}</span>`;
-        spinBtn.className = "action-btn buy-mode";
-        spinBtn.disabled = false;
+        // label
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(start + segAngle / 2);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = SEGMENTS[i].m >= 5 ? '#0f172a' : '#fff';
+        ctx.font = 'bold 13px Plus Jakarta Sans, sans-serif';
+        ctx.fillText(SEGMENTS[i].label, r - 14, 4);
+        ctx.restore();
       }
 
-      const lastReset = localStorage.getItem(lastResetKey);
-      if (lastReset) {
-        const elapsed = Date.now() - parseInt(lastReset, 10);
-        const remainingMs = Math.max(0, RESET_INTERVAL_MS - elapsed);
-        if (remainingMs > 0) {
-          const minutes = Math.floor(remainingMs / (60 * 1000));
-          const seconds = Math.floor((remainingMs % (60 * 1000)) / 1000);
-          timerBadge.textContent = `⏳ Next free spins in: ${minutes}m ${seconds}s`;
-        } else {
-          timerBadge.textContent = `⏳ Free spins restored!`;
-        }
-      }
-      updateBalanceDisplay();
-    }
-
-    function drawSector(sector, i) {
-      const angle = startAngle + i * arc;
-      ctx.save();
+      // center hub
       ctx.beginPath();
-      ctx.arc(160, 160, 152, angle, angle + arc, false);
-      ctx.lineTo(160, 160);
-      ctx.fillStyle = sector.color;
+      ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+      ctx.fillStyle = '#0f172a';
       ctx.fill();
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = 'rgba(212, 175, 55, 0.35)';
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 3;
       ctx.stroke();
-
-      ctx.save();
-      ctx.translate(160, 160);
-      ctx.rotate(angle + arc / 2);
-      ctx.textAlign = 'right';
-      ctx.fillStyle = '#fef08a';
-      ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
-      ctx.shadowColor = 'rgba(0,0,0,0.6)';
-      ctx.shadowBlur = 4;
-      ctx.fillText(sector.text, 138, 5);
-      ctx.restore();
-      ctx.restore();
+      ctx.fillStyle = '#fbbf24';
+      ctx.font = 'bold 11px Plus Jakarta Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('SPIN', cx, cy + 4);
     }
 
-    function drawWheel() {
-      ctx.clearRect(0, 0, 320, 320);
-      for (let i = 0; i < sectors.length; i++) {
-        drawSector(sectors[i], i);
+    async function init() {
+      var user = null;
+      try {
+        var s = await client.auth.getSession();
+        user = s.data && s.data.session && s.data.session.user;
+        if (!user) {
+          var g = await client.auth.getUser();
+          user = g.data && g.data.user;
+        }
+      } catch (e) {}
+      if (!user) { window.location.href = 'index.html'; return; }
+      userId = user.id;
+
+      var { data: profile } = await client.from('profiles')
+        .select('balance, spin_balance')
+        .eq('id', userId).maybeSingle();
+
+      mainBalance = Number(profile && profile.balance || 0);
+      spinBalance = Number(profile && profile.spin_balance || 0);
+      if (!profile || profile.spin_balance == null) {
+        var ls = localStorage.getItem(spinKey());
+        if (ls) spinBalance = Number(ls) || 0;
       }
+
+      renderBalances();
+      drawWheel(0);
+
+      document.querySelectorAll('.q').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var a = btn.getAttribute('data-amt');
+          if (a === 'all') {
+            document.getElementById('wager').value = Math.max(0, Math.floor(spinBalance * 100) / 100);
+          } else {
+            document.getElementById('wager').value = a;
+          }
+        });
+      });
+
+      document.getElementById('spin-btn').addEventListener('click', startSpin);
+      document.getElementById('btn-deposit').addEventListener('click', function () { openFund('deposit'); });
+      document.getElementById('btn-withdraw').addEventListener('click', function () { openFund('withdraw'); });
+      document.getElementById('modal-cancel').addEventListener('click', closeFund);
+      document.getElementById('modal-ok').addEventListener('click', confirmFund);
+    }
+
+    function openFund(mode) {
+      fundMode = mode;
+      document.getElementById('modal-title').textContent =
+        mode === 'deposit' ? 'Deposit to Spin' : 'Withdraw to Main';
+      document.getElementById('modal-desc').textContent =
+        mode === 'deposit'
+          ? 'Move any amount from main balance into spin balance.'
+          : 'Withdraw any amount from spin balance back to main.';
+      document.getElementById('fund-amount').value = '';
+      var q = document.getElementById('modal-quick');
+      var max = mode === 'deposit' ? mainBalance : spinBalance;
+      q.innerHTML = '';
+      [10, 25, 50, 100].forEach(function (n) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'q';
+        b.textContent = '$' + n;
+        b.onclick = function () { document.getElementById('fund-amount').value = n; };
+        q.appendChild(b);
+      });
+      var maxBtn = document.createElement('button');
+      maxBtn.type = 'button';
+      maxBtn.className = 'q';
+      maxBtn.textContent = 'Max';
+      maxBtn.onclick = function () {
+        document.getElementById('fund-amount').value = Math.max(0, Math.floor(max * 100) / 100);
+      };
+      q.appendChild(maxBtn);
+      document.getElementById('fund-modal').classList.add('show');
+    }
+
+    function closeFund() {
+      document.getElementById('fund-modal').classList.remove('show');
+    }
+
+    async function confirmFund() {
+      var amt = parseFloat(document.getElementById('fund-amount').value);
+      if (!amt || amt <= 0) return toast('Enter a valid amount', true);
+
+      if (fundMode === 'deposit') {
+        if (amt > mainBalance) return toast('Not enough main balance', true);
+        mainBalance -= amt;
+        spinBalance += amt;
+      } else {
+        if (amt > spinBalance) return toast('Not enough spin balance', true);
+        spinBalance -= amt;
+        mainBalance += amt;
+      }
+
+      mainBalance = Math.round(mainBalance * 100) / 100;
+      spinBalance = Math.round(spinBalance * 100) / 100;
+
+      var payload = { balance: mainBalance, spin_balance: spinBalance };
+      var { error } = await client.from('profiles').update(payload).eq('id', userId);
+      if (error) {
+        // column may be missing — still save local + main balance
+        localStorage.setItem(spinKey(), String(spinBalance));
+        await client.from('profiles').update({ balance: mainBalance }).eq('id', userId);
+      }
+      localStorage.setItem(spinKey(), String(spinBalance));
+
+      closeFund();
+      renderBalances();
+      toast(fundMode === 'deposit'
+        ? 'Deposited $' + fmt(amt) + ' to spin'
+        : 'Withdrew $' + fmt(amt) + ' to main');
+    }
+
+    async function saveSpinBalance() {
+      localStorage.setItem(spinKey(), String(spinBalance));
+      try {
+        await client.from('profiles').update({ spin_balance: spinBalance }).eq('id', userId);
+      } catch (e) {}
     }
 
     function startSpin() {
-      if (isSpinning) return;
+      if (spinning) return;
+      var wager = parseFloat(document.getElementById('wager').value);
+      if (!wager || wager <= 0) return toast('Enter a wager amount', true);
+      if (wager > spinBalance) return toast('Not enough spin balance — deposit first', true);
+      if (wager < 1) return toast('Minimum wager is $1', true);
 
-      const state = getState();
-      const currentEarnings = getSpinEarnings();
+      spinning = true;
+      document.getElementById('spin-btn').disabled = true;
+      document.getElementById('result').textContent = '';
+      document.getElementById('result').className = 'result-line';
 
-      if (state.spinsLeft <= 0) {
-        const depositUrl = targetUserId 
-          ? `deposit.html?id=${targetUserId}&amount=${COST_FOR_MORE}&type=spins` 
-          : `deposit.html?amount=${COST_FOR_MORE}&type=spins`;
-        window.location.href = depositUrl;
-        return;
+      // Deduct wager immediately
+      spinBalance = Math.round((spinBalance - wager) * 100) / 100;
+      renderBalances();
+
+      // Fair random segment (equal chance per segment as drawn)
+      var winIndex = Math.floor(Math.random() * SEGMENTS.length);
+      var mult = SEGMENTS[winIndex].m;
+
+      // Pointer is at top (-90deg). Segment i is centered at i*seg + seg/2 from start.
+      // We want winIndex center under pointer after rotation.
+      var targetCenter = winIndex * segAngle + segAngle / 2;
+      var extraTurns = 5 + Math.floor(Math.random() * 3);
+      var finalRot = extraTurns * Math.PI * 2 + (Math.PI * 2 - targetCenter);
+
+      var startRot = rotation;
+      var diff = finalRot - (startRot % (Math.PI * 2));
+      if (diff < 0) diff += Math.PI * 2;
+      // add full turns
+      diff += extraTurns * Math.PI * 2;
+
+      var duration = 4200;
+      var t0 = performance.now();
+
+      function easeOut(t) {
+        return 1 - Math.pow(1 - t, 3);
       }
 
-      state.spinsLeft--;
-      saveState(state);
-
-      isSpinning = true;
-      spinBtn.disabled = true;
-      resultMsg.innerText = '';
-
-      const randomSpin = Math.floor(Math.random() * 360) + 2160;
-      currentAngle += randomSpin;
-      canvas.style.transform = `rotate(${currentAngle}deg)`;
-
-      setTimeout(() => {
-        isSpinning = false;
-        spinBtn.disabled = false;
-
-        const normalizedAngle = (360 - (currentAngle % 360)) % 360;
-        const sectorDegree = 360 / sectors.length;
-        const winningIndex = Math.floor(normalizedAngle / sectorDegree) % sectors.length;
-        const winningSector = sectors[winningIndex];
-
-        resultMsg.style.color = "#4ade80";
-        resultMsg.innerText = `🎉 Congratulations! You won ${winningSector.text}!`
-
-        const newEarnings = currentEarnings + winningSector.value;
-        setSpinEarnings(newEarnings);
-
-        updateUI();
-      }, 4000);
+      function frame(now) {
+        var t = Math.min(1, (now - t0) / duration);
+        rotation = startRot + diff * easeOut(t);
+        drawWheel(rotation);
+        if (t < 1) {
+          requestAnimationFrame(frame);
+        } else {
+          finishSpin(wager, mult);
+        }
+      }
+      requestAnimationFrame(frame);
     }
 
-    // --- Withdraw Winnings to REAL Main Account Balance (Supabase) ---
-    async function withdrawWinnings(e) {
-      e.preventDefault();
-      const spinEarnings = getSpinEarnings();
+    async function finishSpin(wager, mult) {
+      var payout = Math.round(wager * mult * 100) / 100;
+      var resultEl = document.getElementById('result');
 
-      if (spinEarnings <= 0) {
-        resultMsg.style.color = "var(--danger)";
-        resultMsg.innerText = "No winnings available to withdraw yet. Spin to win!";
-        return;
+      if (mult <= 0 || payout <= 0) {
+        resultEl.className = 'result-line lose';
+        resultEl.textContent = '0× — Lost $' + fmt(wager);
+        toast('Lost $' + fmt(wager), true);
+      } else {
+        spinBalance = Math.round((spinBalance + payout) * 100) / 100;
+        var profit = Math.round((payout - wager) * 100) / 100;
+        resultEl.className = 'result-line win';
+        if (mult === 1) {
+          resultEl.textContent = '1× — Stake returned $' + fmt(payout);
+        } else {
+          resultEl.textContent = mult + '× — Won $' + fmt(payout) +
+            (profit > 0 ? ' (+$' + fmt(profit) + ')' : '');
+        }
+        toast('Won $' + fmt(payout) + ' (' + mult + '×)');
       }
 
-      // Resolve user ID
-      if (!targetUserId) {
-        try {
-          const { data } = await client.auth.getUser();
-          if (data && data.user && data.user.id) {
-            targetUserId = data.user.id;
-          }
-        } catch (err) {}
-      }
-
-      if (!targetUserId) {
-        resultMsg.style.color = "var(--danger)";
-        resultMsg.innerText = "Please log in to withdraw winnings.";
-        return;
-      }
-
-      try {
-        // Get current main balance from Supabase
-        const { data: profile, error: pErr } = await client
-          .from('profiles')
-          .select('balance')
-          .eq('id', targetUserId)
-          .single();
-
-        if (pErr) throw pErr;
-
-        const currentMain = Number(profile.balance || 0);
-        const newMain = currentMain + spinEarnings;
-
-        // Update main balance in Supabase
-        const { error: updateErr } = await client
-          .from('profiles')
-          .update({ balance: newMain })
-          .eq('id', targetUserId);
-
-        if (updateErr) throw updateErr;
-
-        // Clear spin earnings
-        setSpinEarnings(0.00);
-        updateUI();
-
-        resultMsg.style.color = "#4ade80";
-        resultMsg.innerText = `Successfully transferred $${spinEarnings.toFixed(2)} to your main balance!`;
-
-        // Redirect to dashboard after short delay
-        setTimeout(() => {
-          window.location.href = targetUserId ? `dashboard.html?id=${targetUserId}` : 'dashboard.html';
-        }, 1500);
-
-      } catch (err) {
-        console.error(err);
-        resultMsg.style.color = "var(--danger)";
-        resultMsg.innerText = "Error transferring funds. Please try again.";
-      }
+      renderBalances();
+      await saveSpinBalance();
+      spinning = false;
+      document.getElementById('spin-btn').disabled = false;
     }
 
-    setInterval(updateUI, 1000);
-
-    if (!localStorage.getItem(lastResetKey)) {
-      localStorage.setItem(lastResetKey, String(Date.now()));
+    function toast(msg, isErr) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.borderColor = isErr ? '#ef4444' : '#10b981';
+      t.style.color = isErr ? '#fca5a5' : '#34d399';
+      t.style.display = 'block';
+      setTimeout(function () { t.style.display = 'none'; }, 2800);
     }
 
-    if (localStorage.getItem(balanceKey) === null) {
-      localStorage.setItem(balanceKey, '0.00');
-    }
-
-    updateUI();
-    drawWheel();
-
-    const homeBtn = document.getElementById('home-btn');
-    if (targetUserId) {
-      homeBtn.href = `dashboard.html?id=${targetUserId}`;
-    }
+    init();
   </script>
 </body>
 </html>
