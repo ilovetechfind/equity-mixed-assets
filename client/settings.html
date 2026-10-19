@@ -38,7 +38,18 @@
     
     .btn-main { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border: none; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
     .btn-edit { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 12px; border-radius: 12px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 6px; }
+    .btn-cancel { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: var(--text-muted); padding: 12px; border-radius: 12px; font-weight: 700; width: 100%; cursor: pointer; margin-top: 8px; }
     .btn-logout { background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #fca5a5; padding: 14px; border-radius: 14px; font-weight: 700; width: 100%; cursor: pointer; }
+
+    .locked-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+    }
+    .locked-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+    .locked-value { font-size: 1rem; font-weight: 700; margin-top: 2px; letter-spacing: 2px; }
+    .status-ok { color: #34d399; font-size: 0.8rem; font-weight: 600; }
+    .status-warn { color: #fbbf24; font-size: 0.8rem; font-weight: 600; }
 
     .bottom-nav { position: fixed; bottom: 16px; left: 16px; right: 16px; max-width: 448px; margin: 0 auto; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-around; padding: 10px 0; border-radius: 20px; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
     .nav-item { color: var(--text-muted); text-decoration: none; font-size: 0.7rem; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.2s; }
@@ -53,6 +64,7 @@
       <button class="menu-btn" onclick="window.location.href='dashboard.html'">✕</button>
     </header>
 
+    <!-- PROFILE LOCKED VIEW -->
     <div class="card" id="profile-view-card" style="display: none;">
       <span class="card-title">MY PROFILE</span>
       <div class="profile-header-box">
@@ -65,7 +77,8 @@
       <button class="btn-edit" onclick="enableEditMode()">Edit Profile</button>
     </div>
 
-    <div class="card" id="profile-edit-card">
+    <!-- PROFILE EDIT -->
+    <div class="card" id="profile-edit-card" style="display: none;">
       <span class="card-title" id="setup-title">PROFILE SETUP</span>
       
       <div class="profile-header-box">
@@ -83,20 +96,37 @@
       <label>Username</label>
       <input type="text" id="username-input" placeholder="Enter your unique username">
 
-      <button class="btn-main" onclick="saveProfileData()">Save & Continue</button>
+      <button class="btn-main" onclick="saveProfileData()">Save Profile</button>
+      <button class="btn-cancel" id="profile-cancel-btn" onclick="cancelProfileEdit()" style="display:none;">Cancel</button>
     </div>
 
-    <div class="card" id="pin-card">
+    <!-- PIN LOCKED VIEW -->
+    <div class="card" id="pin-view-card">
       <span class="card-title">TRANSFER PIN</span>
-      <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 12px; line-height: 1.4;">Required when sending money to other users. Keep it private.</p>
-      <label>CURRENT PIN (if changing)</label>
-      <input type="password" id="pin-current" placeholder="Leave blank if first time">
-      <label>NEW PIN (4–12 characters)</label>
-      <input type="password" id="pin-new" placeholder="••••" inputmode="numeric" maxlength="12">
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 12px; line-height: 1.4;">Required when sending money. Locked until you edit.</p>
+      <div class="locked-row">
+        <div>
+          <div class="locked-label">Status</div>
+          <div class="locked-value" id="pin-status-text">••••</div>
+        </div>
+        <div id="pin-status-badge" class="status-warn">Not set</div>
+      </div>
+      <button class="btn-edit" onclick="enablePinEdit()">Edit PIN</button>
+    </div>
+
+    <!-- PIN EDIT -->
+    <div class="card" id="pin-edit-card" style="display: none;">
+      <span class="card-title">EDIT TRANSFER PIN</span>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0 0 12px; line-height: 1.4;">Keep it private. Min 4 characters.</p>
+      <label id="pin-current-label">CURRENT PIN</label>
+      <input type="password" id="pin-current" placeholder="Enter current PIN" autocomplete="off">
+      <label>NEW PIN</label>
+      <input type="password" id="pin-new" placeholder="••••" inputmode="numeric" maxlength="12" autocomplete="new-password">
       <label>CONFIRM NEW PIN</label>
-      <input type="password" id="pin-confirm" placeholder="••••" inputmode="numeric" maxlength="12">
+      <input type="password" id="pin-confirm" placeholder="••••" inputmode="numeric" maxlength="12" autocomplete="new-password">
       <button class="btn-main" onclick="saveTransferPin()">Save Transfer PIN</button>
-      <p id="pin-status" style="font-size: 0.8rem; color: #94a3b8; margin: 10px 0 0; text-align: center;"></p>
+      <button class="btn-cancel" onclick="cancelPinEdit()">Cancel</button>
+      <p id="pin-msg" style="font-size: 0.8rem; color: #94a3b8; margin: 10px 0 0; text-align: center;"></p>
     </div>
 
     <div class="card">
@@ -120,36 +150,112 @@
     const client = window.client || window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     let currentAvatarData = "";
+    let currentUserId = null;
+    let hasUsername = false;
+    let storedPin = "";
 
     async function loadProfile() {
-      const { data: { user } } = await client.auth.getUser();
+      let user = null;
+      try {
+        const { data: { session } } = await client.auth.getSession();
+        user = session && session.user;
+        if (!user) {
+          const res = await client.auth.getUser();
+          user = res.data && res.data.user;
+        }
+      } catch (e) {}
       if (!user) { window.location.href = 'index.html'; return; }
-      
-      const { data, error } = await client.from('profiles').select('username, avatar_url').eq('id', user.id).maybeSingle();
-      
+      currentUserId = user.id;
+
+      const { data } = await client.from('profiles')
+        .select('username, avatar_url, transfer_pin')
+        .eq('id', user.id).maybeSingle();
+
+      // Profile locked / unlocked
       if (data && data.username && data.username.trim() !== "") {
+        hasUsername = true;
         document.getElementById('profile-view-card').style.display = 'block';
         document.getElementById('profile-edit-card').style.display = 'none';
-        
         document.getElementById('view-username').innerText = data.username;
         if (data.avatar_url) {
           currentAvatarData = data.avatar_url;
           document.getElementById('view-avatar-box').innerHTML = `<img src="${data.avatar_url}" alt="Avatar">`;
         }
       } else {
+        hasUsername = false;
         document.getElementById('profile-view-card').style.display = 'none';
         document.getElementById('profile-edit-card').style.display = 'block';
+        document.getElementById('profile-cancel-btn').style.display = 'none';
+        document.getElementById('setup-title').innerText = 'PROFILE SETUP';
+      }
+
+      // PIN — localStorage is source of truth if cloud column missing
+      const cloudPin = (data && data.transfer_pin) ? String(data.transfer_pin) : '';
+      const localPin = localStorage.getItem('transfer_pin_' + user.id) || '';
+      storedPin = cloudPin || localPin;
+
+      // Keep them in sync
+      if (storedPin) {
+        localStorage.setItem('transfer_pin_' + user.id, storedPin);
+      }
+
+      showPinLockedView();
+    }
+
+    function showPinLockedView() {
+      document.getElementById('pin-view-card').style.display = 'block';
+      document.getElementById('pin-edit-card').style.display = 'none';
+      const badge = document.getElementById('pin-status-badge');
+      const text = document.getElementById('pin-status-text');
+      if (storedPin) {
+        text.textContent = '••••••';
+        badge.textContent = 'Locked';
+        badge.className = 'status-ok';
+      } else {
+        text.textContent = 'Not set';
+        badge.textContent = 'Required';
+        badge.className = 'status-warn';
       }
     }
 
     function enableEditMode() {
       document.getElementById('profile-view-card').style.display = 'none';
       document.getElementById('profile-edit-card').style.display = 'block';
-      document.getElementById('setup-title').innerText = "EDIT PROFILE";
-      document.getElementById('username-input').value = document.getElementById('view-username').innerText;
+      document.getElementById('setup-title').innerText = 'EDIT PROFILE';
+      document.getElementById('profile-cancel-btn').style.display = 'block';
+      document.getElementById('username-input').value = document.getElementById('view-username').innerText || '';
       if (currentAvatarData) {
         document.getElementById('edit-avatar-box').innerHTML = `<img src="${currentAvatarData}" alt="Avatar">`;
       }
+    }
+
+    function cancelProfileEdit() {
+      if (hasUsername) {
+        document.getElementById('profile-view-card').style.display = 'block';
+        document.getElementById('profile-edit-card').style.display = 'none';
+      }
+    }
+
+    function enablePinEdit() {
+      document.getElementById('pin-view-card').style.display = 'none';
+      document.getElementById('pin-edit-card').style.display = 'block';
+      document.getElementById('pin-current').value = '';
+      document.getElementById('pin-new').value = '';
+      document.getElementById('pin-confirm').value = '';
+      document.getElementById('pin-msg').textContent = '';
+
+      // First time: hide current PIN field
+      if (!storedPin) {
+        document.getElementById('pin-current-label').style.display = 'none';
+        document.getElementById('pin-current').style.display = 'none';
+      } else {
+        document.getElementById('pin-current-label').style.display = 'block';
+        document.getElementById('pin-current').style.display = 'block';
+      }
+    }
+
+    function cancelPinEdit() {
+      showPinLockedView();
     }
 
     function handleImageUpload(event) {
@@ -178,7 +284,7 @@
           
           currentAvatarData = canvas.toDataURL('image/jpeg', 0.7);
           document.getElementById('edit-avatar-box').innerHTML = `<img src="${currentAvatarData}" alt="Avatar">`;
-          document.getElementById('edit-name-preview').innerText = "Picture Ready";
+          document.getElementById('edit-name-preview').innerText = 'Picture Ready';
         };
         img.src = e.target.result;
       };
@@ -192,10 +298,13 @@
         return;
       }
 
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { window.location.href = 'index.html'; return; }
+      if (!currentUserId) {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) { window.location.href = 'index.html'; return; }
+        currentUserId = user.id;
+      }
 
-      const upsertPayload = { id: user.id, username: username };
+      const upsertPayload = { id: currentUserId, username: username };
       if (currentAvatarData) {
         upsertPayload.avatar_url = currentAvatarData;
       }
@@ -204,54 +313,71 @@
 
       if (error) {
         alert('Save failed: ' + error.message);
-      } else {
-        document.getElementById('view-username').innerText = username;
-        if (currentAvatarData) {
-          document.getElementById('view-avatar-box').innerHTML = `<img src="${currentAvatarData}" alt="Avatar">`;
-        }
-        document.getElementById('profile-view-card').style.display = 'block';
-        document.getElementById('profile-edit-card').style.display = 'none';
+        return;
       }
+
+      hasUsername = true;
+      document.getElementById('view-username').innerText = username;
+      if (currentAvatarData) {
+        document.getElementById('view-avatar-box').innerHTML = `<img src="${currentAvatarData}" alt="Avatar">`;
+      }
+      // Lock again after save
+      document.getElementById('profile-view-card').style.display = 'block';
+      document.getElementById('profile-edit-card').style.display = 'none';
     }
 
     async function saveTransferPin() {
       const cur = document.getElementById('pin-current').value;
       const neu = document.getElementById('pin-new').value;
       const conf = document.getElementById('pin-confirm').value;
-      const status = document.getElementById('pin-status');
+      const msg = document.getElementById('pin-msg');
+
       if (!neu || neu.length < 4) {
-        status.style.color = '#fca5a5';
-        status.textContent = 'PIN must be at least 4 characters';
+        msg.style.color = '#fca5a5';
+        msg.textContent = 'PIN must be at least 4 characters';
         return;
       }
       if (neu !== conf) {
-        status.style.color = '#fca5a5';
-        status.textContent = 'New PIN and confirm do not match';
-        return;
-      }
-      const { data: { user } } = await client.auth.getUser();
-      if (!user) { window.location.href = 'index.html'; return; }
-
-      const { data: profile } = await client.from('profiles').select('transfer_pin').eq('id', user.id).maybeSingle();
-      const existing = profile?.transfer_pin || localStorage.getItem('transfer_pin_' + user.id) || '';
-      if (existing && cur !== existing) {
-        status.style.color = '#fca5a5';
-        status.textContent = 'Current PIN is incorrect';
+        msg.style.color = '#fca5a5';
+        msg.textContent = 'New PIN and confirm do not match';
         return;
       }
 
-      const { error } = await client.from('profiles').update({ transfer_pin: neu }).eq('id', user.id);
-      localStorage.setItem('transfer_pin_' + user.id, neu);
-      if (error) {
-        status.style.color = '#fbbf24';
-        status.textContent = 'Saved on this device. (Add transfer_pin column in Supabase for cloud sync)';
-      } else {
-        status.style.color = '#34d399';
-        status.textContent = 'Transfer PIN saved';
+      if (!currentUserId) {
+        const { data: { user } } = await client.auth.getUser();
+        if (!user) { window.location.href = 'index.html'; return; }
+        currentUserId = user.id;
       }
-      document.getElementById('pin-current').value = '';
-      document.getElementById('pin-new').value = '';
-      document.getElementById('pin-confirm').value = '';
+
+      // Must enter current PIN when changing
+      if (storedPin) {
+        if (cur !== storedPin) {
+          msg.style.color = '#fca5a5';
+          msg.textContent = 'Current PIN is incorrect';
+          return;
+        }
+      }
+
+      // Always lock locally first so Send Money works immediately
+      localStorage.setItem('transfer_pin_' + currentUserId, neu);
+      storedPin = neu;
+
+      // Try cloud (optional if column exists)
+      try {
+        const { error } = await client.from('profiles').update({ transfer_pin: neu }).eq('id', currentUserId);
+        if (error) {
+          console.warn('PIN cloud save:', error.message);
+          // Still OK — local works
+        }
+      } catch (e) {
+        console.warn(e);
+      }
+
+      msg.style.color = '#34d399';
+      msg.textContent = 'PIN saved & locked';
+
+      // Return to locked view after short delay
+      setTimeout(showPinLockedView, 600);
     }
 
     async function logout() {
