@@ -6,104 +6,54 @@
   <title>Equity Mixed Assets - Send Money</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #070b14;
-      --card: rgba(18, 24, 38, 0.9);
-      --border: rgba(255,255,255,0.08);
-      --muted: #8b9bb4;
-      --green: #10b981;
-      --red: #ef4444;
-      --blue: #3b82f6;
-    }
+    :root { --bg:#070b14; --card:rgba(18,24,38,0.9); --border:rgba(255,255,255,0.08); --muted:#8b9bb4; --green:#10b981; --red:#ef4444; --blue:#3b82f6; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-      margin: 0; padding: 12px; padding-bottom: 40px;
-      background: radial-gradient(circle at top, #131c38 0%, var(--bg) 60%);
-      color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
-    }
-    .wrap { max-width: 480px; margin: 0 auto; }
-    .topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-    .back {
-      background: var(--card); border: 1px solid var(--border); color: #fff;
-      padding: 8px 14px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.85rem;
-    }
-    .title { font-size: 1.15rem; font-weight: 800; margin: 0; }
-
-    .bal-card {
-      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(16,185,129,0.12));
-      border: 1px solid rgba(59,130,246,0.3); border-radius: 18px; padding: 16px; margin-bottom: 14px;
-    }
-    .bal-label { font-size: 0.7rem; color: var(--muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
-    .bal-amount { font-size: 1.8rem; font-weight: 800; margin: 6px 0 0; letter-spacing: -1px; }
-
-    .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 18px; padding: 18px; margin-bottom: 14px;
-    }
-    label {
-      display: block; font-size: 0.72rem; color: var(--muted); font-weight: 700;
-      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
-    }
-    input, textarea {
-      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff;
-      padding: 13px 14px; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 14px;
-      font-family: inherit;
-    }
-    input:focus, textarea:focus { border-color: var(--blue); }
-    textarea { resize: vertical; min-height: 70px; }
-
-    .recipient-box {
-      display: none; background: rgba(16,185,129,0.1); border: 1px solid rgba(16,185,129,0.3);
-      border-radius: 12px; padding: 12px; margin-bottom: 14px; align-items: center; gap: 12px;
-    }
-    .recipient-box.show { display: flex; }
-    .recipient-box.error {
-      background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.35);
-    }
-    .avatar {
-      width: 42px; height: 42px; border-radius: 12px; background: rgba(255,255,255,0.08);
-      display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;
-      overflow: hidden; flex-shrink: 0;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .recipient-name { font-weight: 700; }
-    .recipient-sub { font-size: 0.75rem; color: var(--muted); }
-
-    .quick { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
-    .q {
-      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #cbd5e1;
-      padding: 7px 12px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
-    }
-
-    .send-btn {
-      width: 100%; border: none; border-radius: 14px; padding: 15px; font-weight: 800; font-size: 1.05rem;
-      cursor: pointer; color: #fff;
-      background: linear-gradient(135deg, #10b981, #059669);
-    }
-    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .note { font-size: 0.78rem; color: var(--muted); text-align: center; margin-top: 12px; line-height: 1.4; }
-
-    .hist-title {
-      font-size: 0.7rem; color: var(--muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 10px;
-    }
-    .hist-item {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .hist-item:last-child { border-bottom: none; }
-    .hist-name { font-weight: 700; font-size: 0.9rem; }
-    .hist-meta { font-size: 0.72rem; color: var(--muted); }
-    .hist-amt { font-weight: 800; }
-    .sent { color: var(--red); }
-    .recv { color: var(--green); }
-    .empty { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 20px 0; }
-
-    .toast {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      background: #1e293b; border: 1px solid var(--green); color: #34d399;
-      padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.85rem;
-      display: none; z-index: 100; max-width: 90%; text-align: center;
-    }
+    body { margin:0; padding:12px; padding-bottom:40px; background:radial-gradient(circle at top,#131c38 0%,var(--bg) 60%); color:#fff; font-family:'Plus Jakarta Sans',sans-serif; min-height:100vh; }
+    .wrap { max-width:480px; margin:0 auto; }
+    .topbar { display:flex; align-items:center; gap:12px; margin-bottom:16px; }
+    .back { background:var(--card); border:1px solid var(--border); color:#fff; padding:8px 14px; border-radius:10px; text-decoration:none; font-weight:600; font-size:0.85rem; }
+    .title { font-size:1.15rem; font-weight:800; margin:0; }
+    .bal-card { background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(16,185,129,0.12)); border:1px solid rgba(59,130,246,0.3); border-radius:18px; padding:16px; margin-bottom:14px; }
+    .bal-label { font-size:0.7rem; color:var(--muted); font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+    .bal-amount { font-size:1.8rem; font-weight:800; margin:6px 0 0; letter-spacing:-1px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:18px; margin-bottom:14px; }
+    label { display:block; font-size:0.72rem; color:var(--muted); font-weight:700; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px; }
+    input, textarea { width:100%; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#fff; padding:13px 14px; border-radius:12px; font-size:1rem; outline:none; margin-bottom:14px; font-family:inherit; }
+    input:focus, textarea:focus { border-color:var(--blue); }
+    textarea { resize:vertical; min-height:60px; }
+    .recipient-box { display:none; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:12px; margin-bottom:14px; align-items:center; gap:12px; }
+    .recipient-box.show { display:flex; }
+    .recipient-box.error { background:rgba(239,68,68,0.1); border-color:rgba(239,68,68,0.35); }
+    .avatar { width:42px; height:42px; border-radius:12px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem; overflow:hidden; flex-shrink:0; }
+    .avatar img { width:100%; height:100%; object-fit:cover; }
+    .recipient-name { font-weight:700; }
+    .recipient-sub { font-size:0.75rem; color:var(--muted); }
+    .quick { display:flex; gap:6px; margin-bottom:14px; flex-wrap:wrap; }
+    .q { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#cbd5e1; padding:7px 12px; border-radius:8px; font-size:0.78rem; font-weight:600; cursor:pointer; }
+    .send-btn { width:100%; border:none; border-radius:14px; padding:15px; font-weight:800; font-size:1.05rem; cursor:pointer; color:#fff; background:linear-gradient(135deg,#10b981,#059669); }
+    .send-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .note { font-size:0.78rem; color:var(--muted); text-align:center; margin-top:12px; line-height:1.4; }
+    .pin-hint { font-size:0.78rem; color:#fbbf24; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.25); border-radius:10px; padding:10px 12px; margin-bottom:12px; display:none; }
+    .tabs { display:flex; gap:8px; margin-bottom:12px; }
+    .tab { flex:1; background:rgba(0,0,0,0.25); border:1px solid var(--border); color:var(--muted); padding:10px; border-radius:12px; font-weight:700; font-size:0.82rem; cursor:pointer; }
+    .tab.active { background:rgba(59,130,246,0.2); border-color:var(--blue); color:#93c5fd; }
+    .hist-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.05); }
+    .hist-item:last-child { border-bottom:none; }
+    .hist-name { font-weight:700; font-size:0.9rem; }
+    .hist-meta { font-size:0.72rem; color:var(--muted); }
+    .hist-amt { font-weight:800; }
+    .sent { color:var(--red); }
+    .recv { color:var(--green); }
+    .empty { text-align:center; color:var(--muted); font-size:0.85rem; padding:20px 0; }
+    .modal-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:50; align-items:center; justify-content:center; padding:20px; }
+    .modal-bg.show { display:flex; }
+    .modal { background:#0f172a; border:1px solid var(--border); border-radius:18px; padding:20px; width:100%; max-width:360px; }
+    .modal h3 { margin:0 0 8px; font-size:1.1rem; }
+    .modal p { color:var(--muted); font-size:0.85rem; margin:0 0 14px; }
+    .modal-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .modal-cancel { background:rgba(255,255,255,0.05); border:1px solid var(--border); color:#fff; padding:12px; border-radius:12px; font-weight:700; cursor:pointer; }
+    .modal-ok { background:linear-gradient(135deg,#10b981,#059669); border:none; color:#fff; padding:12px; border-radius:12px; font-weight:700; cursor:pointer; }
+    .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%); background:#1e293b; border:1px solid var(--green); color:#34d399; padding:10px 18px; border-radius:12px; font-weight:600; font-size:0.85rem; display:none; z-index:100; max-width:90%; text-align:center; }
   </style>
 </head>
 <body>
@@ -112,16 +62,14 @@
       <a href="dashboard.html" class="back">← Back</a>
       <h1 class="title">Send Money</h1>
     </div>
-
     <div class="bal-card">
       <div class="bal-label">Your Available Balance</div>
       <h2 class="bal-amount" id="my-bal">$0.00</h2>
     </div>
-
     <div class="card">
+      <div class="pin-hint" id="pin-hint"></div>
       <label>Recipient Username</label>
       <input type="text" id="username" placeholder="Enter username" autocomplete="off" autocapitalize="none">
-
       <div class="recipient-box" id="recipient-box">
         <div class="avatar" id="rec-avatar">?</div>
         <div>
@@ -129,7 +77,6 @@
           <div class="recipient-sub" id="rec-sub">User found</div>
         </div>
       </div>
-
       <label>Amount (USD)</label>
       <input type="number" id="amount" placeholder="0.00" min="1" step="0.01">
       <div class="quick">
@@ -140,268 +87,139 @@
         <button class="q" type="button" onclick="setAmt(250)">$250</button>
         <button class="q" type="button" onclick="setAmt('all')">Max</button>
       </div>
-
       <label>Note (optional)</label>
       <textarea id="note" placeholder="What's this for?"></textarea>
-
-      <button class="send-btn" id="send-btn" onclick="sendMoney()">Send Money</button>
-      <div class="note">Transfers are instant. Double-check the username before sending.</div>
+      <button class="send-btn" id="send-btn" onclick="startSend()">Send Money</button>
+      <div class="note">You must confirm with your Transfer PIN before money is sent.</div>
     </div>
-
     <div class="card">
-      <div class="hist-title">RECENT TRANSFERS</div>
-      <div id="history"><div class="empty">No transfers yet</div></div>
+      <div class="tabs">
+        <button class="tab active" onclick="setFilter('all', this)">All</button>
+        <button class="tab" onclick="setFilter('sent', this)">Sent</button>
+        <button class="tab" onclick="setFilter('recv', this)">Received</button>
+      </div>
+      <div id="history"><div class="empty">Loading…</div></div>
     </div>
   </div>
-
+  <div class="modal-bg" id="pin-modal">
+    <div class="modal">
+      <h3>Enter Transfer PIN</h3>
+      <p>Confirm this transfer with your PIN</p>
+      <label>PIN</label>
+      <input type="password" id="pin-input" placeholder="••••" inputmode="numeric" maxlength="12" autocomplete="off">
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closePinModal()">Cancel</button>
+        <button class="modal-ok" onclick="confirmWithPin()">Confirm</button>
+      </div>
+    </div>
+  </div>
   <div class="toast" id="toast"></div>
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    let me = null;
-    let myBalance = 0;
-    let myUsername = '';
-    let recipient = null; // { id, username, avatar_url, balance }
-    let lookupTimer = null;
-
-    async function init() {
-      let user = null;
-      try {
-        const { data: { session } } = await client.auth.getSession();
-        user = session && session.user;
-        if (!user) {
-          const res = await client.auth.getUser();
-          user = res.data && res.data.user;
-        }
-      } catch (e) {}
-      if (!user) { window.location.href = 'index.html'; return; }
-      me = user;
-
-      const { data: profile } = await client.from('profiles')
-        .select('balance, username, avatar_url')
-        .eq('id', me.id).maybeSingle();
-
-      myBalance = Number(profile?.balance || 0);
-      myUsername = (profile?.username || '').toLowerCase();
-      document.getElementById('my-bal').textContent = '$' + fmt(myBalance);
-
-      document.getElementById('username').addEventListener('input', onUsernameInput);
-      loadHistory();
+    let me=null,myBalance=0,myUsername='',transferPin='',recipient=null,lookupTimer=null,pendingAmt=0,pendingNote='',histFilter='all',allHistory=[];
+    async function init(){
+      let user=null;
+      try{const{data:{session}}=await client.auth.getSession();user=session&&session.user;if(!user){const res=await client.auth.getUser();user=res.data&&res.data.user;}}catch(e){}
+      if(!user){window.location.href='index.html';return;}
+      me=user;
+      const{data:profile}=await client.from('profiles').select('balance, username, avatar_url, transfer_pin').eq('id',me.id).maybeSingle();
+      myBalance=Number(profile?.balance||0);
+      myUsername=(profile?.username||'').toLowerCase();
+      transferPin=profile?.transfer_pin||localStorage.getItem('transfer_pin_'+me.id)||'';
+      document.getElementById('my-bal').textContent='$'+fmt(myBalance);
+      const hint=document.getElementById('pin-hint');
+      if(!transferPin){hint.style.display='block';hint.innerHTML='🔒 No transfer PIN set. <a href="settings.html" style="color:#fbbf24;font-weight:700">Set one in Settings</a> before sending.';}
+      document.getElementById('username').addEventListener('input',onUsernameInput);
+      await loadHistory();
     }
-
-    function fmt(n) {
-      return Number(n).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    function fmt(n){return Number(n).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});}
+    function setAmt(v){document.getElementById('amount').value=v==='all'?Math.max(0,Math.floor(myBalance*100)/100):v;}
+    function onUsernameInput(){clearTimeout(lookupTimer);recipient=null;const box=document.getElementById('recipient-box');box.classList.remove('show','error');const val=document.getElementById('username').value.trim();if(val.length<2)return;lookupTimer=setTimeout(()=>lookupUser(val),400);}
+    async function lookupUser(name){
+      const box=document.getElementById('recipient-box');const clean=name.replace(/^@/,'').trim();
+      if(clean.toLowerCase()===myUsername){recipient=null;box.classList.add('show','error');document.getElementById('rec-avatar').textContent='!';document.getElementById('rec-name').textContent="That's you";document.getElementById('rec-sub').textContent='You cannot send money to yourself';return;}
+      const{data,error}=await client.from('profiles').select('id, username, avatar_url, balance').ilike('username',clean).limit(5);
+      if(error||!data||!data.length){recipient=null;box.classList.add('show','error');document.getElementById('rec-avatar').textContent='?';document.getElementById('rec-name').textContent='User not found';document.getElementById('rec-sub').textContent='Check the username and try again';return;}
+      const match=data.find(u=>(u.username||'').toLowerCase()===clean.toLowerCase())||data[0];
+      if(match.id===me.id){recipient=null;box.classList.add('show','error');document.getElementById('rec-avatar').textContent='!';document.getElementById('rec-name').textContent="That's you";document.getElementById('rec-sub').textContent='You cannot send money to yourself';return;}
+      recipient=match;box.classList.remove('error');box.classList.add('show');
+      if(match.avatar_url)document.getElementById('rec-avatar').innerHTML='<img src="'+match.avatar_url+'" alt="">';
+      else document.getElementById('rec-avatar').textContent=(match.username||'?').charAt(0).toUpperCase();
+      document.getElementById('rec-name').textContent='@'+match.username;document.getElementById('rec-sub').textContent='Ready to receive';
     }
-
-    function setAmt(v) {
-      if (v === 'all') {
-        document.getElementById('amount').value = Math.max(0, Math.floor(myBalance * 100) / 100);
-      } else {
-        document.getElementById('amount').value = v;
-      }
+    function startSend(){
+      if(!transferPin){toast('Set a transfer PIN in Settings first',true);return;}
+      if(!recipient){const name=document.getElementById('username').value.trim();if(!name)return toast('Enter a username',true);return lookupUser(name).then(()=>{if(!recipient)return toast('Recipient not found',true);startSend();});}
+      const amt=parseFloat(document.getElementById('amount').value);
+      if(!amt||amt<=0)return toast('Enter a valid amount',true);
+      if(amt>myBalance)return toast('Insufficient balance',true);
+      if(amt<1)return toast('Minimum transfer is $1',true);
+      pendingAmt=amt;pendingNote=(document.getElementById('note').value||'').trim().slice(0,120);
+      document.getElementById('pin-input').value='';document.getElementById('pin-modal').classList.add('show');
+      setTimeout(()=>document.getElementById('pin-input').focus(),100);
     }
-
-    function onUsernameInput() {
-      clearTimeout(lookupTimer);
-      recipient = null;
-      const box = document.getElementById('recipient-box');
-      box.classList.remove('show', 'error');
-      const val = document.getElementById('username').value.trim();
-      if (val.length < 2) return;
-      lookupTimer = setTimeout(() => lookupUser(val), 400);
+    function closePinModal(){document.getElementById('pin-modal').classList.remove('show');}
+    async function confirmWithPin(){
+      const pin=document.getElementById('pin-input').value;
+      if(!pin)return toast('Enter your PIN',true);
+      if(pin!==transferPin)return toast('Incorrect PIN',true);
+      closePinModal();await doSend(pendingAmt,pendingNote);
     }
-
-    async function lookupUser(name) {
-      const box = document.getElementById('recipient-box');
-      const clean = name.replace(/^@/, '').trim();
-
-      if (clean.toLowerCase() === myUsername) {
-        recipient = null;
-        box.classList.add('show', 'error');
-        document.getElementById('rec-avatar').textContent = '!';
-        document.getElementById('rec-name').textContent = 'That\'s you';
-        document.getElementById('rec-sub').textContent = 'You cannot send money to yourself';
-        return;
-      }
-
-      // Case-insensitive username match
-      const { data, error } = await client
-        .from('profiles')
-        .select('id, username, avatar_url, balance')
-        .ilike('username', clean)
-        .limit(5);
-
-      if (error || !data || !data.length) {
-        recipient = null;
-        box.classList.add('show', 'error');
-        document.getElementById('rec-avatar').textContent = '?';
-        document.getElementById('rec-name').textContent = 'User not found';
-        document.getElementById('rec-sub').textContent = 'Check the username and try again';
-        return;
-      }
-
-      // Prefer exact case-insensitive match
-      const match = data.find(u => (u.username || '').toLowerCase() === clean.toLowerCase()) || data[0];
-      if (match.id === me.id) {
-        recipient = null;
-        box.classList.add('show', 'error');
-        document.getElementById('rec-avatar').textContent = '!';
-        document.getElementById('rec-name').textContent = 'That\'s you';
-        document.getElementById('rec-sub').textContent = 'You cannot send money to yourself';
-        return;
-      }
-
-      recipient = match;
-      box.classList.remove('error');
-      box.classList.add('show');
-      const initial = (match.username || '?').charAt(0).toUpperCase();
-      if (match.avatar_url) {
-        document.getElementById('rec-avatar').innerHTML = '<img src="' + match.avatar_url + '" alt="">';
-      } else {
-        document.getElementById('rec-avatar').textContent = initial;
-      }
-      document.getElementById('rec-name').textContent = '@' + match.username;
-      document.getElementById('rec-sub').textContent = 'Ready to receive';
+    async function doSend(amt,note){
+      const btn=document.getElementById('send-btn');btn.disabled=true;btn.textContent='Sending…';
+      try{
+        const{data:senderFresh}=await client.from('profiles').select('balance, username').eq('id',me.id).single();
+        const{data:recipFresh}=await client.from('profiles').select('balance, username').eq('id',recipient.id).single();
+        if(!senderFresh||!recipFresh)throw new Error('Could not load accounts');
+        const senderBal=Number(senderFresh.balance||0),recipBal=Number(recipFresh.balance||0);
+        if(amt>senderBal){myBalance=senderBal;document.getElementById('my-bal').textContent='$'+fmt(myBalance);throw new Error('Insufficient balance');}
+        const newSender=Math.round((senderBal-amt)*100)/100,newRecip=Math.round((recipBal+amt)*100)/100;
+        const{error:e1}=await client.from('profiles').update({balance:newSender}).eq('id',me.id);if(e1)throw e1;
+        const{error:e2}=await client.from('profiles').update({balance:newRecip}).eq('id',recipient.id);
+        if(e2){await client.from('profiles').update({balance:senderBal}).eq('id',me.id);throw e2;}
+        myBalance=newSender;document.getElementById('my-bal').textContent='$'+fmt(myBalance);
+        const fromName=senderFresh.username||'User',toName=recipFresh.username||recipient.username,ts=new Date().toISOString();
+        try{await client.from('notifications').insert([
+          {user_id:me.id,type:'transfer_sent',message:JSON.stringify({dir:'sent',amount:amt,other:toName,other_id:recipient.id,note:note||'',text:'You sent $'+fmt(amt)+' to @'+toName+(note?' — '+note:'')}),created_at:ts},
+          {user_id:recipient.id,type:'transfer_received',message:JSON.stringify({dir:'recv',amount:amt,other:fromName,other_id:me.id,note:note||'',text:'You received $'+fmt(amt)+' from @'+fromName+(note?' — '+note:'')}),created_at:ts}
+        ]);}catch(ne){}
+        const key='transfers_'+me.id;const hist=JSON.parse(localStorage.getItem(key)||'[]');
+        hist.unshift({dir:'sent',other:toName,amount:amt,note,ts:Date.now()});localStorage.setItem(key,JSON.stringify(hist.slice(0,80)));
+        toast('Sent $'+fmt(amt)+' to @'+toName);
+        document.getElementById('amount').value='';document.getElementById('note').value='';
+        await loadHistory();
+      }catch(err){console.error(err);toast(err.message||'Transfer failed. Try again.',true);}
+      btn.disabled=false;btn.textContent='Send Money';
     }
-
-    async function sendMoney() {
-      const btn = document.getElementById('send-btn');
-      if (btn.disabled) return;
-
-      if (!recipient) {
-        const name = document.getElementById('username').value.trim();
-        if (!name) return toast('Enter a username', true);
-        await lookupUser(name);
-        if (!recipient) return toast('Recipient not found', true);
-      }
-
-      const amt = parseFloat(document.getElementById('amount').value);
-      if (!amt || amt <= 0) return toast('Enter a valid amount', true);
-      if (amt > myBalance) return toast('Insufficient balance', true);
-      if (amt < 1) return toast('Minimum transfer is $1', true);
-
-      const note = (document.getElementById('note').value || '').trim().slice(0, 120);
-
-      btn.disabled = true;
-      btn.textContent = 'Sending…';
-
-      try {
-        // Refresh balances to avoid stale reads
-        const { data: senderFresh } = await client.from('profiles')
-          .select('balance, username').eq('id', me.id).single();
-        const { data: recipFresh } = await client.from('profiles')
-          .select('balance, username').eq('id', recipient.id).single();
-
-        if (!senderFresh || !recipFresh) throw new Error('Could not load accounts');
-
-        const senderBal = Number(senderFresh.balance || 0);
-        const recipBal = Number(recipFresh.balance || 0);
-
-        if (amt > senderBal) {
-          myBalance = senderBal;
-          document.getElementById('my-bal').textContent = '$' + fmt(myBalance);
-          throw new Error('Insufficient balance');
-        }
-
-        const newSender = Math.round((senderBal - amt) * 100) / 100;
-        const newRecip = Math.round((recipBal + amt) * 100) / 100;
-
-        // Debit sender
-        const { error: e1 } = await client.from('profiles')
-          .update({ balance: newSender })
-          .eq('id', me.id);
-        if (e1) throw e1;
-
-        // Credit recipient
-        const { error: e2 } = await client.from('profiles')
-          .update({ balance: newRecip })
-          .eq('id', recipient.id);
-
-        if (e2) {
-          // Best-effort rollback
-          await client.from('profiles').update({ balance: senderBal }).eq('id', me.id);
-          throw e2;
-        }
-
-        myBalance = newSender;
-        document.getElementById('my-bal').textContent = '$' + fmt(myBalance);
-
-        // Notifications (ignore errors if table/policy blocks)
-        const fromName = senderFresh.username || 'User';
-        const toName = recipFresh.username || recipient.username;
-        try {
-          await client.from('notifications').insert([
-            {
-              user_id: me.id,
-              type: 'transfer_sent',
-              message: 'You sent $' + fmt(amt) + ' to @' + toName + (note ? ' — ' + note : ''),
-              created_at: new Date().toISOString()
-            },
-            {
-              user_id: recipient.id,
-              type: 'transfer_received',
-              message: 'You received $' + fmt(amt) + ' from @' + fromName + (note ? ' — ' + note : ''),
-              created_at: new Date().toISOString()
-            }
-          ]);
-        } catch (ne) {}
-
-        // Local history
-        const hist = JSON.parse(localStorage.getItem('transfers_' + me.id) || '[]');
-        hist.unshift({
-          dir: 'sent',
-          other: toName,
-          amount: amt,
-          note,
-          ts: Date.now()
-        });
-        localStorage.setItem('transfers_' + me.id, JSON.stringify(hist.slice(0, 50)));
-
-        toast('Sent $' + fmt(amt) + ' to @' + toName);
-        document.getElementById('amount').value = '';
-        document.getElementById('note').value = '';
-        loadHistory();
-      } catch (err) {
-        console.error(err);
-        toast(err.message || 'Transfer failed. Try again.', true);
-      }
-
-      btn.disabled = false;
-      btn.textContent = 'Send Money';
+    function parseNotif(n){
+      try{const j=JSON.parse(n.message);if(j&&(j.dir==='sent'||j.dir==='recv'))return{dir:j.dir,other:j.other||'User',amount:Number(j.amount||0),note:j.note||'',ts:n.created_at?new Date(n.created_at).getTime():Date.now()};}catch(e){}
+      const msg=n.message||'';const m=msg.match(/\$([\d,]+(?:\.\d+)?)/);const amt=m?parseFloat(m[1].replace(/,/g,'')):0;
+      if(n.type==='transfer_sent'){const u=msg.match(/@([\w.-]+)/);return{dir:'sent',other:u?u[1]:'User',amount:amt,note:'',ts:n.created_at?new Date(n.created_at).getTime():Date.now()};}
+      if(n.type==='transfer_received'){const u=msg.match(/from @([\w.-]+)/i)||msg.match(/@([\w.-]+)/);return{dir:'recv',other:u?u[1]:'User',amount:amt,note:'',ts:n.created_at?new Date(n.created_at).getTime():Date.now()};}
+      return null;
     }
-
-    function loadHistory() {
-      const el = document.getElementById('history');
-      const hist = JSON.parse(localStorage.getItem('transfers_' + me.id) || '[]');
-      if (!hist.length) {
-        el.innerHTML = '<div class="empty">No transfers yet</div>';
-        return;
-      }
-      el.innerHTML = hist.slice(0, 15).map(h => {
-        const cls = h.dir === 'sent' ? 'sent' : 'recv';
-        const sign = h.dir === 'sent' ? '−' : '+';
-        const label = h.dir === 'sent' ? 'To @' + h.other : 'From @' + h.other;
-        const when = new Date(h.ts).toLocaleString();
-        return `<div class="hist-item">
-          <div>
-            <div class="hist-name">${label}</div>
-            <div class="hist-meta">${h.note ? h.note + ' · ' : ''}${when}</div>
-          </div>
-          <div class="hist-amt ${cls}">${sign}$${fmt(h.amount)}</div>
-        </div>`;
+    async function loadHistory(){
+      allHistory=[];
+      try{const{data}=await client.from('notifications').select('type, message, created_at').eq('user_id',me.id).in('type',['transfer_sent','transfer_received']).order('created_at',{ascending:false}).limit(50);
+        if(data)data.forEach(n=>{const p=parseNotif(n);if(p)allHistory.push(p);});}catch(e){}
+      const local=JSON.parse(localStorage.getItem('transfers_'+me.id)||'[]');
+      local.forEach(h=>{if(!allHistory.some(x=>x.dir===h.dir&&x.other===h.other&&Math.abs((x.ts||0)-(h.ts||0))<5000&&x.amount===h.amount))allHistory.push(h);});
+      allHistory.sort((a,b)=>(b.ts||0)-(a.ts||0));renderHistory();
+    }
+    function setFilter(f,el){histFilter=f;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderHistory();}
+    function renderHistory(){
+      const el=document.getElementById('history');
+      const items=allHistory.filter(h=>histFilter==='all'||h.dir===histFilter);
+      if(!items.length){el.innerHTML='<div class="empty">No transfers yet</div>';return;}
+      el.innerHTML=items.slice(0,30).map(h=>{
+        const isSent=h.dir==='sent';const cls=isSent?'sent':'recv';const sign=isSent?'−':'+';
+        const label=isSent?('To @'+h.other):('From @'+h.other);const when=h.ts?new Date(h.ts).toLocaleString():'';
+        return '<div class="hist-item"><div><div class="hist-name">'+label+'</div><div class="hist-meta">'+(h.note?h.note+' · ':'')+when+'</div></div><div class="hist-amt '+cls+'">'+sign+'$'+fmt(h.amount)+'</div></div>';
       }).join('');
     }
-
-    function toast(msg, isErr) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.style.borderColor = isErr ? '#ef4444' : '#10b981';
-      t.style.color = isErr ? '#fca5a5' : '#34d399';
-      t.style.display = 'block';
-      setTimeout(() => t.style.display = 'none', 3000);
-    }
-
+    function toast(msg,isErr){const t=document.getElementById('toast');t.textContent=msg;t.style.borderColor=isErr?'#ef4444':'#10b981';t.style.color=isErr?'#fca5a5':'#34d399';t.style.display='block';setTimeout(()=>t.style.display='none',3000);}
+    document.getElementById('pin-input').addEventListener('keydown',e=>{if(e.key==='Enter')confirmWithPin();});
     init();
   </script>
 </body>
