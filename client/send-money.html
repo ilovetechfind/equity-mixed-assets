@@ -123,10 +123,11 @@
       try{const{data:{session}}=await client.auth.getSession();user=session&&session.user;if(!user){const res=await client.auth.getUser();user=res.data&&res.data.user;}}catch(e){}
       if(!user){window.location.href='index.html';return;}
       me=user;
-      const{data:profile}=await client.from('profiles').select('balance, username, avatar_url, transfer_pin').eq('id',me.id).maybeSingle();
+      let profile=null;
+      try{const pr=await client.from('profiles').select('balance, username, avatar_url').eq('id',me.id).maybeSingle();profile=pr.data;}catch(e){}
       myBalance=Number(profile?.balance||0);
       myUsername=(profile?.username||'').toLowerCase();
-      transferPin=profile?.transfer_pin||localStorage.getItem('transfer_pin_'+me.id)||'';
+      transferPin=localStorage.getItem('transfer_pin_'+me.id)||'';
       document.getElementById('my-bal').textContent='$'+fmt(myBalance);
       const hint=document.getElementById('pin-hint');
       if(!transferPin){hint.style.display='block';hint.innerHTML='🔒 No transfer PIN set. <a href="settings.html" style="color:#fbbf24;font-weight:700">Set one in Settings</a> before sending.';}
@@ -176,14 +177,27 @@
         if(amt>senderBal){myBalance=senderBal;document.getElementById('my-bal').textContent='$'+fmt(myBalance);throw new Error('Insufficient balance');}
         const newSender=Math.round((senderBal-amt)*100)/100,newRecip=Math.round((recipBal+amt)*100)/100;
         const{error:e1}=await client.from('profiles').update({balance:newSender}).eq('id',me.id);if(e1)throw e1;
-        const{error:e2}=await client.from('profiles').update({balance:newRecip}).eq('id',recipient.id);
+        let e2=null;
+        {
+          const r2=await client.from('profiles').update({
+            balance:newRecip,
+            last_incoming:{from:senderFresh.username||'User',amount:amt,at:Date.now(),note:note||''}
+          }).eq('id',recipient.id);
+          e2=r2.error;
+          if(e2){
+            const r2b=await client.from('profiles').update({balance:newRecip}).eq('id',recipient.id);
+            e2=r2b.error;
+          }
+        }
         if(e2){await client.from('profiles').update({balance:senderBal}).eq('id',me.id);throw e2;}
         myBalance=newSender;document.getElementById('my-bal').textContent='$'+fmt(myBalance);
         const fromName=senderFresh.username||'User',toName=recipFresh.username||recipient.username,ts=new Date().toISOString();
-        try{await client.from('notifications').insert([
-          {user_id:me.id,type:'transfer_sent',message:JSON.stringify({dir:'sent',amount:amt,other:toName,other_id:recipient.id,note:note||'',text:'You sent $'+fmt(amt)+' to @'+toName+(note?' — '+note:'')}),created_at:ts},
-          {user_id:recipient.id,type:'transfer_received',message:JSON.stringify({dir:'recv',amount:amt,other:fromName,other_id:me.id,note:note||'',text:'You received $'+fmt(amt)+' from @'+fromName+(note?' — '+note:'')}),created_at:ts}
-        ]);}catch(ne){}
+        try{
+          await client.from('notifications').insert({user_id:me.id,type:'transfer_sent',message:JSON.stringify({dir:'sent',amount:amt,other:toName,other_id:recipient.id,note:note||'',text:'You sent $'+fmt(amt)+' to @'+toName+(note?' — '+note:'')}),created_at:ts});
+        }catch(ne){}
+        try{
+          await client.from('notifications').insert({user_id:recipient.id,type:'transfer_received',message:JSON.stringify({dir:'recv',amount:amt,other:fromName,other_id:me.id,note:note||'',text:'You received $'+fmt(amt)+' from @'+fromName+(note?' — '+note:'')}),created_at:ts});
+        }catch(ne){}
         const key='transfers_'+me.id;const hist=JSON.parse(localStorage.getItem(key)||'[]');
         hist.unshift({dir:'sent',other:toName,amount:amt,note,ts:Date.now()});localStorage.setItem(key,JSON.stringify(hist.slice(0,80)));
         toast('Sent $'+fmt(amt)+' to @'+toName);
