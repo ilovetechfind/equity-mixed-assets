@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equity Mixed Assets - Trading Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+      --green: #10b981;
+      --red: #ef4444;
+    }
+    body {
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      color: white;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0;
+      padding: 16px;
+      padding-bottom: 90px;
+    }
+    .container { width: 100%; max-width: 560px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .logo-text {
+      background: linear-gradient(90deg, #818cf8, #c084fc);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      font-size: 1.35rem; font-weight: 800; margin: 0;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #818cf8; text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 16px;
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      backdrop-filter: blur(12px); border-radius: 18px; padding: 18px; margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 0.75rem; color: var(--text-muted); font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; margin: 0 0 14px;
+    }
+    .form-group { margin-bottom: 14px; }
+    label {
+      display: block; font-size: 0.75rem; color: var(--text-muted);
+      font-weight: 700; text-transform: uppercase; margin-bottom: 6px;
+    }
+    select, input[type=number] {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      color: white; padding: 12px; border-radius: 10px; font-size: 0.9rem; outline: none;
+      box-sizing: border-box;
+    }
+    select:focus, input:focus { border-color: var(--primary); }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hint { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; line-height: 1.4; }
+    .pair-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      padding: 6px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;
+      margin: 0 6px 6px 0; cursor: pointer;
+    }
+    .pair-chip.active { border-color: var(--primary); background: rgba(99,102,241,0.2); color: #c7d2fe; }
+    .submit-btn {
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      color: white; border: none; padding: 14px; border-radius: 12px;
+      font-weight: 700; width: 100%; cursor: pointer; font-size: 0.95rem;
+    }
+    .status-msg { text-align: center; font-size: 0.85rem; font-weight: 600; margin-top: 10px; min-height: 20px; }
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .toggle-row span { font-weight: 600; font-size: 0.9rem; }
+    .switch {
+      width: 48px; height: 26px; background: rgba(255,255,255,0.15); border-radius: 20px;
+      position: relative; cursor: pointer; transition: 0.2s;
+    }
+    .switch.on { background: var(--green); }
+    .switch::after {
+      content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+      background: #fff; border-radius: 50%; transition: 0.2s;
+    }
+    .switch.on::after { left: 25px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="logo-text">Control Trading</h1>
+    </header>
+
+    <a href="#" id="back-link" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Back to User Info
+    </a>
+
+    <div class="card">
+      <div class="card-title">Master Switch</div>
+      <div class="toggle-row">
+        <span>Enable controlled moves for this user</span>
+        <div class="switch" id="enabled-switch" onclick="toggleEnabled()"></div>
+      </div>
+      <p class="hint">When ON, price moves after a client buys/sells follow the rules below instead of pure random walk.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Apply To Pairs</div>
+      <div id="pair-chips"></div>
+      <p class="hint">Tap to select which instruments are controlled. Leave none selected = all crypto pairs.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Move Rules (after client opens a trade)</div>
+
+      <div class="form-group">
+        <label>Direction</label>
+        <select id="direction">
+          <option value="up">Go Up (favorable or against depending on side)</option>
+          <option value="down">Go Down</option>
+          <option value="against">Always against the client (loss)</option>
+          <option value="with">Always with the client (win)</option>
+        </select>
+        <p class="hint">"Against" forces the price against the trade side. "With" forces it in their favor.</p>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Target % Move</label>
+          <input type="number" id="target-pct" min="0.1" max="50" step="0.1" value="2.5">
+        </div>
+        <div class="form-group">
+          <label>Start After (minutes)</label>
+          <input type="number" id="start-after" min="0" max="120" step="0.5" value="1">
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="form-group">
+          <label>Duration to Target (minutes)</label>
+          <input type="number" id="duration" min="0.5" max="120" step="0.5" value="3">
+        </div>
+        <div class="form-group">
+          <label>After Target Behavior</label>
+          <select id="after-behavior">
+            <option value="static">Stay static</option>
+            <option value="drop">Drop / reverse</option>
+            <option value="grow">Keep growing randomly</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="hint">
+        Timeline: Client opens trade → wait <b>Start After</b> minutes → price moves toward target % over <b>Duration</b> minutes → then follows After Target Behavior.
+      </p>
+    </div>
+
+    <button class="submit-btn" id="save-btn" onclick="saveControls()">Save Trading Controls</button>
+    <div class="status-msg" id="status"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const targetUserId = urlParams.get('id') || '';
+    document.getElementById('back-link').href = 'user-info.html?id=' + encodeURIComponent(targetUserId);
+
+    const CRYPTO_PAIRS = [
+      { id: 'BTCUSD', name: 'BTC/USD' },
+      { id: 'ETHUSD', name: 'ETH/USD' },
+      { id: 'SOLUSD', name: 'SOL/USD' }
+    ];
+
+    let enabled = false;
+    let selectedPairs = [];
+
+    function storageKey() {
+      return 'trading_control_' + (targetUserId || 'global');
+    }
+
+    function toggleEnabled() {
+      enabled = !enabled;
+      const el = document.getElementById('enabled-switch');
+      el.classList.toggle('on', enabled);
+    }
+
+    function renderChips() {
+      const box = document.getElementById('pair-chips');
+      box.innerHTML = CRYPTO_PAIRS.map(p => {
+        const on = selectedPairs.includes(p.id) ? 'active' : '';
+        return `<span class="pair-chip ${on}" data-id="${p.id}" onclick="togglePair('${p.id}')">${p.name}</span>`;
+      }).join('');
+    }
+
+    function togglePair(id) {
+      const i = selectedPairs.indexOf(id);
+      if (i >= 0) selectedPairs.splice(i, 1);
+      else selectedPairs.push(id);
+      renderChips();
+    }
+
+    function loadControls() {
+      try {
+        const raw = localStorage.getItem(storageKey());
+        if (!raw) return;
+        const c = JSON.parse(raw);
+        enabled = !!c.enabled;
+        document.getElementById('enabled-switch').classList.toggle('on', enabled);
+        document.getElementById('direction').value = c.direction || 'against';
+        document.getElementById('target-pct').value = c.targetPct ?? 2.5;
+        document.getElementById('start-after').value = c.startAfterMin ?? 1;
+        document.getElementById('duration').value = c.durationMin ?? 3;
+        document.getElementById('after-behavior').value = c.afterBehavior || 'static';
+        selectedPairs = Array.isArray(c.pairs) ? c.pairs : [];
+      } catch (e) {}
+      renderChips();
+    }
+
+    async function saveControls() {
+      if (!targetUserId) {
+        document.getElementById('status').style.color = '#f87171';
+        document.getElementById('status').textContent = 'No user ID — open this page from a user.';
+        return;
+      }
+      const controls = {
+        enabled,
+        direction: document.getElementById('direction').value,
+        targetPct: parseFloat(document.getElementById('target-pct').value) || 2.5,
+        startAfterMin: parseFloat(document.getElementById('start-after').value) || 0,
+        durationMin: parseFloat(document.getElementById('duration').value) || 3,
+        afterBehavior: document.getElementById('after-behavior').value,
+        pairs: selectedPairs.slice(),
+        updatedAt: Date.now()
+      };
+
+      localStorage.setItem(storageKey(), JSON.stringify(controls));
+
+      // Also push to profiles so client can read it (column may or may not exist)
+      try {
+        await client.from('profiles').update({ trading_control: controls }).eq('id', targetUserId);
+      } catch (e) {}
+
+      // Backup channel: notifications-style key in localStorage that client can poll via same origin if shared
+      try {
+        localStorage.setItem('ema_trading_control_' + targetUserId, JSON.stringify(controls));
+      } catch (e) {}
+
+      const st = document.getElementById('status');
+      st.style.color = '#34d399';
+      st.textContent = 'Trading controls saved for this user.';
+      setTimeout(() => { st.textContent = ''; }, 3000);
+    }
+
+    loadControls();
+  </script>
+</body>
+</html>
