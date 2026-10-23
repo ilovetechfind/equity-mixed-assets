@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Settings</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #1e1b4b 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.6);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --text-muted: #94a3b8;
+      --primary: #6366f1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background: var(--bg-gradient); background-attachment: fixed;
+      color: white; font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0; padding: 16px; padding-bottom: 100px;
+    }
+    .container { width: 100%; max-width: 520px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h1 {
+      margin: 0; font-size: 1.35rem; font-weight: 800;
+      background: linear-gradient(90deg, #818cf8, #c084fc);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .back {
+      color: #a5b4fc; text-decoration: none; font-weight: 600; font-size: 0.85rem;
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 20px; padding: 20px; margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 0.75rem; color: var(--text-muted); font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase; margin: 0 0 14px;
+    }
+    .avatar-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 18px; }
+    .avatar {
+      width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+      border: 3px solid rgba(129,140,248,0.5); background: rgba(0,0,0,0.35);
+    }
+    .avatar-placeholder {
+      width: 96px; height: 96px; border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; font-weight: 800; color: #fff;
+      border: 3px solid rgba(129,140,248,0.5);
+    }
+    .file-btn {
+      background: rgba(129,140,248,0.15); border: 1px solid rgba(129,140,248,0.35);
+      color: #a5b4fc; padding: 8px 14px; border-radius: 10px; font-weight: 700;
+      font-size: 0.8rem; cursor: pointer;
+    }
+    input[type="file"] { display: none; }
+    label.field { display: block; font-size: 0.75rem; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+    input[type="text"], input[type="email"] {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; padding: 12px 14px; border-radius: 12px; font-size: 0.9rem; outline: none; margin-bottom: 14px;
+    }
+    input:focus { border-color: var(--primary); }
+    input:disabled { opacity: 0.7; }
+    .hint { font-size: 0.75rem; color: var(--text-muted); margin: -8px 0 14px; }
+    .save-btn {
+      width: 100%; border: none; border-radius: 12px; padding: 14px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff;
+      font-weight: 700; font-size: 0.95rem; cursor: pointer;
+    }
+    .save-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .msg { text-align: center; font-size: 0.85rem; font-weight: 600; margin-top: 12px; min-height: 20px; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: rgba(19, 17, 53, 0.85); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--card-border); display: flex; justify-content: space-around;
+      padding: 12px 0; z-index: 1000; padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; color: var(--text-muted);
+      text-decoration: none; font-size: 0.75rem; font-weight: 600; gap: 6px;
+    }
+    .nav-item.active { color: #818cf8; }
+    .nav-item svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Settings</h1>
+      <a class="back" href="dashboard.html">← Back</a>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Profile</div>
+
+      <div class="avatar-wrap">
+        <img id="avatar-img" class="avatar" style="display:none" alt="Profile">
+        <div id="avatar-ph" class="avatar-placeholder">A</div>
+        <label class="file-btn" for="avatar-file">Change photo</label>
+        <input type="file" id="avatar-file" accept="image/*">
+      </div>
+
+      <label class="field" for="full-name">Display name</label>
+      <input type="text" id="full-name" placeholder="Your name">
+
+      <label class="field" for="email">Email</label>
+      <input type="email" id="email" disabled>
+      <p class="hint">Login email comes from your account (read-only here).</p>
+
+      <button class="save-btn" id="save-btn" onclick="saveProfile()">Save profile</button>
+      <div class="msg" id="msg"></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="dashboard.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      Home
+    </a>
+    <a href="referred-users.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+      Users
+    </a>
+    <a href="settings.html" class="nav-item active">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      Settings
+    </a>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    let userId = null;
+    let avatarData = null;
+
+    function setAvatarUI(url, name) {
+      const img = document.getElementById('avatar-img');
+      const ph = document.getElementById('avatar-ph');
+      if (url) {
+        img.src = url;
+        img.style.display = 'block';
+        ph.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        ph.style.display = 'flex';
+        ph.textContent = (name || 'A').trim().charAt(0).toUpperCase() || 'A';
+      }
+    }
+
+    async function init() {
+      const { data: { session } } = await client.auth.getSession();
+      let user = session && session.user;
+      if (!user) {
+        const r = await client.auth.getUser();
+        user = r.data && r.data.user;
+      }
+      if (!user) { location.replace('login.html'); return; }
+      userId = user.id;
+
+      document.getElementById('email').value = user.email || '';
+
+      const { data: profile } = await client.from('profiles')
+        .select('full_name, avatar_url')
+        .eq('id', userId).maybeSingle();
+
+      const name = (profile && profile.full_name) || '';
+      document.getElementById('full-name').value = name;
+      avatarData = (profile && profile.avatar_url) || null;
+      setAvatarUI(avatarData, name);
+    }
+
+    document.getElementById('avatar-file').addEventListener('change', function (e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (file.size > 1.5 * 1024 * 1024) {
+        document.getElementById('msg').style.color = '#f87171';
+        document.getElementById('msg').textContent = 'Image too large. Use under 1.5MB.';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function () {
+        // Compress via canvas
+        const img = new Image();
+        img.onload = function () {
+          const max = 256;
+          let w = img.width, h = img.height;
+          if (w > h && w > max) { h = Math.round(h * max / w); w = max; }
+          else if (h > max) { w = Math.round(w * max / h); h = max; }
+          const canvas = document.createElement('canvas');
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+          avatarData = canvas.toDataURL('image/jpeg', 0.85);
+          setAvatarUI(avatarData, document.getElementById('full-name').value);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    async function saveProfile() {
+      const msg = document.getElementById('msg');
+      const btn = document.getElementById('save-btn');
+      const name = document.getElementById('full-name').value.trim();
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      msg.textContent = '';
+      try {
+        const payload = { id: userId, full_name: name || null };
+        if (avatarData) payload.avatar_url = avatarData;
+        const { error } = await client.from('profiles').upsert(payload);
+        if (error) throw error;
+        msg.style.color = '#34d399';
+        msg.textContent = 'Profile saved.';
+        setAvatarUI(avatarData, name);
+      } catch (e) {
+        msg.style.color = '#f87171';
+        msg.textContent = e.message || 'Save failed. If avatar_url column is missing, run SQL in Dev panel.';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Save profile';
+    }
+
+    init();
+  </script>
+</body>
+</html>

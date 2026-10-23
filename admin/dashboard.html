@@ -29,9 +29,9 @@
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 10px; flex-wrap: wrap; }
     .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
     .header-actions { display: flex; align-items: center; gap: 8px; }
-    .dev-link {
-      background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35);
-      color: #7dd3fc; padding: 8px 14px; border-radius: 10px; font-weight: 700;
+    .settings-link {
+      background: rgba(129, 140, 248, 0.12); border: 1px solid rgba(129, 140, 248, 0.35);
+      color: #a5b4fc; padding: 8px 14px; border-radius: 10px; font-weight: 700;
       text-decoration: none; font-size: 0.85rem;
     }
     
@@ -73,7 +73,7 @@
     <header class="header">
       <h1 class="logo-text">Admin Panel</h1>
       <div class="header-actions">
-        <a class="dev-link" href="../dev/index.html">Developer</a>
+        <a class="settings-link" href="settings.html">Settings</a>
         <button class="logout-btn" onclick="logout()">Log Out</button>
       </div>
     </header>
@@ -81,7 +81,6 @@
     <div class="card">
       <span class="card-title">Your Admin Referral Code</span>
       
-      <!-- View / Copy Mode (Locked) -->
       <div id="code-view-section" style="display: none;">
         <div class="code-container">
           <div class="code-display" id="displayed-admin-code"></div>
@@ -90,7 +89,6 @@
         <span class="locked-notice">✔ Code is permanently locked in. You cannot change this code.</span>
       </div>
 
-      <!-- Set / Generate Mode -->
       <div id="code-set-section" style="display: none;">
         <form onsubmit="saveAdminCode(event)" class="form-row">
           <div class="input-group" style="max-width: 300px;">
@@ -119,7 +117,6 @@
       </div>
     </div>
 
-    <!-- Email Notifications Card Button Added Right Under Network Statistics -->
     <div class="card">
       <span class="card-title">Email Notifications</span>
       <div style="text-align: center; padding: 10px 0;">
@@ -137,6 +134,10 @@
     <a href="referred-users.html" class="nav-item">
       <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
       Users
+    </a>
+    <a href="settings.html" class="nav-item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      Settings
     </a>
   </nav>
 
