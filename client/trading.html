@@ -100,12 +100,18 @@
     .pos-item:last-child { border-bottom: none; }
     .pos-sym { font-weight: 700; }
     .pos-meta { font-size: 0.72rem; color: var(--muted); }
+    .pos-timer {
+      display: inline-block; margin-top: 4px; font-size: 0.72rem; font-weight: 800;
+      color: #fbbf24; background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35);
+      padding: 2px 8px; border-radius: 20px; font-variant-numeric: tabular-nums;
+    }
+    .pos-timer.urgent { color: #f87171; background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.4); }
     .close-btn {
       background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5;
       padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; cursor: pointer;
     }
     .modal-bg {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50;
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50;
       align-items: center; justify-content: center; padding: 20px;
     }
     .modal-bg.show { display: flex; }
@@ -123,13 +129,26 @@
       background: linear-gradient(135deg, #3b82f6, #1d4ed8); border: none; color: #fff;
       padding: 12px; border-radius: 12px; font-weight: 700; cursor: pointer;
     }
+    .choice-btn {
+      width: 100%; border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+      color: #fff; border-radius: 12px; padding: 14px; font-weight: 700; font-size: 0.9rem;
+      cursor: pointer; margin-bottom: 10px; text-align: left;
+    }
+    .choice-btn:hover, .choice-btn.active { border-color: var(--blue); background: rgba(59,130,246,0.15); }
+    .choice-btn small { display: block; color: var(--muted); font-weight: 500; font-size: 0.75rem; margin-top: 4px; }
+    .auto-panel { display: none; margin-top: 4px; }
+    .auto-panel.show { display: block; }
+    .quick-sec { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .qs {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #cbd5e1;
+      padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer;
+    }
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
       background: #1e293b; border: 1px solid var(--green); color: #34d399;
       padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 0.85rem;
       display: none; z-index: 100; max-width: 90%;
     }
-    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .avail-hint { font-size: 0.78rem; color: #93c5fd; margin: -6px 0 10px; font-weight: 600; }
   </style>
 </head>
@@ -185,22 +204,45 @@
         <button class="q" onclick="setAmt(250)">$250</button>
         <button class="q" onclick="setAmt('all')">Max</button>
       </div>
-      <div class="row-2">
-        <div>
-          <label>Auto-Close After (min)</label>
-          <input type="number" id="auto-close-min" placeholder="0 = off" min="0" max="1440" step="1" value="0">
-        </div>
-        <div>
-          <label>&nbsp;</label>
-          <div style="font-size:0.72rem;color:var(--muted);line-height:1.35;padding-top:4px">0 = no auto close.</div>
-        </div>
-      </div>
-      <button class="exec buy" id="exec-btn" onclick="executeTrade()">Buy BTC/USD</button>
+      <button class="exec buy" id="exec-btn" onclick="openCloseChoice()">Buy BTC/USD</button>
     </div>
 
     <div class="pos-card">
       <div class="pos-title">OPEN POSITIONS</div>
       <div id="positions"><div class="pos-empty">No open positions</div></div>
+    </div>
+  </div>
+
+  <div class="modal-bg" id="close-choice-modal">
+    <div class="modal">
+      <h3 id="choice-title">Place Trade</h3>
+      <p id="choice-desc">How do you want to close this trade?</p>
+
+      <button class="choice-btn" id="btn-manual" onclick="selectCloseMode('manual')">
+        Close Manually
+        <small>You close the trade yourself anytime</small>
+      </button>
+      <button class="choice-btn" id="btn-auto" onclick="selectCloseMode('auto')">
+        Auto Close After Timer
+        <small>Trade closes automatically after the time you set</small>
+      </button>
+
+      <div class="auto-panel" id="auto-panel">
+        <label>Auto-close after (seconds)</label>
+        <input type="number" id="auto-close-sec" placeholder="e.g. 30" min="5" max="86400" step="1" value="30">
+        <div class="quick-sec">
+          <button class="qs" onclick="setAutoSec(15)">15s</button>
+          <button class="qs" onclick="setAutoSec(30)">30s</button>
+          <button class="qs" onclick="setAutoSec(60)">1m</button>
+          <button class="qs" onclick="setAutoSec(120)">2m</button>
+          <button class="qs" onclick="setAutoSec(300)">5m</button>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeChoiceModal()">Cancel</button>
+        <button class="modal-ok" id="choice-confirm" onclick="confirmTrade()">Confirm Trade</button>
+      </div>
     </div>
   </div>
 
@@ -242,6 +284,7 @@
     let selected = INSTRUMENTS[0], side = 'buy', positions = [];
     let fundMode = 'deposit', chartHistory = [], catFilter = 'all';
     let adminControl = null;
+    let closeMode = 'manual';
 
     INSTRUMENTS.forEach(i => { i.base = i.price; i.chg = 0; });
 
@@ -318,7 +361,8 @@
       renderBalances(); renderPairs(); renderPositions(); seedChart();
       setInterval(tickPrices, 1200);
       setInterval(drawChart, 400);
-      setInterval(checkAutoClose, 2000);
+      setInterval(checkAutoClose, 500);
+      setInterval(renderPositions, 1000);
       setInterval(loadAdminControl, 12000);
       setInterval(refreshBalances, 20000);
 
@@ -371,6 +415,39 @@
       document.getElementById('trade-amount').value = v==='all' ? Math.max(0, Math.floor(tradeBalance*100)/100) : v;
     }
 
+    function openCloseChoice() {
+      const amt = parseMoney(document.getElementById('trade-amount').value);
+      if (!amt || amt <= 0) return toast('Enter a valid amount', true);
+      if (amt > tradeBalance + 0.001) return toast('Insufficient trading balance', true);
+
+      closeMode = 'manual';
+      document.getElementById('btn-manual').classList.add('active');
+      document.getElementById('btn-auto').classList.remove('active');
+      document.getElementById('auto-panel').classList.remove('show');
+      document.getElementById('auto-close-sec').value = 30;
+
+      const sideLabel = side === 'buy' ? 'Buy' : 'Sell';
+      document.getElementById('choice-title').textContent = sideLabel + ' ' + selected.name;
+      document.getElementById('choice-desc').textContent =
+        'Amount $' + fmt(amt) + ' · How do you want to close this trade?';
+      document.getElementById('close-choice-modal').classList.add('show');
+    }
+
+    function closeChoiceModal() {
+      document.getElementById('close-choice-modal').classList.remove('show');
+    }
+
+    function selectCloseMode(mode) {
+      closeMode = mode;
+      document.getElementById('btn-manual').classList.toggle('active', mode === 'manual');
+      document.getElementById('btn-auto').classList.toggle('active', mode === 'auto');
+      document.getElementById('auto-panel').classList.toggle('show', mode === 'auto');
+    }
+
+    function setAutoSec(s) {
+      document.getElementById('auto-close-sec').value = s;
+    }
+
     function applyControlledMove(inst, now) {
       const controlled = positions.filter(p => p.instrumentId === inst.id && p.control);
       if (!controlled.length) return false;
@@ -418,7 +495,7 @@
       });
       chartHistory.push(selected.price);
       if (chartHistory.length > 60) chartHistory.shift();
-      renderPairs(); renderPositions();
+      renderPairs();
     }
 
     function seedChart() {
@@ -445,18 +522,31 @@
       ctx.stroke();
     }
 
-    async function executeTrade() {
+    async function confirmTrade() {
       const amt = parseMoney(document.getElementById('trade-amount').value);
       if (!amt || amt <= 0) return toast('Enter a valid amount', true);
       if (amt > tradeBalance + 0.001) return toast('Insufficient trading balance', true);
-      const autoCloseMin = parseMoney(document.getElementById('auto-close-min').value) || 0;
+
+      let autoCloseSec = null;
+      if (closeMode === 'auto') {
+        autoCloseSec = parseInt(document.getElementById('auto-close-sec').value, 10);
+        if (!autoCloseSec || autoCloseSec < 5) return toast('Enter at least 5 seconds for auto-close', true);
+      }
+
       const entry = selected.price;
       const pos = {
-        id: Date.now(), symbol: selected.name, instrumentId: selected.id,
-        side, amount: amt, entry, digits: selected.digits,
-        openedAt: new Date().toISOString(), openedTs: Date.now(),
-        autoCloseMin: autoCloseMin > 0 ? autoCloseMin : null
+        id: Date.now(),
+        symbol: selected.name,
+        instrumentId: selected.id,
+        side,
+        amount: amt,
+        entry,
+        digits: selected.digits,
+        openedAt: new Date().toISOString(),
+        openedTs: Date.now(),
+        autoCloseSec: autoCloseSec
       };
+
       if (adminControl && adminControl.enabled && controlApplies(selected.id)) {
         pos.control = {
           direction: adminControl.direction || 'against',
@@ -466,12 +556,15 @@
           afterBehavior: adminControl.afterBehavior || 'static'
         };
       }
+
       positions.unshift(pos);
       tradeBalance -= amt;
       await saveTradeState();
-      renderBalances(); renderPositions();
+      closeChoiceModal();
+      renderBalances();
+      renderPositions();
       toast((side === 'buy' ? 'Bought' : 'Sold') + ' ' + selected.name + ' @ ' + fmt(entry, selected.digits) +
-        (autoCloseMin > 0 ? ' · auto-close ' + autoCloseMin + 'm' : ''));
+        (autoCloseSec ? ' · auto-close ' + autoCloseSec + 's' : ' · close manually'));
     }
 
     function currentPnL(pos) {
@@ -481,19 +574,33 @@
       return pos.amount * move * (pos.side === 'buy' ? 1 : -1);
     }
 
+    function formatCountdown(totalSec) {
+      totalSec = Math.max(0, Math.floor(totalSec));
+      const m = Math.floor(totalSec / 60);
+      const s = totalSec % 60;
+      if (m > 0) return m + 'm ' + String(s).padStart(2, '0') + 's';
+      return s + 's';
+    }
+
     function renderPositions() {
       const el = document.getElementById('positions');
       if (!positions.length) { el.innerHTML = '<div class="pos-empty">No open positions</div>'; return; }
+      const now = Date.now();
       el.innerHTML = positions.map(p => {
         const pnl = currentPnL(p);
         const cls = pnl >= 0 ? 'up' : 'down';
         let meta = '$' + fmt(p.amount) + ' @ ' + fmt(p.entry, p.digits);
-        if (p.autoCloseMin) {
-          const left = Math.max(0, p.autoCloseMin - (Date.now() - p.openedTs) / 60000);
-          meta += ' · auto ' + left.toFixed(1) + 'm';
+        let timerHtml = '';
+        let totalSec = null;
+        if (p.autoCloseSec) totalSec = p.autoCloseSec;
+        else if (p.autoCloseMin) totalSec = p.autoCloseMin * 60;
+        if (totalSec) {
+          const left = Math.max(0, totalSec - (now - p.openedTs) / 1000);
+          const urgent = left <= 10 ? ' urgent' : '';
+          timerHtml = '<div class="pos-timer' + urgent + '">⏱ ' + formatCountdown(left) + '</div>';
         }
         return `<div class="pos-item"><div><div class="pos-sym">${p.side.toUpperCase()} ${p.symbol}</div>
-          <div class="pos-meta">${meta}</div></div>
+          <div class="pos-meta">${meta}</div>${timerHtml}</div>
           <div style="text-align:right"><div class="${cls}" style="font-weight:700">${pnl>=0?'+':''}$${fmt(pnl)}</div>
           <button class="close-btn" onclick="closePosition(${p.id})">Close</button></div></div>`;
       }).join('');
@@ -518,8 +625,11 @@
 
     function checkAutoClose() {
       const now = Date.now();
-      positions.filter(p => p.autoCloseMin && (now - p.openedTs) >= p.autoCloseMin * 60000)
-        .forEach(p => closePosition(p.id));
+      positions.filter(p => {
+        if (p.autoCloseSec) return (now - p.openedTs) >= p.autoCloseSec * 1000;
+        if (p.autoCloseMin) return (now - p.openedTs) >= p.autoCloseMin * 60000;
+        return false;
+      }).forEach(p => closePosition(p.id));
     }
 
     async function openFundModal(mode) {
@@ -541,15 +651,12 @@
       const btn = document.getElementById('modal-ok-btn');
       btn.disabled = true;
       btn.textContent = 'Working...';
-
       await refreshBalances();
-
       const amt = parseMoney(document.getElementById('fund-amount').value);
       if (!amt || amt <= 0) {
         btn.disabled = false; btn.textContent = 'Confirm';
         return toast('Enter a valid amount', true);
       }
-
       if (fundMode === 'deposit') {
         if (amt > mainBalance + 0.001) {
           btn.disabled = false; btn.textContent = 'Confirm';
@@ -565,23 +672,17 @@
         tradeBalance = Math.max(0, tradeBalance - amt);
         mainBalance = mainBalance + amt;
       }
-
       try {
         const { error } = await client.from('profiles')
           .update({ balance: mainBalance, trading_balance: tradeBalance })
           .eq('id', userId);
-        if (error) {
-          await client.from('profiles').update({ balance: mainBalance }).eq('id', userId);
-        }
+        if (error) await client.from('profiles').update({ balance: mainBalance }).eq('id', userId);
       } catch (e) {}
-
       localStorage.setItem('trading_balance_' + userId, String(tradeBalance));
       btn.disabled = false; btn.textContent = 'Confirm';
       closeFundModal();
       renderBalances();
-      toast(fundMode === 'deposit'
-        ? 'Deposited $' + fmt(amt) + ' to trading'
-        : 'Withdrew $' + fmt(amt) + ' to main');
+      toast(fundMode === 'deposit' ? 'Deposited $' + fmt(amt) + ' to trading' : 'Withdrew $' + fmt(amt) + ' to main');
     }
 
     async function saveTradeState() {
