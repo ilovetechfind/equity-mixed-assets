@@ -139,7 +139,7 @@
     <div class="card locked" id="card-pairs">
       <div class="card-title">Apply To Pairs</div>
       <div id="pair-chips"></div>
-      <p class="hint">Tap to select which instruments are controlled. Leave none selected = all crypto pairs.</p>
+      <p class="hint">Tap to select which instruments are controlled. Leave none selected = all pairs (crypto, forex, stocks, commodities).</p>
     </div>
 
     <div class="card locked" id="card-rules">
@@ -201,10 +201,19 @@
     const targetUserId = urlParams.get('id') || '';
     document.getElementById('back-link').href = 'user-info.html?id=' + encodeURIComponent(targetUserId);
 
-    const CRYPTO_PAIRS = [
-      { id: 'BTCUSD', name: 'BTC/USD' },
-      { id: 'ETHUSD', name: 'ETH/USD' },
-      { id: 'SOLUSD', name: 'SOL/USD' }
+    const ALL_PAIRS = [
+      { id: 'BTCUSD', name: 'BTC/USD', cat: 'crypto' },
+      { id: 'ETHUSD', name: 'ETH/USD', cat: 'crypto' },
+      { id: 'SOLUSD', name: 'SOL/USD', cat: 'crypto' },
+      { id: 'EURUSD', name: 'EUR/USD', cat: 'forex' },
+      { id: 'GBPUSD', name: 'GBP/USD', cat: 'forex' },
+      { id: 'USDJPY', name: 'USD/JPY', cat: 'forex' },
+      { id: 'AAPL', name: 'AAPL', cat: 'stocks' },
+      { id: 'TSLA', name: 'TSLA', cat: 'stocks' },
+      { id: 'NVDA', name: 'NVDA', cat: 'stocks' },
+      { id: 'XAUUSD', name: 'XAU/USD', cat: 'commodities' },
+      { id: 'XAGUSD', name: 'XAG/USD', cat: 'commodities' },
+      { id: 'WTI', name: 'WTI Oil', cat: 'commodities' }
     ];
 
     let enabled = false;
@@ -276,12 +285,25 @@
     }
 
     function renderChips() {
-      document.getElementById('pair-chips').innerHTML = CRYPTO_PAIRS.map(p => {
-        const on = selectedPairs.includes(p.id) ? 'active' : '';
-        const dis = isEditing ? '' : ' disabled';
-        const click = isEditing ? `onclick="togglePair('${p.id}')"` : '';
-        return `<span class="pair-chip ${on}${dis}" ${click}>${p.name}</span>`;
-      }).join('');
+      const cats = [
+        { key: 'crypto', label: 'Crypto' },
+        { key: 'forex', label: 'Forex' },
+        { key: 'stocks', label: 'Stocks' },
+        { key: 'commodities', label: 'Commodities' }
+      ];
+      let html = '';
+      cats.forEach(cat => {
+        const items = ALL_PAIRS.filter(p => p.cat === cat.key);
+        if (!items.length) return;
+        html += `<div style="font-size:0.68rem;color:#94a3b8;font-weight:700;letter-spacing:0.5px;margin:10px 0 6px;text-transform:uppercase">${cat.label}</div>`;
+        html += items.map(p => {
+          const on = selectedPairs.includes(p.id) ? 'active' : '';
+          const dis = isEditing ? '' : ' disabled';
+          const click = isEditing ? `onclick="togglePair('${p.id}')"` : '';
+          return `<span class="pair-chip ${on}${dis}" ${click}>${p.name}</span>`;
+        }).join('');
+      });
+      document.getElementById('pair-chips').innerHTML = html;
     }
 
     function togglePair(id) {
