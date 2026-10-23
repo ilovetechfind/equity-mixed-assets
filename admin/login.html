@@ -98,6 +98,52 @@
       }
     }
 
+    async function ensureAdminProfile(userId, email) {
+      await client.from('profiles').upsert({
+        id: userId,
+        role: 'admin',
+        admin_access: false,
+        admin_status: 'pending',
+        full_name: email || null
+      });
+    }
+
+    async function routeAfterLogin(user) {
+      // Ensure profile marked as admin account
+      try {
+        const { data: profile } = await client.from('profiles')
+          .select('admin_access, role, admin_status')
+          .eq('id', user.id).maybeSingle();
+
+        if (!profile) {
+          await ensureAdminProfile(user.id, user.email);
+          location.href = 'pending.html';
+          return;
+        }
+
+        // If they were a client, upgrade request to admin pending
+        if (profile.role !== 'admin' && profile.admin_access !== true) {
+          await client.from('profiles').update({
+            role: 'admin',
+            admin_access: false,
+            admin_status: 'pending'
+          }).eq('id', user.id);
+          location.href = 'pending.html';
+          return;
+        }
+
+        if (profile.admin_access === false) {
+          location.href = 'pending.html';
+          return;
+        }
+
+        // true or null (legacy) → dashboard
+        location.href = 'dashboard.html';
+      } catch (e) {
+        location.href = 'dashboard.html';
+      }
+    }
+
     async function handleAuth(e) {
       e.preventDefault();
       const email = document.getElementById('admin-email').value;
@@ -114,9 +160,13 @@
           btn.innerText = "Register Account";
           btn.disabled = false;
         } else {
-          alert("Admin account created successfully! You can now log in.");
+          if (data.user) {
+            await ensureAdminProfile(data.user.id, email);
+          }
+          alert("Admin account created. Sign in — a developer must approve your access.");
           toggleMode();
           btn.disabled = false;
+          btn.innerText = "Sign In to Dashboard";
         }
       } else {
         const { data, error } = await client.auth.signInWithPassword({ email, password });
@@ -125,11 +175,10 @@
           btn.innerText = "Sign In to Dashboard";
           btn.disabled = false;
         } else {
-          window.location.href = 'dashboard.html';
+          await routeAfterLogin(data.user);
         }
       }
     }
   </script>
-</body
-  >
+</body>
 </html>
