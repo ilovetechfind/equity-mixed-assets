@@ -78,14 +78,59 @@
       border-radius: 10px; padding: 12px; font-family: ui-monospace, monospace; font-size: 0.72rem;
       color: #bae6fd; white-space: pre-wrap; line-height: 1.45;
     }
+
+    /* Password gate */
+    #gate {
+      max-width: 400px; margin: 10vh auto 0;
+    }
+    #gate .card { text-align: center; }
+    #gate h2 { margin: 0 0 8px; font-size: 1.25rem; }
+    #gate p { color: var(--muted); font-size: 0.85rem; margin: 0 0 18px; }
+    #gate input {
+      width: 100%; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12);
+      color: #fff; padding: 14px; border-radius: 12px; font-size: 1rem; outline: none; margin-bottom: 12px;
+      text-align: center; letter-spacing: 2px;
+    }
+    #gate input:focus { border-color: var(--accent); }
+    #gate .unlock-btn {
+      width: 100%; border: none; border-radius: 12px; padding: 14px;
+      background: linear-gradient(135deg, #38bdf8, #6366f1); color: #fff;
+      font-weight: 700; font-size: 0.95rem; cursor: pointer;
+    }
+    #gate .unlock-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    #gate .err { color: #f87171; font-size: 0.85rem; font-weight: 600; min-height: 22px; margin-top: 10px; }
+    #app { display: none; }
+    .lock-out {
+      background: none; border: none; color: var(--muted); font-size: 0.75rem;
+      cursor: pointer; text-decoration: underline; margin-left: 8px;
+    }
   </style>
 </head>
 <body>
-  <div class="wrap">
+
+  <!-- Password gate -->
+  <div id="gate">
+    <div class="card">
+      <span class="badge" style="margin-bottom:12px;display:inline-block">DEV</span>
+      <h2>Developer Access</h2>
+      <p>Enter the developer password to continue.</p>
+      <form onsubmit="tryUnlock(event)">
+        <input type="password" id="dev-pass" placeholder="Password" autocomplete="current-password" autofocus>
+        <button type="submit" class="unlock-btn" id="unlock-btn">Unlock</button>
+      </form>
+      <div class="err" id="gate-err"></div>
+    </div>
+  </div>
+
+  <!-- Main panel (hidden until unlocked) -->
+  <div class="wrap" id="app">
     <a class="back" href="../admin/dashboard.html">← Back to Admin</a>
     <div class="header">
       <h1 class="logo">Developer Control</h1>
-      <span class="badge">DEV</span>
+      <div>
+        <span class="badge">DEV</span>
+        <button type="button" class="lock-out" onclick="lockDev()">Lock</button>
+      </div>
     </div>
     <div class="stats">
       <div class="stat"><div class="stat-n" id="n-total">0</div><div class="stat-l">Total</div></div>
@@ -105,36 +150,116 @@
       <div id="list"><div class="empty">Loading users…</div></div>
     </div>
     <div class="card">
-      <div class="card-title">One-time SQL (Supabase)</div>
-      <p class="hint">This is only for the database. Run it once in Supabase → SQL Editor so the new columns exist. It is not an admin setting.</p>
-      <div class="sql-box">ALTER TABLE profiles
+      <div class="card-title">Password &amp; database setup (Supabase)</div>
+      <p class="hint">
+        Dev password lives in table <b>dev_settings</b> (column <b>password</b>). Change it only in Supabase Table Editor.
+        Default is <b>123456</b>. Run this once if the table is missing:
+      </p>
+      <div class="sql-box">CREATE TABLE IF NOT EXISTS dev_settings (
+  id int PRIMARY KEY DEFAULT 1 CHECK (id = 1),
+  password text NOT NULL DEFAULT '123456'
+);
+
+INSERT INTO dev_settings (id, password)
+VALUES (1, '123456')
+ON CONFLICT (id) DO NOTHING;
+
+-- Allow the app to read the password (needed for the lock screen)
+ALTER TABLE dev_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "dev_settings_read" ON dev_settings;
+CREATE POLICY "dev_settings_read" ON dev_settings
+  FOR SELECT TO anon, authenticated USING (true);
+
+-- Optional profile columns for admin access + avatars
+ALTER TABLE profiles
   ADD COLUMN IF NOT EXISTS admin_access boolean DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS admin_status text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS role text DEFAULT 'client',
-  ADD COLUMN IF NOT EXISTS avatar_url text DEFAULT NULL;
-
--- Keep your own account approved (use your user id):
--- UPDATE profiles SET role = 'admin', admin_access = true, admin_status = 'approved'
--- WHERE id = 'YOUR-USER-UUID';</div>
+  ADD COLUMN IF NOT EXISTS avatar_url text DEFAULT NULL;</div>
     </div>
   </div>
+
   <div class="toast" id="toast"></div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    let users = [];
-    let filter = 'all';
+    var SESSION_KEY = 'dev_unlocked_v1';
+    var users = [];
+    var filter = 'all';
+
     function toast(msg, err) {
-      const t = document.getElementById('toast');
+      var t = document.getElementById('toast');
       t.textContent = msg;
       t.style.borderColor = err ? '#ef4444' : '#10b981';
       t.style.color = err ? '#fca5a5' : '#34d399';
       t.style.display = 'block';
-      setTimeout(() => t.style.display = 'none', 2800);
+      setTimeout(function () { t.style.display = 'none'; }, 2800);
     }
+
+    function showApp() {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadUsers();
+    }
+
+    function showGate() {
+      document.getElementById('gate').style.display = 'block';
+      document.getElementById('app').style.display = 'none';
+    }
+
+    function lockDev() {
+      try { sessionStorage.removeItem(SESSION_KEY); } catch (e) {}
+      showGate();
+      document.getElementById('dev-pass').value = '';
+      document.getElementById('gate-err').textContent = '';
+    }
+
+    async function fetchDevPassword() {
+      // Prefer Supabase table; fall back to default 123456 if table missing
+      try {
+        var res = await client.from('dev_settings').select('password').eq('id', 1).maybeSingle();
+        if (res.error) throw res.error;
+        if (res.data && res.data.password != null && String(res.data.password).length) {
+          return String(res.data.password);
+        }
+      } catch (e) {
+        console.warn('dev_settings read failed, using default', e);
+      }
+      return '123456';
+    }
+
+    async function tryUnlock(e) {
+      e.preventDefault();
+      var input = document.getElementById('dev-pass').value;
+      var err = document.getElementById('gate-err');
+      var btn = document.getElementById('unlock-btn');
+      err.textContent = '';
+      if (!input) {
+        err.textContent = 'Enter the password.';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'Checking…';
+      try {
+        var real = await fetchDevPassword();
+        if (input === real) {
+          try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (x) {}
+          showApp();
+        } else {
+          err.textContent = 'Wrong password.';
+        }
+      } catch (ex) {
+        err.textContent = 'Could not verify password. Check Supabase setup.';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+    }
+
     function isAdminAccount(u) {
       return u.role === 'admin' || u.admin_access === true || u.admin_status === 'pending' || u.admin_status === 'revoked' || u.admin_status === 'approved';
     }
+
     function accessLabel(u) {
       if (!isAdminAccount(u)) return null;
       if (u.admin_access === true) return { text: 'Approved', cls: 'approved' };
@@ -142,37 +267,43 @@
       if (u.admin_access === false || u.admin_status === 'pending') return { text: 'Pending', cls: 'pending' };
       return { text: 'Legacy', cls: 'approved' };
     }
+
     async function loadUsers() {
       try {
-        const { data, error } = await client.from('profiles')
+        var res = await client.from('profiles')
           .select('id, full_name, role, admin_access, admin_status, referral_code, balance, created_at')
           .order('created_at', { ascending: false }).limit(500);
-        if (error) throw error;
-        users = data || [];
+        if (res.error) throw res.error;
+        users = res.data || [];
         document.getElementById('n-total').textContent = users.length;
         document.getElementById('n-admin').textContent = users.filter(isAdminAccount).length;
-        document.getElementById('n-client').textContent = users.filter(u => !isAdminAccount(u)).length;
+        document.getElementById('n-client').textContent = users.filter(function (u) { return !isAdminAccount(u); }).length;
         render();
       } catch (e) {
         document.getElementById('list').innerHTML = '<div class="empty">Could not load users.<br><br>' + (e.message || '') + '</div>';
       }
     }
+
     function render() {
-      const q = (document.getElementById('search').value || '').toLowerCase().trim();
-      let list = users.slice();
+      var q = (document.getElementById('search').value || '').toLowerCase().trim();
+      var list = users.slice();
       if (filter === 'admin') list = list.filter(isAdminAccount);
-      else if (filter === 'client') list = list.filter(u => !isAdminAccount(u));
-      else if (filter === 'pending') list = list.filter(u => u.admin_access === false || u.admin_status === 'pending' || u.admin_status === 'revoked');
-      if (q) list = list.filter(u => ((u.full_name || '') + (u.id || '')).toLowerCase().includes(q));
-      const el = document.getElementById('list');
+      else if (filter === 'client') list = list.filter(function (u) { return !isAdminAccount(u); });
+      else if (filter === 'pending') list = list.filter(function (u) {
+        return u.admin_access === false || u.admin_status === 'pending' || u.admin_status === 'revoked';
+      });
+      if (q) list = list.filter(function (u) {
+        return ((u.full_name || '') + (u.id || '')).toLowerCase().indexOf(q) !== -1;
+      });
+      var el = document.getElementById('list');
       if (!list.length) { el.innerHTML = '<div class="empty">No users in this view.</div>'; return; }
-      el.innerHTML = list.map(u => {
-        const admin = isAdminAccount(u);
-        const acc = accessLabel(u);
-        const approved = u.admin_access === true;
-        const name = u.full_name || 'Unnamed user';
-        const shortId = (u.id || '').slice(0, 8) + '…';
-        let actions = '';
+      el.innerHTML = list.map(function (u) {
+        var admin = isAdminAccount(u);
+        var acc = accessLabel(u);
+        var approved = u.admin_access === true;
+        var name = u.full_name || 'Unnamed user';
+        var shortId = (u.id || '').slice(0, 8) + '…';
+        var actions = '';
         if (admin || u.admin_status === 'pending' || u.admin_access === false) {
           actions = '<div class="actions">' +
             '<button class="btn btn-approve" ' + (approved ? 'disabled' : '') + ' onclick="setAccess(\'' + u.id + '\', true)">' + (approved ? 'Already approved' : 'Approve admin access') + '</button>' +
@@ -180,43 +311,55 @@
         } else {
           actions = '<div class="actions"><button class="btn btn-approve" onclick="promoteToAdmin(\'' + u.id + '\')">Make admin (approved)</button></div>';
         }
-        const pills = '<span class="pill ' + (admin ? 'admin' : 'client') + '">' + (admin ? 'Admin' : 'Client') + '</span>' +
+        var pills = '<span class="pill ' + (admin ? 'admin' : 'client') + '">' + (admin ? 'Admin' : 'Client') + '</span>' +
           (acc ? ' <span class="pill ' + acc.cls + '">' + acc.text + '</span>' : '');
         return '<div class="user"><div class="user-top"><div><div class="user-name">' + name + '</div><div class="user-email">ID: ' + shortId + '</div></div><div style="text-align:right">' + pills + '</div></div>' +
           '<div class="user-meta">Balance: $' + Number(u.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) +
           (u.referral_code ? ' · Ref: ' + u.referral_code : '') + '</div>' + actions + '</div>';
       }).join('');
     }
+
     async function setAccess(id, allow) {
       try {
-        const { error } = await client.from('profiles').update({
+        var res = await client.from('profiles').update({
           admin_access: !!allow, admin_status: allow ? 'approved' : 'revoked', role: 'admin'
         }).eq('id', id);
-        if (error) throw error;
+        if (res.error) throw res.error;
         toast(allow ? 'Admin access approved' : 'Admin access restricted');
         await loadUsers();
       } catch (e) { toast(e.message || 'Update failed', true); }
     }
+
     async function promoteToAdmin(id) {
       try {
-        const { error } = await client.from('profiles').update({
+        var res = await client.from('profiles').update({
           role: 'admin', admin_access: true, admin_status: 'approved'
         }).eq('id', id);
-        if (error) throw error;
+        if (res.error) throw res.error;
         toast('User promoted to approved admin');
         await loadUsers();
       } catch (e) { toast(e.message || 'Update failed', true); }
     }
-    document.querySelectorAll('.tab').forEach(t => {
-      t.onclick = () => {
-        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+
+    document.querySelectorAll('.tab').forEach(function (t) {
+      t.onclick = function () {
+        document.querySelectorAll('.tab').forEach(function (x) { x.classList.remove('active'); });
         t.classList.add('active');
         filter = t.getAttribute('data-f');
         render();
       };
     });
-    loadUsers();
-    setInterval(loadUsers, 15000);
+
+    // Boot: unlock if session already valid this browser tab
+    (function boot() {
+      try {
+        if (sessionStorage.getItem(SESSION_KEY) === '1') {
+          showApp();
+          return;
+        }
+      } catch (e) {}
+      showGate();
+    })();
   </script>
 </body>
 </html>
