@@ -40,7 +40,7 @@
     .item {
       background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px;
     }
-    .item-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+    .item-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 8px; }
     .item-title { font-weight: 700; font-size: 0.95rem; }
     .item-amt { font-weight: 800; font-size: 0.95rem; white-space: nowrap; }
     .up { color: var(--green); }
@@ -55,6 +55,16 @@
     .badge.bet { color: #fca5a5; background: rgba(239,68,68,0.15); }
     .badge.transfer { color: #6ee7b7; background: rgba(16,185,129,0.15); }
     .badge.race { color: #4ade80; background: rgba(34,197,94,0.15); }
+    .badge.win { color: #34d399; background: rgba(16,185,129,0.15); }
+    .badge.loss { color: #fca5a5; background: rgba(239,68,68,0.15); }
+    .stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+      margin-top: 10px; background: rgba(0,0,0,0.25); border-radius: 10px; padding: 10px;
+    }
+    .stat-label { font-size: 0.62rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; }
+    .stat-val { font-size: 0.85rem; font-weight: 800; margin-top: 2px; }
+    .stat-val.up { color: var(--green); }
+    .stat-val.down { color: var(--red); }
   </style>
 </head>
 <body>
@@ -98,6 +108,7 @@
             title: j.dir === 'sent' ? ('To @' + (j.other || 'User')) : ('From @' + (j.other || 'User')),
             detail: j.note || (j.dir === 'sent' ? 'Money sent' : 'Money received'),
             pnl: j.dir === 'sent' ? -Number(j.amount || 0) : Number(j.amount || 0),
+            amount: Number(j.amount || 0),
             ts: n.created_at ? new Date(n.created_at).getTime() : Date.now()
           };
         }
@@ -107,11 +118,11 @@
       var amt = m ? parseFloat(m[1].replace(/,/g, '')) : 0;
       if (n.type === 'transfer_sent') {
         var u = msg.match(/@([\w.-]+)/);
-        return { kind: 'transfer', dir: 'sent', title: 'To @' + (u ? u[1] : 'User'), detail: 'Money sent', pnl: -amt, ts: n.created_at ? new Date(n.created_at).getTime() : Date.now() };
+        return { kind: 'transfer', dir: 'sent', title: 'To @' + (u ? u[1] : 'User'), detail: 'Money sent', pnl: -amt, amount: amt, ts: n.created_at ? new Date(n.created_at).getTime() : Date.now() };
       }
       if (n.type === 'transfer_received') {
         var u2 = msg.match(/from @([\w.-]+)/i) || msg.match(/@([\w.-]+)/);
-        return { kind: 'transfer', dir: 'recv', title: 'From @' + (u2 ? u2[1] : 'User'), detail: 'Money received', pnl: amt, ts: n.created_at ? new Date(n.created_at).getTime() : Date.now() };
+        return { kind: 'transfer', dir: 'recv', title: 'From @' + (u2 ? u2[1] : 'User'), detail: 'Money received', pnl: amt, amount: amt, ts: n.created_at ? new Date(n.created_at).getTime() : Date.now() };
       }
       return null;
     }
@@ -135,11 +146,19 @@
 
       allItems = [];
       tradeHist.forEach(function (h) {
+        var side = (h.side || '').toUpperCase();
+        var sym = h.symbol || (h.title || '').replace(/^(BUY|SELL)\s+/i, '') || 'Trade';
+        var title = (side ? side + ' ' : '') + sym;
+        if (!side && h.title) title = h.title;
         allItems.push({
           kind: 'trade',
-          title: h.title || h.symbol || 'Trade',
-          detail: h.detail || '',
+          title: title,
+          detail: '',
           pnl: Number(h.pnl || 0),
+          amount: h.amount != null ? Number(h.amount) : null,
+          entry: h.entry,
+          exit: h.exit,
+          digits: h.digits || 2,
           ts: h.ts || 0
         });
       });
@@ -149,6 +168,7 @@
           title: h.title || 'Red / Black',
           detail: h.detail || '',
           pnl: Number(h.pnl || 0),
+          amount: h.amount != null ? Number(h.amount) : (h.stake != null ? Number(h.stake) : null),
           ts: h.ts || 0
         });
       });
@@ -158,6 +178,7 @@
           title: h.title || 'Horse Race',
           detail: h.detail || '',
           pnl: Number(h.pnl || 0),
+          amount: h.amount != null ? Number(h.amount) : (h.stake != null ? Number(h.stake) : null),
           ts: h.ts || 0
         });
       });
@@ -190,6 +211,7 @@
               title: h.dir === 'sent' ? ('To @' + h.other) : ('From @' + h.other),
               detail: h.note || (h.dir === 'sent' ? 'Money sent' : 'Money received'),
               pnl: h.dir === 'sent' ? -Number(h.amount || 0) : Number(h.amount || 0),
+              amount: Number(h.amount || 0),
               ts: h.ts || 0
             });
           }
@@ -232,13 +254,42 @@
         var when = i.ts ? new Date(i.ts).toLocaleString() : '';
         var badge = i.kind === 'trade' ? 'trade' : (i.kind === 'bet' ? 'bet' : (i.kind === 'race' ? 'race' : 'transfer'));
         var label = i.kind === 'trade' ? 'TRADE' : (i.kind === 'bet' ? 'BET' : (i.kind === 'race' ? 'RACE' : 'TRANSFER'));
+        var resultBadge = '';
+        if (i.kind === 'trade' || i.kind === 'bet' || i.kind === 'race') {
+          resultBadge = pnl >= 0
+            ? ' <span class="badge win">WIN</span>'
+            : ' <span class="badge loss">LOSS</span>';
+        }
+
+        var metaParts = [];
+        if (i.kind === 'trade') {
+          if (i.entry != null) metaParts.push('Entry ' + Number(i.entry).toLocaleString(undefined, { maximumFractionDigits: i.digits || 2 }));
+          if (i.exit != null) metaParts.push('Exit ' + Number(i.exit).toLocaleString(undefined, { maximumFractionDigits: i.digits || 2 }));
+        } else if (i.detail) {
+          metaParts.push(i.detail);
+        }
+        if (when) metaParts.push(when);
+
+        var statsHtml = '';
+        if (i.kind === 'trade' || i.kind === 'bet' || i.kind === 'race') {
+          var orig = i.amount != null ? '$' + fmt(i.amount) : '—';
+          var returned = i.amount != null ? '$' + fmt(Math.max(0, Number(i.amount) + pnl)) : '—';
+          statsHtml =
+            '<div class="stats">' +
+              '<div><div class="stat-label">Original</div><div class="stat-val">' + orig + '</div></div>' +
+              '<div><div class="stat-label">P/L</div><div class="stat-val ' + cls + '">' + sign + '$' + fmt(Math.abs(pnl)) + '</div></div>' +
+              '<div><div class="stat-label">Returned</div><div class="stat-val ' + cls + '">' + returned + '</div></div>' +
+            '</div>';
+        }
+
         return '<div class="item">' +
           '<div class="item-top">' +
-            '<div><span class="badge ' + badge + '">' + label + '</span> ' +
-            '<span class="item-title" style="margin-left:6px">' + (i.title || '—') + '</span></div>' +
+            '<div><span class="badge ' + badge + '">' + label + '</span>' + resultBadge +
+            '<div class="item-title" style="margin-top:6px">' + (i.title || '—') + '</div></div>' +
             '<div class="item-amt ' + cls + '">' + sign + '$' + fmt(Math.abs(pnl)) + '</div>' +
           '</div>' +
-          '<div class="item-meta">' + (i.detail || '') + (when ? ' · ' + when : '') + '</div>' +
+          (metaParts.length ? '<div class="item-meta">' + metaParts.join(' · ') + '</div>' : '') +
+          statsHtml +
         '</div>';
       }).join('');
     }
