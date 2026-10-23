@@ -55,12 +55,10 @@
     
     .status-msg { font-size: 0.85rem; font-weight: 600; text-align: center; margin-top: 10px; display: block; }
 
-    /* Management Navigation Grid */
     .admin-nav-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
     .admin-nav-btn { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08); color: white; padding: 14px 16px; border-radius: 12px; font-weight: 700; font-size: 0.9rem; text-decoration: none; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
     .admin-nav-btn:hover { background: rgba(255, 255, 255, 0.08); border-color: var(--primary); }
 
-    /* Small Floating Bubble */
     .floating-bubble { position: fixed; bottom: 20px; right: 20px; width: 48px; height: 48px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4); cursor: pointer; z-index: 999; text-decoration: none; font-size: 20px; border: 2px solid rgba(255,255,255,0.2); transition: transform 0.2s; }
     .floating-bubble:hover { transform: scale(1.08); }
   </style>
@@ -78,7 +76,6 @@
       Back to Network List
     </a>
 
-    <!-- Account Details Form -->
     <div class="card">
       <div class="card-title-row">
         <span class="card-title">Manage Account Details</span>
@@ -114,7 +111,6 @@
       </form>
     </div>
 
-    <!-- Management Files Card -->
     <div class="card">
       <span class="card-title">Client Control Files</span>
       <div class="admin-nav-grid">
@@ -134,11 +130,14 @@
           <span>All Client Notifications</span>
           <span>🔔</span>
         </a>
+        <a href="trading-control.html" id="btn-trading" class="admin-nav-btn">
+          <span>Control Trading</span>
+          <span>📊</span>
+        </a>
       </div>
     </div>
   </div>
 
-  <!-- Clickable Small Floating Bubble -->
   <a href="customer-care-admin.html" id="bubble-link" class="floating-bubble" title="Customer Care">🎧</a>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -149,7 +148,7 @@
     let isEditing = false;
 
     if (targetUserId) {
-      ['btn-payment', 'btn-plan', 'btn-chat', 'bubble-link', 'btn-notifications'].forEach(id => {
+      ['btn-payment', 'btn-plan', 'btn-chat', 'bubble-link', 'btn-notifications', 'btn-trading'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.setAttribute('href', el.getAttribute('href') + '?id=' + targetUserId);
@@ -193,7 +192,6 @@
         return;
       }
 
-      // Load profile data
       const { data, error } = await client
         .from('profiles')
         .select('*')
@@ -208,7 +206,6 @@
       document.getElementById('user-username').value = data.username || data.full_name || data.name || '';
       document.getElementById('user-balance').value = data.balance || 0;
 
-      // Pull email directly using our newly created Supabase function
       const { data: emailData, error: emailError } = await client.rpc('get_user_email', { user_id: targetUserId });
       
       if (!emailError && emailData) {
