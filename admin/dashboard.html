@@ -26,8 +26,14 @@
     }
 
     .container { width: 100%; max-width: 960px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 10px; flex-wrap: wrap; }
     .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .dev-link {
+      background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35);
+      color: #7dd3fc; padding: 8px 14px; border-radius: 10px; font-weight: 700;
+      text-decoration: none; font-size: 0.85rem;
+    }
     
     .card { background: var(--card-bg); border: 1px solid var(--card-border); backdrop-filter: blur(12px); border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); }
     .card-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; letter-spacing: 1px; margin-bottom: 14px; display: block; text-transform: uppercase; }
@@ -66,7 +72,10 @@
   <div class="container">
     <header class="header">
       <h1 class="logo-text">Admin Panel</h1>
-      <button class="logout-btn" onclick="logout()">Log Out</button>
+      <div class="header-actions">
+        <a class="dev-link" href="../dev/index.html">Developer</a>
+        <button class="logout-btn" onclick="logout()">Log Out</button>
+      </div>
     </header>
 
     <div class="card">
