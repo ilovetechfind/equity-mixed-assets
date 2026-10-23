@@ -27,7 +27,28 @@
 
     .container { width: 100%; max-width: 960px; margin: 0 auto; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 10px; flex-wrap: wrap; }
+    .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .logo-text { background: linear-gradient(90deg, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 1.5rem; font-weight: 800; margin: 0; }
+    .profile-chip {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(129, 140, 248, 0.1); border: 1px solid rgba(129, 140, 248, 0.25);
+      border-radius: 999px; padding: 4px 12px 4px 4px; text-decoration: none; color: inherit;
+      max-width: 220px;
+    }
+    .profile-chip img, .profile-chip .ph {
+      width: 36px; height: 36px; border-radius: 50%; object-fit: cover; flex-shrink: 0;
+    }
+    .profile-chip .ph {
+      background: linear-gradient(135deg, #6366f1, #a855f7);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 0.9rem; color: #fff;
+    }
+    .profile-meta { min-width: 0; }
+    .profile-name {
+      font-size: 0.82rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      color: #e2e8f0;
+    }
+    .profile-sub { font-size: 0.68rem; color: var(--text-muted); }
     .header-actions { display: flex; align-items: center; gap: 8px; }
     .settings-link {
       background: rgba(129, 140, 248, 0.12); border: 1px solid rgba(129, 140, 248, 0.35);
@@ -71,7 +92,17 @@
 
   <div class="container">
     <header class="header">
-      <h1 class="logo-text">Admin Panel</h1>
+      <div class="header-left">
+        <a class="profile-chip" href="settings.html" title="Open settings">
+          <img id="dash-avatar" style="display:none" alt="">
+          <div class="ph" id="dash-avatar-ph">A</div>
+          <div class="profile-meta">
+            <div class="profile-name" id="dash-name">Admin</div>
+            <div class="profile-sub">View profile</div>
+          </div>
+        </a>
+        <h1 class="logo-text">Admin Panel</h1>
+      </div>
       <div class="header-actions">
         <a class="settings-link" href="settings.html">Settings</a>
         <button class="logout-btn" onclick="logout()">Log Out</button>
@@ -147,6 +178,22 @@
     let currentAdminUser = null;
     let savedCodeValue = '';
 
+    function setDashProfile(name, avatarUrl, email) {
+      const display = (name && name.trim()) || (email ? email.split('@')[0] : 'Admin');
+      document.getElementById('dash-name').textContent = display;
+      const img = document.getElementById('dash-avatar');
+      const ph = document.getElementById('dash-avatar-ph');
+      if (avatarUrl) {
+        img.src = avatarUrl;
+        img.style.display = 'block';
+        ph.style.display = 'none';
+      } else {
+        img.style.display = 'none';
+        ph.style.display = 'flex';
+        ph.textContent = display.charAt(0).toUpperCase();
+      }
+    }
+
     async function checkAdmin() {
       const { data: { session }, error } = await client.auth.getSession();
       
@@ -161,7 +208,26 @@
         currentAdminUser = session.user;
       }
 
+      loadAdminProfile();
       loadAdminCode();
+    }
+
+    async function loadAdminProfile() {
+      try {
+        const { data: profile } = await client
+          .from('profiles')
+          .select('full_name, avatar_url')
+          .eq('id', currentAdminUser.id)
+          .maybeSingle();
+
+        setDashProfile(
+          profile && profile.full_name,
+          profile && profile.avatar_url,
+          currentAdminUser.email
+        );
+      } catch (e) {
+        setDashProfile(null, null, currentAdminUser.email);
+      }
     }
 
     async function loadAdminCode() {
