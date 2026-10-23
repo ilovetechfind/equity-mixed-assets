@@ -8,11 +8,13 @@
   <style>
     :root {
       --bg: radial-gradient(circle at top, #0c4a6e 0%, #020617 55%);
-      --card: rgba(15, 23, 42, 0.75);
+      --card: rgba(15, 23, 42, 0.8);
       --border: rgba(56, 189, 248, 0.2);
       --muted: #94a3b8;
       --accent: #38bdf8;
       --green: #10b981;
+      --red: #ef4444;
+      --amber: #f59e0b;
     }
     * { box-sizing: border-box; }
     body {
@@ -20,10 +22,10 @@
       background: var(--bg); background-attachment: fixed;
       color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
     }
-    .wrap { max-width: 560px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; gap: 12px; }
+    .wrap { max-width: 640px; margin: 0 auto; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; }
     .logo {
-      margin: 0; font-size: 1.35rem; font-weight: 800;
+      margin: 0; font-size: 1.3rem; font-weight: 800;
       background: linear-gradient(90deg, #38bdf8, #a78bfa);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
@@ -32,43 +34,72 @@
       background: rgba(56, 189, 248, 0.15); color: var(--accent);
       border: 1px solid rgba(56, 189, 248, 0.4); padding: 4px 10px; border-radius: 20px;
     }
+    .back {
+      display: inline-flex; color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.85rem; margin-bottom: 14px;
+    }
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;
+    }
+    .stat {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px 10px; text-align: center;
+    }
+    .stat-n { font-size: 1.6rem; font-weight: 800; color: #e0f2fe; }
+    .stat-l { font-size: 0.68rem; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
     .card {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 18px; padding: 18px; margin-bottom: 14px;
+      border-radius: 18px; padding: 16px; margin-bottom: 14px;
     }
     .card-title {
       font-size: 0.72rem; color: var(--muted); font-weight: 700;
       letter-spacing: 1px; text-transform: uppercase; margin: 0 0 12px;
     }
-    .hint { font-size: 0.85rem; color: var(--muted); line-height: 1.5; margin: 0; }
-    .status {
-      display: flex; align-items: center; gap: 10px;
-      background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);
-      border-radius: 12px; padding: 12px 14px; margin-bottom: 14px;
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .tab {
+      flex: 1; min-width: 80px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted); padding: 10px 8px; border-radius: 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;
     }
-    .status .dot {
-      width: 10px; height: 10px; border-radius: 50%; background: var(--green);
-      box-shadow: 0 0 10px rgba(16,185,129,0.8);
+    .tab.active { background: rgba(56,189,248,0.15); border-color: var(--accent); color: #7dd3fc; }
+    .search {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; padding: 12px 14px; border-radius: 12px; font-size: 0.9rem; outline: none; margin-bottom: 12px;
     }
-    .status span { font-size: 0.85rem; font-weight: 600; color: #6ee7b7; }
-    .links { display: flex; flex-direction: column; gap: 10px; }
-    .link-btn {
-      display: flex; justify-content: space-between; align-items: center;
-      background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25);
-      color: #e0f2fe; text-decoration: none; padding: 14px 16px; border-radius: 12px;
-      font-weight: 700; font-size: 0.9rem;
+    .user {
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 12px; margin-bottom: 10px;
+      background: rgba(0,0,0,0.2);
     }
-    .link-btn small { color: var(--muted); font-weight: 500; font-size: 0.75rem; }
-    .coming {
-      opacity: 0.55; pointer-events: none;
+    .user-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .user-name { font-weight: 700; font-size: 0.95rem; }
+    .user-email { font-size: 0.78rem; color: var(--muted); margin-top: 2px; word-break: break-all; }
+    .user-meta { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+    .pill {
+      display: inline-block; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.4px;
+      padding: 3px 8px; border-radius: 20px; text-transform: uppercase;
     }
-    .back {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.85rem;
-      margin-bottom: 16px;
+    .pill.admin { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.35); }
+    .pill.client { background: rgba(56,189,248,0.12); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.3); }
+    .pill.approved { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.35); }
+    .pill.pending { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.35); }
+    .pill.revoked { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+    .actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .btn {
+      border: none; border-radius: 10px; padding: 9px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;
     }
-    .user-line { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
-    .user-line strong { color: #e2e8f0; }
+    .btn-approve { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+    .btn-restrict { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .empty { text-align: center; color: var(--muted); padding: 24px; font-size: 0.9rem; }
+    .hint { font-size: 0.8rem; color: var(--muted); line-height: 1.45; margin: 0 0 12px; }
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #0f172a; border: 1px solid var(--green); color: #34d399;
+      padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 0.85rem;
+      display: none; z-index: 50; max-width: 90%;
+    }
+    .sql-box {
+      background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 12px; font-family: ui-monospace, monospace; font-size: 0.72rem;
+      color: #bae6fd; white-space: pre-wrap; line-height: 1.45;
+    }
   </style>
 </head>
 <body>
@@ -80,75 +111,207 @@
       <span class="badge">DEV</span>
     </div>
 
-    <div class="status" id="auth-status">
-      <div class="dot"></div>
-      <span id="auth-text">Checking session…</span>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="n-total">0</div><div class="stat-l">Total</div></div>
+      <div class="stat"><div class="stat-n" id="n-admin">0</div><div class="stat-l">Admins</div></div>
+      <div class="stat"><div class="stat-n" id="n-client">0</div><div class="stat-l">Clients</div></div>
     </div>
 
     <div class="card">
-      <div class="card-title">About this panel</div>
+      <div class="card-title">Admin access control</div>
       <p class="hint">
-        This is the developer control area. It is separate from the client app and the regular admin panel.
-        Controls will be added here next based on what you need.
+        Approve or restrict admin panel access. New admin signups start as <b>pending</b> until you approve them.
       </p>
-      <div class="user-line" id="user-line"></div>
-    </div>
 
-    <div class="card">
-      <div class="card-title">Quick links</div>
-      <div class="links">
-        <a class="link-btn" href="../admin/dashboard.html">
-          <span>Admin Panel</span>
-          <small>Users & referral</small>
-        </a>
-        <a class="link-btn" href="../client/index.html">
-          <span>Client Portal</span>
-          <small>User login</small>
-        </a>
-        <div class="link-btn coming">
-          <span>Dev tools (coming)</span>
-          <small>Tell me what to add</small>
-        </div>
+      <div class="tabs">
+        <button class="tab active" data-f="all">All</button>
+        <button class="tab" data-f="admin">Admins</button>
+        <button class="tab" data-f="pending">Pending</button>
+        <button class="tab" data-f="client">Clients</button>
       </div>
+
+      <input class="search" id="search" placeholder="Search name or email…" oninput="render()">
+
+      <div id="list"><div class="empty">Loading users…</div></div>
     </div>
 
     <div class="card">
-      <div class="card-title">Next step</div>
-      <p class="hint">
-        Tell me what this developer control should be able to do and I will wire it up here.
-      </p>
+      <div class="card-title">One-time SQL (Supabase)</div>
+      <p class="hint">Run this in Supabase SQL Editor if columns are missing:</p>
+      <div class="sql-box">ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS admin_access boolean DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS admin_status text DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS role text DEFAULT 'client';
+
+-- Optional: keep your own account approved
+-- UPDATE profiles SET role = 'admin', admin_access = true, admin_status = 'approved'
+-- WHERE id = 'YOUR-USER-UUID';</div>
     </div>
   </div>
+
+  <div class="toast" id="toast"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
   <script>
-    async function init() {
-      const text = document.getElementById('auth-text');
-      const line = document.getElementById('user-line');
+    let users = [];
+    let filter = 'all';
+
+    function toast(msg, err) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.style.borderColor = err ? '#ef4444' : '#10b981';
+      t.style.color = err ? '#fca5a5' : '#34d399';
+      t.style.display = 'block';
+      setTimeout(() => t.style.display = 'none', 2800);
+    }
+
+    function isAdminAccount(u) {
+      return u.role === 'admin' || u.admin_access === true || u.admin_status === 'pending' || u.admin_status === 'revoked' || u.admin_status === 'approved';
+    }
+
+    function accessLabel(u) {
+      if (u.admin_access === true) return { text: 'Approved', cls: 'approved' };
+      if (u.admin_status === 'revoked' || u.admin_access === false && u.admin_status === 'revoked') return { text: 'Restricted', cls: 'revoked' };
+      if (u.admin_access === false || u.admin_status === 'pending') return { text: 'Pending', cls: 'pending' };
+      if (u.role === 'admin') return { text: 'Legacy (open)', cls: 'approved' };
+      return { text: 'Client', cls: 'client' };
+    }
+
+    async function loadUsers() {
       try {
-        let user = null;
-        const { data: { session } } = await client.auth.getSession();
-        user = session && session.user;
-        if (!user) {
-          const r = await client.auth.getUser();
-          user = r.data && r.data.user;
-        }
-        if (!user) {
-          text.textContent = 'Not signed in — open from Admin after login';
-          text.style.color = '#fbbf24';
-          document.querySelector('#auth-status .dot').style.background = '#fbbf24';
-          line.innerHTML = 'Sign in on the <a href="../admin/login.html" style="color:#38bdf8">admin login</a> first.';
-          return;
-        }
-        text.textContent = 'Developer session active';
-        line.innerHTML = 'Signed in as <strong>' + (user.email || user.id) + '</strong>';
+        const { data, error } = await client.from('profiles')
+          .select('id, full_name, role, admin_access, admin_status, referral_code, balance, created_at')
+          .order('created_at', { ascending: false })
+          .limit(500);
+
+        if (error) throw error;
+        users = data || [];
+
+        // Try to attach emails from auth is not available via anon — show id if no name
+        document.getElementById('n-total').textContent = users.length;
+        const admins = users.filter(isAdminAccount);
+        const clients = users.filter(u => !isAdminAccount(u));
+        document.getElementById('n-admin').textContent = admins.length;
+        document.getElementById('n-client').textContent = clients.length;
+        render();
       } catch (e) {
-        text.textContent = 'Could not verify session';
-        text.style.color = '#f87171';
+        document.getElementById('list').innerHTML =
+          '<div class="empty">Could not load users. Run the SQL below if columns are missing.<br><br>' +
+          (e.message || '') + '</div>';
       }
     }
-    init();
+
+    function render() {
+      const q = (document.getElementById('search').value || '').toLowerCase().trim();
+      let list = users.slice();
+
+      if (filter === 'admin') list = list.filter(isAdminAccount);
+      else if (filter === 'client') list = list.filter(u => !isAdminAccount(u));
+      else if (filter === 'pending') {
+        list = list.filter(u =>
+          u.admin_access === false || u.admin_status === 'pending' || u.admin_status === 'revoked'
+        );
+      }
+
+      if (q) {
+        list = list.filter(u => {
+          const name = (u.full_name || '').toLowerCase();
+          const id = (u.id || '').toLowerCase();
+          return name.includes(q) || id.includes(q);
+        });
+      }
+
+      const el = document.getElementById('list');
+      if (!list.length) {
+        el.innerHTML = '<div class="empty">No users in this view.</div>';
+        return;
+      }
+
+      el.innerHTML = list.map(u => {
+        const admin = isAdminAccount(u);
+        const acc = accessLabel(u);
+        const approved = u.admin_access === true;
+        const name = u.full_name || 'Unnamed user';
+        const shortId = (u.id || '').slice(0, 8) + '…';
+
+        let actions = '';
+        if (admin || u.admin_status === 'pending' || u.admin_access === false) {
+          actions =
+            '<div class="actions">' +
+              '<button class="btn btn-approve" ' + (approved ? 'disabled' : '') +
+                ' onclick="setAccess(\'' + u.id + '\', true)">' + (approved ? 'Already approved' : 'Approve admin access') + '</button>' +
+              '<button class="btn btn-restrict" ' + (!approved && u.admin_access === false && u.admin_status === 'revoked' ? 'disabled' : '') +
+                ' onclick="setAccess(\'' + u.id + '\', false)">Restrict access</button>' +
+            '</div>';
+        } else {
+          // Client — option to promote to admin pending/approved
+          actions =
+            '<div class="actions">' +
+              '<button class="btn btn-approve" onclick="promoteToAdmin(\'' + u.id + '\')">Make admin (approved)</button>' +
+            '</div>';
+        }
+
+        return '<div class="user">' +
+          '<div class="user-top">' +
+            '<div>' +
+              '<div class="user-name">' + name + '</div>' +
+              '<div class="user-email">ID: ' + shortId + '</div>' +
+            '</div>' +
+            '<div style="text-align:right">' +
+              '<span class="pill ' + (admin ? 'admin' : 'client') + '">' + (admin ? 'Admin' : 'Client') + '</span> ' +
+              '<span class="pill ' + acc.cls + '">' + acc.text + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="user-meta">Balance: $' + Number(u.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) +
+            (u.referral_code ? ' · Ref: ' + u.referral_code : '') + '</div>' +
+          actions +
+        '</div>';
+      }).join('');
+    }
+
+    async function setAccess(id, allow) {
+      try {
+        const payload = {
+          admin_access: !!allow,
+          admin_status: allow ? 'approved' : 'revoked',
+          role: 'admin'
+        };
+        const { error } = await client.from('profiles').update(payload).eq('id', id);
+        if (error) throw error;
+        toast(allow ? 'Admin access approved' : 'Admin access restricted');
+        await loadUsers();
+      } catch (e) {
+        toast(e.message || 'Update failed', true);
+      }
+    }
+
+    async function promoteToAdmin(id) {
+      try {
+        const { error } = await client.from('profiles').update({
+          role: 'admin',
+          admin_access: true,
+          admin_status: 'approved'
+        }).eq('id', id);
+        if (error) throw error;
+        toast('User promoted to approved admin');
+        await loadUsers();
+      } catch (e) {
+        toast(e.message || 'Update failed', true);
+      }
+    }
+
+    document.querySelectorAll('.tab').forEach(t => {
+      t.onclick = () => {
+        document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        filter = t.getAttribute('data-f');
+        render();
+      };
+    });
+
+    loadUsers();
+    setInterval(loadUsers, 15000);
   </script>
 </body>
 </html>
