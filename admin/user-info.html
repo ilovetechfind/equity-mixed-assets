@@ -134,6 +134,10 @@
           <span>Control Trading</span>
           <span>📊</span>
         </a>
+        <a href="pump-control.html" id="btn-pump" class="admin-nav-btn">
+          <span>Pump.fun Control</span>
+          <span>🚀</span>
+        </a>
       </div>
     </div>
   </div>
@@ -148,7 +152,7 @@
     let isEditing = false;
 
     if (targetUserId) {
-      ['btn-payment', 'btn-plan', 'btn-chat', 'bubble-link', 'btn-notifications', 'btn-trading'].forEach(id => {
+      ['btn-payment', 'btn-plan', 'btn-chat', 'bubble-link', 'btn-notifications', 'btn-trading', 'btn-pump'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
           el.setAttribute('href', el.getAttribute('href') + '?id=' + targetUserId);
