@@ -1,713 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Pump.fun - Meme Coins</title>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg: #070b14;
-      --card: rgba(18, 24, 38, 0.9);
-      --border: rgba(255,255,255,0.08);
-      --muted: #8b9bb4;
-      --green: #10b981;
-      --red: #ef4444;
-      --pink: #f472b6;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0; padding: 12px; padding-bottom: 40px;
-      background: radial-gradient(circle at top, #2e1065 0%, var(--bg) 55%);
-      color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
-    }
-    .wrap { max-width: 480px; margin: 0 auto; }
-    .top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
-    .back {
-      background: var(--card); border: 1px solid var(--border); color: #fff;
-      padding: 8px 12px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.85rem;
-      border: none; cursor: pointer;
-    }
-    h1 {
-      margin: 0; font-size: 1.2rem; font-weight: 800;
-      background: linear-gradient(90deg, #f472b6, #a78bfa, #38bdf8);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .bal {
-      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 12px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
-    }
-    .bal span { color: var(--muted); font-size: 0.75rem; font-weight: 700; }
-    .bal b { font-size: 1.15rem; }
-    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
-    .tab {
-      flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--muted);
-      padding: 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer;
-    }
-    .tab.on { background: rgba(244,114,182,0.15); border-color: var(--pink); color: #fbcfe8; }
-    .card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-      padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.15s;
-    }
-    .card:active { border-color: var(--pink); }
-    .coin-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-    .coin-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
-    .emoji {
-      width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; background: rgba(255,255,255,0.06); flex-shrink: 0;
-    }
-    .cname { font-weight: 800; font-size: 0.95rem; }
-    .csym { font-size: 0.72rem; color: var(--muted); }
-    .cprice { font-weight: 800; text-align: right; }
-    .chg { font-size: 0.75rem; font-weight: 700; }
-    .up { color: var(--green); }
-    .down { color: var(--red); }
-    .create-btn {
-      width: 100%; border: none; border-radius: 14px; padding: 14px;
-      background: linear-gradient(135deg, #f472b6, #a78bfa); color: #fff;
-      font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-bottom: 12px;
-    }
-    label { display: block; font-size: 0.7rem; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
-    input, textarea {
-      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff;
-      padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 0.9rem; outline: none;
-    }
-    .modal {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 50;
-      display: none; align-items: flex-end; justify-content: center; padding: 12px;
-    }
-    .modal.show { display: flex; }
-    .modal-box {
-      background: #121826; border: 1px solid var(--border); border-radius: 18px;
-      padding: 16px; width: 100%; max-width: 460px; max-height: 92vh; overflow-y: auto;
-    }
-    .modal h3 { margin: 0 0 8px; font-size: 1.05rem; }
-    .hint { font-size: 0.75rem; color: var(--muted); margin: 0 0 10px; }
-    .hold { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
-    .empty { text-align: center; color: var(--muted); padding: 28px; font-size: 0.9rem; }
-    .badge-live {
-      font-size: 0.65rem; font-weight: 800; background: rgba(16,185,129,0.15); color: #34d399;
-      padding: 3px 8px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.35);
-    }
-    .actions { display: flex; gap: 8px; margin-top: 10px; }
-    .btn {
-      flex: 1; border: none; border-radius: 10px; padding: 12px; font-weight: 700; font-size: 0.85rem; cursor: pointer;
-    }
-    .buy { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
-    .sell { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
-    .ghost { background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid var(--border); }
-
-    /* Detail view */
-    #detail { display: none; }
-    #detail.show { display: block; }
-    #market-view.hide { display: none; }
-    .chart-wrap {
-      background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 14px;
-      padding: 8px; margin: 10px 0 12px; height: 180px; position: relative;
-    }
-    canvas { width: 100%; height: 100%; display: block; }
-    .detail-head { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-    .detail-price { font-size: 1.5rem; font-weight: 800; margin: 4px 0; }
-    .pos-card {
-      background: rgba(255,255,255,0.04); border: 1px solid var(--border);
-      border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; font-size: 0.82rem;
-    }
-    .pos-card .row { display: flex; justify-content: space-between; margin: 3px 0; }
-    .timer { color: #fbbf24; font-weight: 700; }
-    .section-title { font-size: 0.72rem; color: var(--muted); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin: 14px 0 8px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pump.fun</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b14;--card:rgba(18,24,38,.9);--border:rgba(255,255,255,.08);--muted:#8b9bb4;--green:#10b981;--red:#ef4444;--pink:#f472b6}
+*{box-sizing:border-box}body{margin:0;padding:12px 12px 40px;background:radial-gradient(circle at top,#2e1065 0%,var(--bg) 55%);color:#fff;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh}
+.wrap{max-width:480px;margin:0 auto}.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.back{background:var(--card);border:1px solid var(--border);color:#fff;padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:600;font-size:.85rem;cursor:pointer}
+h1{margin:0;font-size:1.2rem;font-weight:800;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.bal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.bal span{color:var(--muted);font-size:.75rem;font-weight:700}.bal b{font-size:1.15rem}
+.tabs{display:flex;gap:8px;margin-bottom:12px}.tab{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:12px;font-weight:700;font-size:.8rem;cursor:pointer}
+.tab.on{background:rgba(244,114,182,.15);border-color:var(--pink);color:#fbcfe8}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer}
+.coin-row{display:flex;justify-content:space-between;align-items:center;gap:10px}.coin-left{display:flex;align-items:center;gap:10px;min-width:0}
+.emoji{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:rgba(255,255,255,.06);flex-shrink:0}
+.cname{font-weight:800;font-size:.95rem}.csym{font-size:.72rem;color:var(--muted)}.cprice{font-weight:800;text-align:right}.chg{font-size:.75rem;font-weight:700}.up{color:var(--green)}.down{color:var(--red)}
+.create-btn{width:100%;border:none;border-radius:14px;padding:14px;background:linear-gradient(135deg,#f472b6,#a78bfa);color:#fff;font-weight:800;font-size:.95rem;cursor:pointer;margin-bottom:12px}
+label{display:block;font-size:.7rem;color:var(--muted);font-weight:700;text-transform:uppercase;margin-bottom:5px}
+input{width:100%;background:rgba(0,0,0,.3);border:1px solid var(--border);color:#fff;padding:12px;border-radius:10px;margin-bottom:10px;font-size:.9rem;outline:none}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:50;display:none;align-items:flex-end;justify-content:center;padding:12px}.modal.show{display:flex}
+.modal-box{background:#121826;border:1px solid var(--border);border-radius:18px;padding:16px;width:100%;max-width:460px;max-height:92vh;overflow-y:auto}
+.modal h3{margin:0 0 8px;font-size:1.05rem}.hint{font-size:.75rem;color:var(--muted);margin:0 0 10px}.hold{font-size:.78rem;color:var(--muted);margin-top:6px}.empty{text-align:center;color:var(--muted);padding:28px;font-size:.9rem}
+.badge-live{font-size:.65rem;font-weight:800;background:rgba(16,185,129,.15);color:#34d399;padding:3px 8px;border-radius:20px;border:1px solid rgba(16,185,129,.35)}
+.actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.btn{flex:1;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:.85rem;cursor:pointer;min-width:120px}
+.buy{background:linear-gradient(135deg,#10b981,#059669);color:#fff}.sell{background:rgba(239,68,68,.15);color:#fca5a5;border:1px solid rgba(239,68,68,.35)}.ghost{background:rgba(255,255,255,.06);color:#e2e8f0;border:1px solid var(--border)}
+.choice{width:100%;text-align:left;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:14px;color:#fff;font-weight:700;cursor:pointer;margin-bottom:8px}
+.choice small{display:block;font-weight:500;color:var(--muted);margin-top:4px;font-size:.75rem}
+.time-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+#detail{display:none}#detail.show{display:block}#market-view.hide{display:none}
+.chart-wrap{background:rgba(0,0,0,.35);border:1px solid var(--border);border-radius:14px;padding:8px;margin:10px 0 12px;height:180px}
+canvas{width:100%;height:100%;display:block}.detail-head{display:flex;align-items:center;gap:10px}.detail-price{font-size:1.5rem;font-weight:800;margin:4px 0}
+.pos-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:.82rem}
+.pos-card .row{display:flex;justify-content:space-between;margin:3px 0}.timer{color:#fbbf24;font-weight:700}
+.section-title{font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.5px;text-transform:uppercase;margin:14px 0 8px}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <div id="market-view">
-      <div class="top">
-        <a class="back" href="dashboard.html" id="back-link" style="text-decoration:none;display:inline-block">← Back</a>
-        <h1>Pump.fun</h1>
-        <span class="badge-live">LIVE</span>
-      </div>
-
-      <div class="bal">
-        <div><span>MAIN BALANCE</span><br><b id="bal">$0.00</b></div>
-        <div style="text-align:right"><span>MEME VALUE</span><br><b id="meme-val">$0.00</b></div>
-      </div>
-
-      <button class="create-btn" onclick="openCreate()">+ Create Meme Coin</button>
-
-      <div class="tabs">
-        <button class="tab on" data-t="market" onclick="setTab('market')">Market</button>
-        <button class="tab" data-t="holdings" onclick="setTab('holdings')">My Coins</button>
-      </div>
-
-      <div id="list"></div>
-    </div>
-
-    <!-- Coin detail: chart + trade + auto-close -->
-    <div id="detail">
-      <div class="top">
-        <button type="button" class="back" onclick="closeDetail()">← Market</button>
-        <h1 id="d-title">Coin</h1>
-      </div>
-
-      <div class="card" style="cursor:default">
-        <div class="detail-head">
-          <div class="emoji" id="d-emoji">🪙</div>
-          <div>
-            <div class="cname" id="d-name">—</div>
-            <div class="csym" id="d-sym">—</div>
-          </div>
-        </div>
-        <div class="detail-price" id="d-price">$0</div>
-        <div class="chg" id="d-chg">0%</div>
-        <div class="chart-wrap"><canvas id="chart" width="400" height="180"></canvas></div>
-
-        <label>Trade amount ($)</label>
-        <input type="number" id="d-amt" min="1" step="0.01" placeholder="10.00">
-
-        <label>Auto-close after (seconds) — 0 = manual only</label>
-        <input type="number" id="d-auto" min="0" max="3600" step="1" value="0" placeholder="0">
-
-        <div class="actions">
-          <button class="btn buy" onclick="detailBuy()">Buy</button>
-          <button class="btn sell" onclick="detailSell()">Sell</button>
-        </div>
-        <p class="hint" id="d-hold-hint" style="margin-top:10px"></p>
-      </div>
-
-      <div class="section-title">Open positions (this coin)</div>
-      <div id="d-positions"></div>
-    </div>
-  </div>
-
-  <div class="modal" id="create-modal">
-    <div class="modal-box">
-      <h3>Create Meme Coin</h3>
-      <p class="hint">Launch your coin. Cost: $5 from main balance.</p>
-      <label>Name</label>
-      <input type="text" id="c-name" placeholder="e.g. Moon Cat">
-      <label>Symbol</label>
-      <input type="text" id="c-sym" maxlength="8" placeholder="e.g. MCAT">
-      <label>Emoji</label>
-      <input type="text" id="c-emoji" maxlength="4" placeholder="🐱">
-      <label>Starting price ($)</label>
-      <input type="number" id="c-price" min="0.0001" step="any" value="0.001">
-      <div class="actions">
-        <button class="btn ghost" onclick="closeCreate()">Cancel</button>
-        <button class="btn buy" onclick="createCoin()">Launch ($5)</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="config.js"></script>
-  <script>
-    var userId = null;
-    var balance = 0;
-    var tab = 'market';
-    var coins = [];
-    var holdings = {}; // id -> { units, spent }
-    var positions = []; // { id, coinId, units, entry, amount, autoCloseAt, openedAt }
-    var control = null;
-    var activeCoinId = null;
-    var historyMap = {}; // coinId -> [prices]
-
-    var DEFAULT_COINS = [
-      { id: 'PEPE', name: 'Pepe', symbol: 'PEPE', emoji: '🐸', price: 0.000012, base: 0.000012 },
-      { id: 'DOGE', name: 'Dogecoin', symbol: 'DOGE', emoji: '🐶', price: 0.16, base: 0.16 },
-      { id: 'SHIB', name: 'Shiba Inu', symbol: 'SHIB', emoji: '🐕', price: 0.000024, base: 0.000024 },
-      { id: 'BONK', name: 'Bonk', symbol: 'BONK', emoji: '🦴', price: 0.000028, base: 0.000028 },
-      { id: 'WIF', name: 'dogwifhat', symbol: 'WIF', emoji: '🎩', price: 2.4, base: 2.4 },
-      { id: 'FLOKI', name: 'Floki', symbol: 'FLOKI', emoji: '⚔️', price: 0.00018, base: 0.00018 },
-      { id: 'BRETT', name: 'Brett', symbol: 'BRETT', emoji: '🟦', price: 0.12, base: 0.12 },
-      { id: 'POPCAT', name: 'Popcat', symbol: 'POPCAT', emoji: '😺', price: 0.85, base: 0.85 },
-      { id: 'NEIRO', name: 'Neiro', symbol: 'NEIRO', emoji: '🐕‍🦺', price: 0.0015, base: 0.0015 },
-      { id: 'MEME', name: 'Memecoin', symbol: 'MEME', emoji: '😂', price: 0.014, base: 0.014 }
-    ];
-
-    function fmt(n, d) {
-      d = d == null ? 6 : d;
-      var x = Number(n) || 0;
-      if (x >= 1) return x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-      return x.toFixed(d).replace(/\.?0+$/, '') || '0';
-    }
-    function fmtUsd(n) {
-      return '$' + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    }
-
-    function coinsKey() { return 'pump_fun_coins_v1'; }
-    function holdKey() { return 'pump_holdings_' + userId; }
-    function posKey() { return 'pump_positions_' + userId; }
-    function histKey() { return 'pump_history_v1'; }
-
-    function loadCoins() {
-      try {
-        var raw = localStorage.getItem(coinsKey());
-        if (raw) {
-          coins = JSON.parse(raw);
-          if (Array.isArray(coins) && coins.length) return;
-        }
-      } catch (e) {}
-      coins = DEFAULT_COINS.map(function (c) {
-        return Object.assign({}, c, { change: 0, createdBy: null, t0: Date.now(), phaseStart: Date.now() });
-      });
-      saveCoins();
-    }
-    function saveCoins() {
-      try { localStorage.setItem(coinsKey(), JSON.stringify(coins)); } catch (e) {}
-    }
-
-    function loadHoldings() {
-      try { holdings = JSON.parse(localStorage.getItem(holdKey()) || '{}'); } catch (e) { holdings = {}; }
-    }
-    function saveHoldings() {
-      try { localStorage.setItem(holdKey(), JSON.stringify(holdings)); } catch (e) {}
-    }
-
-    function loadPositions() {
-      try { positions = JSON.parse(localStorage.getItem(posKey()) || '[]'); } catch (e) { positions = []; }
-      if (!Array.isArray(positions)) positions = [];
-    }
-    function savePositions() {
-      try { localStorage.setItem(posKey(), JSON.stringify(positions)); } catch (e) {}
-    }
-
-    function loadHistory() {
-      try { historyMap = JSON.parse(localStorage.getItem(histKey()) || '{}'); } catch (e) { historyMap = {}; }
-    }
-    function saveHistory() {
-      try { localStorage.setItem(histKey(), JSON.stringify(historyMap)); } catch (e) {}
-    }
-
-    async function loadControl() {
-      control = null;
-      try {
-        var { data } = await client.from('profiles').select('pump_control').eq('id', userId).maybeSingle();
-        if (data && data.pump_control) {
-          control = typeof data.pump_control === 'string' ? JSON.parse(data.pump_control) : data.pump_control;
-        }
-      } catch (e) {}
-      try {
-        if (!control) {
-          var raw = localStorage.getItem('pump_control_' + userId);
-          if (raw) control = JSON.parse(raw);
-        }
-      } catch (e) {}
-    }
-
-    function getRule(coin) {
-      if (!control || !control.enabled) return null;
-      var r = control.coins && control.coins[coin.id];
-      if (r && r.enabled === false) return null;
-      if (r && r.enabled) return r;
-      // default from control.default if any
-      if (control.default) return Object.assign({ enabled: true }, control.default);
-      return null;
-    }
-
-    function applyControlTick(coin) {
-      if (!coin.phaseStart) coin.phaseStart = Date.now();
-      if (!coin.entryRef) coin.entryRef = coin.base;
-
-      var rule = getRule(coin);
-      if (!rule) {
-        var r = (Math.random() - 0.48) * 0.006;
-        coin.price = Math.max(coin.price * (1 + r), 1e-12);
-        coin.change = ((coin.price - coin.base) / coin.base) * 100;
-        pushHist(coin);
-        return;
-      }
-
-      // Support both new (targetX) and old (targetPct) shapes
-      var targetX = rule.targetX != null ? Number(rule.targetX) : (1 + (Number(rule.targetPct) || 5) / 100);
-      if (targetX <= 0) targetX = 1;
-      var durationMs = (Number(rule.durationMin) || 5) * 60 * 1000;
-      var startAfterMs = (Number(rule.startAfterMin) || 0) * 60 * 1000;
-      var dir = rule.direction || 'up';
-      var after = rule.afterBehavior || 'static';
-
-      var elapsed = Date.now() - (coin.phaseStart || Date.now());
-      if (elapsed < startAfterMs) {
-        // gentle noise before start
-        coin.price = Math.max(coin.price * (1 + (Math.random() - 0.5) * 0.001), 1e-12);
-      } else {
-        var t = Math.min(1, (elapsed - startAfterMs) / Math.max(durationMs, 1));
-        var targetPrice;
-        if (dir === 'down') targetPrice = coin.base / targetX;
-        else if (dir === 'random') targetPrice = coin.base * (Math.random() > 0.5 ? targetX : 1 / targetX);
-        else targetPrice = coin.base * targetX;
-
-        // ease toward target
-        var desired = coin.base + (targetPrice - coin.base) * t;
-        coin.price = coin.price * 0.7 + desired * 0.3;
-
-        if (t >= 1) {
-          // after target
-          if (after === 'static') {
-            coin.price = desired;
-          } else if (after === 'drop') {
-            coin.price = Math.max(coin.price * (1 - 0.004 * Math.random()), 1e-12);
-          } else if (after === 'dump') {
-            coin.price = Math.max(coin.price * (1 - 0.006 * Math.random()), 1e-12);
-          } else {
-            // grow
-            coin.price = coin.price * (1 + 0.004 * Math.random());
-          }
-        }
-      }
-      coin.change = ((coin.price - coin.base) / coin.base) * 100;
-      pushHist(coin);
-    }
-
-    function pushHist(coin) {
-      if (!historyMap[coin.id]) historyMap[coin.id] = [];
-      historyMap[coin.id].push(coin.price);
-      if (historyMap[coin.id].length > 60) historyMap[coin.id].shift();
-    }
-
-    function drawChart(coinId) {
-      var canvas = document.getElementById('chart');
-      if (!canvas) return;
-      var ctx = canvas.getContext('2d');
-      var w = canvas.width, h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-      var data = historyMap[coinId] || [];
-      if (data.length < 2) {
-        ctx.fillStyle = '#64748b';
-        ctx.font = '12px sans-serif';
-        ctx.fillText('Waiting for price data…', 12, h / 2);
-        return;
-      }
-      var min = Math.min.apply(null, data);
-      var max = Math.max.apply(null, data);
-      if (max === min) { max = min * 1.01; min = min * 0.99; }
-      var up = data[data.length - 1] >= data[0];
-      ctx.strokeStyle = up ? '#10b981' : '#ef4444';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      data.forEach(function (p, i) {
-        var x = (i / (data.length - 1)) * (w - 8) + 4;
-        var y = h - 8 - ((p - min) / (max - min)) * (h - 16);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
-      // fill
-      ctx.lineTo(w - 4, h);
-      ctx.lineTo(4, h);
-      ctx.closePath();
-      ctx.fillStyle = up ? 'rgba(16,185,129,0.12)' : 'rgba(239,68,68,0.12)';
-      ctx.fill();
-    }
-
-    function processAutoClose() {
-      var now = Date.now();
-      var changed = false;
-      positions.slice().forEach(function (pos) {
-        if (pos.autoCloseAt && now >= pos.autoCloseAt) {
-          closePosition(pos.id, true);
-          changed = true;
-        }
-      });
-      if (changed && activeCoinId) renderDetailPositions();
-    }
-
-    function closePosition(posId, isAuto) {
-      var idx = positions.findIndex(function (p) { return p.id === posId; });
-      if (idx < 0) return;
-      var pos = positions[idx];
-      var coin = coins.find(function (c) { return c.id === pos.coinId; });
-      if (!coin) return;
-      var value = pos.units * coin.price;
-      // reduce holdings
-      if (holdings[pos.coinId]) {
-        holdings[pos.coinId].units = Math.max(0, (holdings[pos.coinId].units || 0) - pos.units);
-      }
-      saveHoldings();
-      positions.splice(idx, 1);
-      savePositions();
-      setBalance(balance + value);
-      if (activeCoinId === pos.coinId) {
-        updateDetailHeader();
-        renderDetailPositions();
-      }
-      updateMemeVal();
-      if (tab === 'holdings') renderList();
-    }
-
-    function tick() {
-      coins.forEach(applyControlTick);
-      saveCoins();
-      saveHistory();
-      processAutoClose();
-      if (document.getElementById('detail').classList.contains('show') && activeCoinId) {
-        updateDetailHeader();
-        drawChart(activeCoinId);
-        renderDetailPositions();
-      } else {
-        renderList();
-      }
-      updateMemeVal();
-    }
-
-    function updateMemeVal() {
-      var total = 0;
-      Object.keys(holdings).forEach(function (id) {
-        var h = holdings[id];
-        var c = coins.find(function (x) { return x.id === id; });
-        if (c && h && h.units) total += h.units * c.price;
-      });
-      document.getElementById('meme-val').textContent = fmtUsd(total);
-    }
-
-    function setTab(t) {
-      tab = t;
-      document.querySelectorAll('.tab').forEach(function (el) {
-        el.classList.toggle('on', el.getAttribute('data-t') === t);
-      });
-      renderList();
-    }
-
-    function renderList() {
-      var el = document.getElementById('list');
-      if (tab === 'holdings') {
-        var ids = Object.keys(holdings).filter(function (id) { return holdings[id] && holdings[id].units > 0; });
-        if (!ids.length) {
-          el.innerHTML = '<div class="empty">No meme holdings yet. Tap a coin to trade.</div>';
-          return;
-        }
-        el.innerHTML = ids.map(function (id) {
-          var c = coins.find(function (x) { return x.id === id; }) || { name: id, symbol: id, emoji: '🪙', price: 0, change: 0 };
-          var units = holdings[id].units;
-          var val = units * c.price;
-          var cls = (c.change || 0) >= 0 ? 'up' : 'down';
-          return '<div class="card" onclick="openDetail(\'' + id + '\')"><div class="coin-row">' +
-            '<div class="coin-left"><div class="emoji">' + (c.emoji || '🪙') + '</div><div>' +
-            '<div class="cname">' + c.name + '</div><div class="csym">' + c.symbol + ' · ' + fmt(units, 4) + ' units</div></div></div>' +
-            '<div><div class="cprice">' + fmtUsd(val) + '</div>' +
-            '<div class="chg ' + cls + '">' + ((c.change || 0) >= 0 ? '+' : '') + (c.change || 0).toFixed(2) + '%</div></div></div></div>';
-        }).join('');
-        return;
-      }
-
-      var list = coins.slice().sort(function (a, b) { return Math.abs(b.change || 0) - Math.abs(a.change || 0); });
-      el.innerHTML = list.map(function (c) {
-        var cls = (c.change || 0) >= 0 ? 'up' : 'down';
-        var held = holdings[c.id] && holdings[c.id].units ? '<div class="hold">You hold ' + fmt(holdings[c.id].units, 4) + ' · tap to trade</div>' : '<div class="hold">Tap for chart & trade</div>';
-        return '<div class="card" onclick="openDetail(\'' + c.id + '\')"><div class="coin-row">' +
-          '<div class="coin-left"><div class="emoji">' + (c.emoji || '🪙') + '</div><div>' +
-          '<div class="cname">' + c.name + '</div><div class="csym">' + c.symbol +
-          (c.createdBy ? ' · yours' : '') + '</div></div></div>' +
-          '<div><div class="cprice">$' + fmt(c.price) + '</div>' +
-          '<div class="chg ' + cls + '">' + ((c.change || 0) >= 0 ? '+' : '') + (c.change || 0).toFixed(2) + '%</div></div></div>' +
-          held + '</div>';
-      }).join('');
-    }
-
-    function openDetail(id) {
-      activeCoinId = id;
-      document.getElementById('market-view').classList.add('hide');
-      document.getElementById('detail').classList.add('show');
-      updateDetailHeader();
-      drawChart(id);
-      renderDetailPositions();
-      document.getElementById('d-amt').value = '';
-      document.getElementById('d-auto').value = '0';
-    }
-
-    function closeDetail() {
-      activeCoinId = null;
-      document.getElementById('detail').classList.remove('show');
-      document.getElementById('market-view').classList.remove('hide');
-      renderList();
-    }
-
-    function updateDetailHeader() {
-      var c = coins.find(function (x) { return x.id === activeCoinId; });
-      if (!c) return;
-      document.getElementById('d-title').textContent = c.symbol;
-      document.getElementById('d-emoji').textContent = c.emoji || '🪙';
-      document.getElementById('d-name').textContent = c.name;
-      document.getElementById('d-sym').textContent = c.symbol + (c.createdBy ? ' · created by you' : '');
-      document.getElementById('d-price').textContent = '$' + fmt(c.price);
-      var cls = (c.change || 0) >= 0 ? 'up' : 'down';
-      var chgEl = document.getElementById('d-chg');
-      chgEl.className = 'chg ' + cls;
-      chgEl.textContent = ((c.change || 0) >= 0 ? '+' : '') + (c.change || 0).toFixed(2) + '%';
-      var units = (holdings[c.id] && holdings[c.id].units) || 0;
-      document.getElementById('d-hold-hint').textContent =
-        'Balance ' + fmtUsd(balance) + ' · You hold ' + fmt(units, 4) + ' (~' + fmtUsd(units * c.price) + ')';
-    }
-
-    function renderDetailPositions() {
-      var el = document.getElementById('d-positions');
-      var list = positions.filter(function (p) { return p.coinId === activeCoinId; });
-      if (!list.length) {
-        el.innerHTML = '<div class="empty" style="padding:16px">No open timed positions on this coin.</div>';
-        return;
-      }
-      var coin = coins.find(function (c) { return c.id === activeCoinId; });
-      var now = Date.now();
-      el.innerHTML = list.map(function (p) {
-        var cur = (coin ? coin.price : p.entry) * p.units;
-        var pnl = cur - p.amount;
-        var pnlCls = pnl >= 0 ? 'up' : 'down';
-        var timer = 'Manual';
-        if (p.autoCloseAt) {
-          var left = Math.max(0, Math.ceil((p.autoCloseAt - now) / 1000));
-          timer = left + 's';
-        }
-        return '<div class="pos-card">' +
-          '<div class="row"><span>Original</span><b>' + fmtUsd(p.amount) + '</b></div>' +
-          '<div class="row"><span>Current</span><b>' + fmtUsd(cur) + '</b></div>' +
-          '<div class="row"><span>P/L</span><b class="' + pnlCls + '">' + (pnl >= 0 ? '+' : '') + fmtUsd(pnl) + '</b></div>' +
-          '<div class="row"><span>Auto-close</span><span class="timer">' + timer + '</span></div>' +
-          '<button class="btn sell" style="margin-top:8px" onclick="event.stopPropagation();closePosition(\'' + p.id + '\')">Close now</button>' +
-          '</div>';
-      }).join('');
-    }
-
-    async function refreshBalance() {
-      try {
-        var { data } = await client.from('profiles').select('balance').eq('id', userId).maybeSingle();
-        if (data) balance = Number(data.balance) || 0;
-      } catch (e) {}
-      document.getElementById('bal').textContent = fmtUsd(balance);
-    }
-
-    async function setBalance(newBal) {
-      balance = newBal;
-      document.getElementById('bal').textContent = fmtUsd(balance);
-      try { await client.from('profiles').update({ balance: newBal }).eq('id', userId); } catch (e) {}
-    }
-
-    async function detailBuy() {
-      var c = coins.find(function (x) { return x.id === activeCoinId; });
-      if (!c) return;
-      var amt = parseFloat(document.getElementById('d-amt').value);
-      var autoSec = parseInt(document.getElementById('d-auto').value, 10) || 0;
-      if (!amt || amt <= 0) { alert('Enter amount'); return; }
-      if (amt > balance) { alert('Not enough balance'); return; }
-      var units = amt / c.price;
-      if (!holdings[c.id]) holdings[c.id] = { units: 0, spent: 0 };
-      holdings[c.id].units += units;
-      holdings[c.id].spent = (holdings[c.id].spent || 0) + amt;
-      saveHoldings();
-
-      positions.push({
-        id: 'p_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-        coinId: c.id,
-        units: units,
-        entry: c.price,
-        amount: amt,
-        openedAt: Date.now(),
-        autoCloseAt: autoSec > 0 ? Date.now() + autoSec * 1000 : null
-      });
-      savePositions();
-
-      // reset control phase when user buys so admin timeline applies from this moment
-      c.phaseStart = Date.now();
-      c.base = c.price;
-      saveCoins();
-
-      await setBalance(balance - amt);
-      updateDetailHeader();
-      renderDetailPositions();
-      updateMemeVal();
-    }
-
-    async function detailSell() {
-      var c = coins.find(function (x) { return x.id === activeCoinId; });
-      if (!c) return;
-      var amt = parseFloat(document.getElementById('d-amt').value);
-      var have = (holdings[c.id] && holdings[c.id].units) || 0;
-      if (have <= 0) { alert('No holdings'); return; }
-
-      var sellUnits, value;
-      if (!amt || amt <= 0) {
-        // sell all
-        sellUnits = have;
-        value = have * c.price;
-      } else {
-        sellUnits = Math.min(have, amt / c.price);
-        value = sellUnits * c.price;
-      }
-
-      holdings[c.id].units = Math.max(0, have - sellUnits);
-      saveHoldings();
-
-      // close oldest positions proportionally
-      var left = sellUnits;
-      positions = positions.filter(function (p) {
-        if (p.coinId !== c.id || left <= 0) return true;
-        if (p.units <= left) {
-          left -= p.units;
-          return false;
-        }
-        p.units -= left;
-        p.amount = p.units * p.entry;
-        left = 0;
-        return true;
-      });
-      savePositions();
-
-      await setBalance(balance + value);
-      updateDetailHeader();
-      renderDetailPositions();
-      updateMemeVal();
-    }
-
-    function openCreate() { document.getElementById('create-modal').classList.add('show'); }
-    function closeCreate() { document.getElementById('create-modal').classList.remove('show'); }
-
-    async function createCoin() {
-      var name = (document.getElementById('c-name').value || '').trim();
-      var sym = (document.getElementById('c-sym').value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-      var emoji = (document.getElementById('c-emoji').value || '🪙').trim() || '🪙';
-      var price = parseFloat(document.getElementById('c-price').value) || 0.001;
-      if (!name || !sym) { alert('Name and symbol required'); return; }
-      if (coins.some(function (c) { return c.id === sym || c.symbol === sym; })) {
-        alert('Symbol already exists'); return;
-      }
-      if (balance < 5) { alert('Need $5 to launch'); return; }
-      await setBalance(balance - 5);
-      coins.unshift({
-        id: sym, name: name, symbol: sym, emoji: emoji,
-        price: price, base: price, change: 0,
-        createdBy: userId, t0: Date.now(), phaseStart: Date.now()
-      });
-      saveCoins();
-      closeCreate();
-      setTab('market');
-      openDetail(sym);
-    }
-
-    async function init() {
-      var params = new URLSearchParams(location.search);
-      var qid = params.get('id');
-      if (qid) {
-        userId = qid;
-        document.getElementById('back-link').href = 'dashboard.html?id=' + encodeURIComponent(qid);
-      } else {
-        var session = await client.auth.getSession();
-        var user = session.data && session.data.session && session.data.session.user;
-        if (!user) {
-          var r = await client.auth.getUser();
-          user = r.data && r.data.user;
-        }
-        if (!user) { location.href = 'index.html'; return; }
-        userId = user.id;
-      }
-      loadCoins();
-      loadHoldings();
-      loadPositions();
-      loadHistory();
-      await loadControl();
-      await refreshBalance();
-      renderList();
-      updateMemeVal();
-      setInterval(tick, 1500);
-      setInterval(loadControl, 10000);
-    }
-    init();
-  </script>
-</body>
-</html>
+<div class="wrap">
+<div id="market-view">
+<div class="top"><a class="back" href="dashboard.html" id="back-link" style="text-decoration:none;display:inline-block">← Back</a><h1>Pump.fun</h1><span class="badge-live">LIVE</span></div>
+<div class="bal"><div><span>MAIN BALANCE</span><br><b id="bal">$0.00</b></div><div style="text-align:right"><span>MEME VALUE</span><br><b id="meme-val">$0.00</b></div></div>
+<button class="create-btn" onclick="openCreate()">+ Create Meme Coin</button>
+<div class="tabs"><button class="tab on" data-t="market" onclick="setTab('market')">Market</button><button class="tab" data-t="holdings" onclick="setTab('holdings')">My Coins</button></div>
+<div id="list"></div>
+</div>
+<div id="detail">
+<div class="top"><button type="button" class="back" onclick="closeDetail()">← Market</button><h1 id="d-title">Coin</h1></div>
+<div class="card" style="cursor:default">
+<div class="detail-head"><div class="emoji" id="d-emoji">🪙</div><div><div class="cname" id="d-name">—</div><div class="csym" id="d-sym">—</div></div></div>
+<div class="detail-price" id="d-price">$0</div><div class="chg" id="d-chg">0%</div>
+<div class="chart-wrap"><canvas id="chart" width="400" height="180"></canvas></div>
+<label>Trade amount ($)</label><input type="number" id="d-amt" min="1" step="0.01" placeholder="10.00">
+<div class="actions"><button class="btn buy" onclick="startBuy()">Buy</button><button class="btn sell" onclick="detailSell()">Sell</button></div>
+<p class="hint" id="d-hold-hint" style="margin-top:10px"></p>
+</div>
+<div class="section-title">Open positions (this coin)</div><div id="d-positions"></div>
+</div>
+</div>
+<div class="modal" id="close-modal"><div class="modal-box">
+<h3>How do you want to close?</h3>
+<p class="hint" id="close-hint">Choose manual close or set an auto-close timer.</p>
+<button type="button" class="choice" onclick="confirmBuy(null)">Close manually<small>Stays open until you sell or close it</small></button>
+<button type="button" class="choice" onclick="showAutoFields()">Auto close after time<small>Set hours, minutes, and/or seconds</small></button>
+<div id="auto-fields" style="display:none;margin-top:8px">
+<div class="time-row">
+<div><label>Hours</label><input type="number" id="t-h" min="0" max="72" value="0"></div>
+<div><label>Minutes</label><input type="number" id="t-m" min="0" max="59" value="0"></div>
+<div><label>Seconds</label><input type="number" id="t-s" min="0" max="59" value="30"></div>
+</div>
+<div class="actions"><button class="btn ghost" onclick="hideCloseModal()">Cancel</button><button class="btn buy" onclick="confirmBuyFromFields()">Confirm buy</button></div>
+</div>
+<div class="actions" id="close-cancel-row" style="margin-top:8px"><button class="btn ghost" onclick="hideCloseModal()">Cancel</button></div>
+</div></div>
+<div class="modal" id="create-modal"><div class="modal-box">
+<h3>Create Meme Coin</h3>
+<p class="hint">Launch cost $5. Admin can control this coin automatically.</p>
+<label>Name</label><input type="text" id="c-name" placeholder="e.g. Moon Cat">
+<label>Symbol</label><input type="text" id="c-sym" maxlength="8" placeholder="e.g. MCAT">
+<label>Emoji</label><input type="text" id="c-emoji" maxlength="4" placeholder="🐱">
+<label>Starting price ($)</label><input type="number" id="c-price" min="0.0001" step="any" value="0.001">
+<div class="actions"><button class="btn ghost" onclick="closeCreate()">Cancel</button><button class="btn buy" onclick="createCoin()">Launch ($5)</button></div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="pump-fun-app.js"></script>
+</body></html>
