@@ -11,7 +11,6 @@
       --card-bg: rgba(30, 27, 75, 0.65);
       --card-border: rgba(255,255,255,0.08);
       --muted: #94a3b8;
-      --primary: #a78bfa;
       --green: #10b981;
     }
     body {
@@ -83,6 +82,11 @@
       display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 20px;
       background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3);
     }
+    .sql-box {
+      background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 12px; font-family: ui-monospace, monospace; font-size: 0.68rem;
+      color: #e9d5ff; white-space: pre-wrap; line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -108,8 +112,9 @@
       <div class="card-title">Select coin</div>
       <label>Coin</label>
       <select id="coin-select" onchange="onCoinChange()"></select>
-      <p class="hint">Popular coins and any coins users created appear here. Pick one, Edit, set rules, Save. Rules stay until you edit that coin again.</p>
+      <p class="hint">Popular + user-created coins (from database). New client launches show here automatically after the SQL setup below.</p>
       <div id="coin-status"></div>
+      <button type="button" class="cancel-btn" style="margin-top:8px" onclick="refreshCoins()">Refresh coin list</button>
     </div>
 
     <div class="card locked-fields" id="card-rules">
@@ -131,7 +136,7 @@
         <div>
           <label>Target move (X)</label>
           <input type="number" id="target-x" min="0.1" max="100" step="0.1" value="2" disabled>
-          <p class="hint">e.g. 2 = 2× (100% gain), 0.5 = half</p>
+          <p class="hint">e.g. 2 = 2×</p>
         </div>
         <div>
           <label>Reach in (minutes)</label>
@@ -154,10 +159,6 @@
           </select>
         </div>
       </div>
-
-      <p class="hint">
-        Timeline: client buys → wait <b>Start after</b> → price moves toward <b>Target X</b> over <b>Reach in</b> minutes → then <b>After target</b> behavior.
-      </p>
     </div>
 
     <div class="btn-row one" id="btn-row">
@@ -165,6 +166,35 @@
       <button class="save-btn" id="save-btn" disabled onclick="save()">Save this coin</button>
     </div>
     <div class="status" id="status"></div>
+
+    <div class="card">
+      <div class="card-title">One-time SQL (user-created coins registry)</div>
+      <p class="hint">Run once in Supabase so client-created coins appear here automatically:</p>
+      <div class="sql-box">CREATE TABLE IF NOT EXISTS pump_coins (
+  id text PRIMARY KEY,
+  name text,
+  symbol text,
+  emoji text,
+  price numeric,
+  base numeric,
+  created_by uuid,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE pump_coins ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "pump_coins_read" ON pump_coins;
+CREATE POLICY "pump_coins_read" ON pump_coins
+  FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "pump_coins_insert" ON pump_coins;
+CREATE POLICY "pump_coins_insert" ON pump_coins
+  FOR INSERT TO authenticated WITH CHECK (true);
+DROP POLICY IF EXISTS "pump_coins_update" ON pump_coins;
+CREATE POLICY "pump_coins_update" ON pump_coins
+  FOR UPDATE TO authenticated USING (true);
+
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS pump_control jsonb DEFAULT NULL;</div>
+    </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -192,6 +222,7 @@
     var controls = { enabled: false, coins: {} };
     var snapshot = null;
     var currentId = '';
+    var remoteUserCoins = [];
 
     function defaultRule() {
       return {
@@ -204,23 +235,38 @@
       };
     }
 
-    function loadCoinList() {
-      var map = {};
-      POPULAR.forEach(function (c) { map[c.id] = { id: c.id, name: c.name, created: false }; });
+    async function fetchRemoteCoins() {
+      remoteUserCoins = [];
+      try {
+        var { data, error } = await client.from('pump_coins').select('id, name, symbol, created_by').order('created_at', { ascending: false }).limit(200);
+        if (!error && Array.isArray(data)) remoteUserCoins = data;
+      } catch (e) {}
+      // also merge localStorage in case same browser
       try {
         var stored = JSON.parse(localStorage.getItem('pump_fun_coins_v1') || '[]');
         if (Array.isArray(stored)) {
           stored.forEach(function (c) {
-            if (!c || !c.id) return;
-            map[c.id] = {
-              id: c.id,
-              name: c.name || c.symbol || c.id,
-              created: !!c.createdBy
-            };
+            if (c && c.id && c.createdBy) {
+              if (!remoteUserCoins.some(function (r) { return r.id === c.id; })) {
+                remoteUserCoins.push({ id: c.id, name: c.name, symbol: c.symbol, created_by: c.createdBy });
+              }
+            }
           });
         }
       } catch (e) {}
-      // also surface any keys already in saved controls
+    }
+
+    function buildCoinList() {
+      var map = {};
+      POPULAR.forEach(function (c) { map[c.id] = { id: c.id, name: c.name, created: false }; });
+      remoteUserCoins.forEach(function (c) {
+        if (!c || !c.id) return;
+        map[c.id] = {
+          id: c.id,
+          name: c.name || c.symbol || c.id,
+          created: true
+        };
+      });
       Object.keys(controls.coins || {}).forEach(function (id) {
         if (!map[id]) map[id] = { id: id, name: id, created: true };
       });
@@ -235,10 +281,21 @@
       sel.innerHTML = allCoins.map(function (c) {
         var tag = c.created ? ' (user)' : '';
         return '<option value="' + c.id + '">' + c.id + ' — ' + c.name + tag + '</option>';
-      }).join('');
+      }).join('') || '<option value="">No coins</option>';
       if (prev && map[prev]) sel.value = prev;
       currentId = sel.value;
       fillFormFromRule();
+    }
+
+    async function refreshCoins() {
+      var st = document.getElementById('status');
+      st.style.color = '#818cf8';
+      st.textContent = 'Refreshing coins…';
+      await fetchRemoteCoins();
+      buildCoinList();
+      st.style.color = '#34d399';
+      st.textContent = 'Coin list updated (' + allCoins.length + ' coins).';
+      setTimeout(function () { if (st.textContent.indexOf('updated') >= 0) st.textContent = ''; }, 2500);
     }
 
     function getRule(id) {
@@ -247,6 +304,7 @@
     }
 
     function fillFormFromRule() {
+      if (!currentId) return;
       var r = getRule(currentId);
       document.getElementById('coin-enabled').classList.toggle('on', !!r.enabled);
       document.getElementById('direction').value = r.direction || 'up';
@@ -278,9 +336,7 @@
       ['direction', 'target-x', 'duration', 'start-after', 'after'].forEach(function (id) {
         document.getElementById(id).disabled = locked;
       });
-      // coin select always available so admin can switch coins while locked
       document.getElementById('card-rules').classList.toggle('locked-fields', locked);
-
       var banner = document.getElementById('lock-banner');
       banner.classList.toggle('unlocked', !locked);
       document.getElementById('lock-msg').textContent = locked
@@ -296,17 +352,13 @@
       masterOn = !masterOn;
       document.getElementById('master').classList.toggle('on', masterOn);
     }
-
     function toggleCoinEnabled() {
       if (!isEditing) return;
       document.getElementById('coin-enabled').classList.toggle('on');
     }
 
     function onCoinChange() {
-      if (isEditing) {
-        // don't lose mid-edit without cancel — auto cancel to selected new coin
-        cancelEdit();
-      }
+      if (isEditing) cancelEdit();
       currentId = document.getElementById('coin-select').value;
       fillFormFromRule();
       document.getElementById('status').textContent = '';
@@ -336,9 +388,7 @@
           document.getElementById('duration').value = f.durationMin;
           document.getElementById('start-after').value = f.startAfterMin;
           document.getElementById('after').value = f.afterBehavior;
-        } else {
-          fillFormFromRule();
-        }
+        } else fillFormFromRule();
       }
       setLocked(true);
       document.getElementById('status').textContent = '';
@@ -359,25 +409,19 @@
       var btn = document.getElementById('save-btn');
       btn.disabled = true;
       btn.textContent = 'Saving…';
-
       localStorage.setItem('pump_control_' + targetUserId, JSON.stringify(controls));
 
       var ok = false;
       try {
         var { error } = await client.from('profiles').update({ pump_control: controls }).eq('id', targetUserId);
         if (!error) ok = true;
-        else {
-          st.style.color = '#fbbf24';
-          st.textContent = 'Saved locally. DB: ' + error.message;
-        }
+        else { st.style.color = '#fbbf24'; st.textContent = 'Saved locally. DB: ' + error.message; }
       } catch (e) {
         st.style.color = '#fbbf24';
         st.textContent = 'Saved locally only.';
       }
-
       btn.disabled = false;
       btn.textContent = 'Save this coin';
-
       if (ok) {
         st.style.color = '#34d399';
         st.textContent = 'Saved rules for ' + currentId + ' & locked.';
@@ -394,12 +438,9 @@
             var c = typeof data.pump_control === 'string' ? JSON.parse(data.pump_control) : data.pump_control;
             controls = c || { enabled: false, coins: {} };
             if (!controls.coins) controls.coins = {};
-            // migrate old shape (targetPct/speed) if present
             Object.keys(controls.coins).forEach(function (id) {
               var r = controls.coins[id];
-              if (r.targetX == null && r.targetPct != null) {
-                r.targetX = 1 + (Number(r.targetPct) || 0) / 100;
-              }
+              if (r.targetX == null && r.targetPct != null) r.targetX = 1 + (Number(r.targetPct) || 0) / 100;
               if (r.durationMin == null) r.durationMin = 5;
               if (r.startAfterMin == null) r.startAfterMin = 0;
               if (!r.afterBehavior) r.afterBehavior = 'static';
@@ -418,14 +459,14 @@
 
       masterOn = !!controls.enabled;
       document.getElementById('master').classList.toggle('on', masterOn);
-      loadCoinList();
+      await fetchRemoteCoins();
+      buildCoinList();
       setLocked(true);
     }
 
-    // refresh coin list periodically so new user coins appear
     setInterval(function () {
-      if (!isEditing) loadCoinList();
-    }, 8000);
+      if (!isEditing) refreshCoins();
+    }, 15000);
 
     load();
   </script>
