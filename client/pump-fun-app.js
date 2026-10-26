@@ -44,6 +44,13 @@ function loadPositions(){try{positions=JSON.parse(localStorage.getItem(posKey())
 function savePositions(){try{localStorage.setItem(posKey(),JSON.stringify(positions));}catch(e){}}
 function loadHistory(){try{historyMap=JSON.parse(localStorage.getItem(histKey())||'{}');}catch(e){historyMap={};}}
 function saveHistory(){try{localStorage.setItem(histKey(),JSON.stringify(historyMap));}catch(e){}}
+function lockedUnits(coinId){
+return positions.filter(function(p){return p.coinId===coinId;}).reduce(function(s,p){return s+(Number(p.units)||0);},0);
+}
+function freeUnits(coinId){
+var have=(holdings[coinId]&&holdings[coinId].units)||0;
+return Math.max(0,have-lockedUnits(coinId));
+}
 async function loadControl(){
 control=null;
 try{var res=await client.from('profiles').select('pump_control').eq('id',userId).maybeSingle();
@@ -148,7 +155,9 @@ document.getElementById('d-price').textContent='$'+fmt(c.price);
 var cls=(c.change||0)>=0?'up':'down';
 var chgEl=document.getElementById('d-chg');chgEl.className='chg '+cls;chgEl.textContent=((c.change||0)>=0?'+':'')+(c.change||0).toFixed(2)+'%';
 var units=(holdings[c.id]&&holdings[c.id].units)||0;
-document.getElementById('d-hold-hint').textContent='Balance '+fmtUsd(balance)+' · You hold '+fmt(units,4)+' (~'+fmtUsd(units*c.price)+')';
+var free=freeUnits(c.id);
+var locked=lockedUnits(c.id);
+document.getElementById('d-hold-hint').textContent='Balance '+fmtUsd(balance)+' · Hold '+fmt(units,4)+' (free '+fmt(free,4)+', in positions '+fmt(locked,4)+') · ~'+fmtUsd(units*c.price);
 }
 function formatLeft(ms){
 if(ms<=0)return '0s';
@@ -158,7 +167,7 @@ if(h)parts.push(h+'h');if(m||h)parts.push(m+'m');parts.push(sec+'s');return part
 function renderDetailPositions(){
 var el=document.getElementById('d-positions');
 var list=positions.filter(function(p){return p.coinId===activeCoinId;});
-if(!list.length){el.innerHTML='<div class="empty" style="padding:16px">No open positions on this coin.</div>';return;}
+if(!list.length){el.innerHTML='<div class="empty" style="padding:16px">No open positions on this coin. Positions only close with Close now or auto-close.</div>';return;}
 var coin=coins.find(function(c){return c.id===activeCoinId;}),now=Date.now();
 el.innerHTML=list.map(function(p){
 var cur=(coin?coin.price:p.entry)*p.units,pnl=cur-p.amount,pnlCls=pnl>=0?'up':'down';
@@ -203,12 +212,24 @@ await setBalance(balance-amt);hideCloseModal();updateDetailHeader();renderDetail
 async function detailSell(){
 var c=coins.find(function(x){return x.id===activeCoinId;});if(!c)return;
 var amt=parseFloat(document.getElementById('d-amt').value);
-var have=(holdings[c.id]&&holdings[c.id].units)||0;if(have<=0){alert('No holdings');return;}
-var sellUnits,value;if(!amt||amt<=0){sellUnits=have;value=have*c.price;}else{sellUnits=Math.min(have,amt/c.price);value=sellUnits*c.price;}
-holdings[c.id].units=Math.max(0,have-sellUnits);saveHoldings();
-var left=sellUnits;
-positions=positions.filter(function(p){if(p.coinId!==c.id||left<=0)return true;if(p.units<=left){left-=p.units;return false;}p.units-=left;p.amount=p.units*p.entry;left=0;return true;});
-savePositions();await setBalance(balance+value);updateDetailHeader();renderDetailPositions();updateMemeVal();
+if(!amt||amt<=0){alert('Enter how much ($) you want to sell');return;}
+var free=freeUnits(c.id);
+if(free<=0){
+alert('All of this coin is locked in open positions.\n\nSell only works on free coins.\nTo exit a trade, use Close now on that position, or wait for auto-close.');
+return;
+}
+var maxValue=free*c.price;
+var value=Math.min(amt,maxValue);
+var sellUnits=value/c.price;
+if(sellUnits<=0){alert('Nothing to sell');return;}
+var have=(holdings[c.id]&&holdings[c.id].units)||0;
+holdings[c.id].units=Math.max(0,have-sellUnits);
+saveHoldings();
+// Do NOT touch positions — they only close via Close now or auto-close
+await setBalance(balance+value);
+updateDetailHeader();
+renderDetailPositions();
+updateMemeVal();
 }
 function openCreate(){document.getElementById('create-modal').classList.add('show');}
 function closeCreate(){document.getElementById('create-modal').classList.remove('show');}
