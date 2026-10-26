@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Pump.fun - Meme Coins</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #070b14;
+      --card: rgba(18, 24, 38, 0.9);
+      --border: rgba(255,255,255,0.08);
+      --muted: #8b9bb4;
+      --green: #10b981;
+      --red: #ef4444;
+      --pink: #f472b6;
+      --purple: #a78bfa;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 12px; padding-bottom: 40px;
+      background: radial-gradient(circle at top, #2e1065 0%, var(--bg) 55%);
+      color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100vh;
+    }
+    .wrap { max-width: 480px; margin: 0 auto; }
+    .top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .back {
+      background: var(--card); border: 1px solid var(--border); color: #fff;
+      padding: 8px 12px; border-radius: 10px; text-decoration: none; font-weight: 600; font-size: 0.85rem;
+    }
+    h1 {
+      margin: 0; font-size: 1.2rem; font-weight: 800;
+      background: linear-gradient(90deg, #f472b6, #a78bfa, #38bdf8);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .bal {
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 12px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .bal span { color: var(--muted); font-size: 0.75rem; font-weight: 700; }
+    .bal b { font-size: 1.15rem; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+    .tab {
+      flex: 1; background: var(--card); border: 1px solid var(--border); color: var(--muted);
+      padding: 10px; border-radius: 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer;
+    }
+    .tab.on { background: rgba(244,114,182,0.15); border-color: var(--pink); color: #fbcfe8; }
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+      padding: 14px; margin-bottom: 10px;
+    }
+    .coin-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .coin-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .emoji {
+      width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; background: rgba(255,255,255,0.06); flex-shrink: 0;
+    }
+    .cname { font-weight: 800; font-size: 0.95rem; }
+    .csym { font-size: 0.72rem; color: var(--muted); }
+    .cprice { font-weight: 800; text-align: right; }
+    .chg { font-size: 0.75rem; font-weight: 700; }
+    .up { color: var(--green); }
+    .down { color: var(--red); }
+    .actions { display: flex; gap: 8px; margin-top: 10px; }
+    .btn {
+      flex: 1; border: none; border-radius: 10px; padding: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    }
+    .buy { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+    .sell { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+    .create-btn {
+      width: 100%; border: none; border-radius: 14px; padding: 14px;
+      background: linear-gradient(135deg, #f472b6, #a78bfa); color: #fff;
+      font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-bottom: 12px;
+    }
+    label { display: block; font-size: 0.7rem; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
+    input, textarea {
+      width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff;
+      padding: 12px; border-radius: 10px; margin-bottom: 10px; font-size: 0.9rem; outline: none;
+    }
+    .modal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 50;
+      display: none; align-items: flex-end; justify-content: center; padding: 16px;
+    }
+    .modal.show { display: flex; }
+    .modal-box {
+      background: #121826; border: 1px solid var(--border); border-radius: 18px 18px 12px 12px;
+      padding: 18px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h3 { margin: 0 0 12px; font-size: 1.05rem; }
+    .hint { font-size: 0.75rem; color: var(--muted); margin: -4px 0 10px; }
+    .hold { font-size: 0.78rem; color: var(--muted); margin-top: 6px; }
+    .empty { text-align: center; color: var(--muted); padding: 28px; font-size: 0.9rem; }
+    .badge-live {
+      font-size: 0.65rem; font-weight: 800; background: rgba(16,185,129,0.15); color: #34d399;
+      padding: 3px 8px; border-radius: 20px; border: 1px solid rgba(16,185,129,0.35);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <a class="back" href="dashboard.html" id="back-link">← Back</a>
+      <h1>Pump.fun</h1>
+      <span class="badge-live">LIVE</span>
+    </div>
+
+    <div class="bal">
+      <div><span>MAIN BALANCE</span><br><b id="bal">$0.00</b></div>
+      <div style="text-align:right"><span>MEME VALUE</span><br><b id="meme-val">$0.00</b></div>
+    </div>
+
+    <button class="create-btn" onclick="openCreate()">+ Create Meme Coin</button>
+
+    <div class="tabs">
+      <button class="tab on" data-t="market" onclick="setTab('market')">Market</button>
+      <button class="tab" data-t="holdings" onclick="setTab('holdings')">My Coins</button>
+    </div>
+
+    <div id="list"></div>
+  </div>
+
+  <div class="modal" id="trade-modal">
+    <div class="modal-box">
+      <h3 id="trade-title">Buy</h3>
+      <p class="hint" id="trade-hint"></p>
+      <label>Amount ($)</label>
+      <input type="number" id="trade-amt" min="1" step="0.01" placeholder="10.00">
+      <div class="actions">
+        <button class="btn sell" onclick="closeTrade()">Cancel</button>
+        <button class="btn buy" id="trade-confirm" onclick="confirmTrade()">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="create-modal">
+    <div class="modal-box">
+      <h3>Create Meme Coin</h3>
+      <p class="hint">Launch your coin on the board. Cost: $5 from main balance.</p>
+      <label>Name</label>
+      <input type="text" id="c-name" placeholder="e.g. Moon Cat">
+      <label>Symbol</label>
+      <input type="text" id="c-sym" maxlength="8" placeholder="e.g. MCAT">
+      <label>Emoji / Icon</label>
+      <input type="text" id="c-emoji" maxlength="4" placeholder="🐱">
+      <label>Starting price ($)</label>
+      <input type="number" id="c-price" min="0.0001" step="any" value="0.001">
+      <div class="actions">
+        <button class="btn sell" onclick="closeCreate()">Cancel</button>
+        <button class="btn buy" onclick="createCoin()">Launch ($5)</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script>
+    var userId = null;
+    var balance = 0;
+    var tab = 'market';
+    var coins = [];
+    var holdings = {};
+    var control = null;
+    var tradeMode = 'buy';
+    var tradeCoinId = null;
+
+    var DEFAULT_COINS = [
+      { id: 'PEPE', name: 'Pepe', symbol: 'PEPE', emoji: '🐸', price: 0.000012, base: 0.000012 },
+      { id: 'DOGE', name: 'Dogecoin', symbol: 'DOGE', emoji: '🐶', price: 0.16, base: 0.16 },
+      { id: 'SHIB', name: 'Shiba Inu', symbol: 'SHIB', emoji: '🐕', price: 0.000024, base: 0.000024 },
+      { id: 'BONK', name: 'Bonk', symbol: 'BONK', emoji: '🦴', price: 0.000028, base: 0.000028 },
+      { id: 'WIF', name: 'dogwifhat', symbol: 'WIF', emoji: '🎩', price: 2.4, base: 2.4 },
+      { id: 'FLOKI', name: 'Floki', symbol: 'FLOKI', emoji: '⚔️', price: 0.00018, base: 0.00018 },
+      { id: 'BRETT', name: 'Brett', symbol: 'BRETT', emoji: '🟦', price: 0.12, base: 0.12 },
+      { id: 'POPCAT', name: 'Popcat', symbol: 'POPCAT', emoji: '😺', price: 0.85, base: 0.85 },
+      { id: 'NEIRO', name: 'Neiro', symbol: 'NEIRO', emoji: '🐕‍🦺', price: 0.0015, base: 0.0015 },
+      { id: 'MEME', name: 'Memecoin', symbol: 'MEME', emoji: '😂', price: 0.014, base: 0.014 }
+    ];
+
+    function fmt(n, d) {
+      d = d == null ? 6 : d;
+      var x = Number(n) || 0;
+      if (x >= 1) return x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+      return x.toFixed(d).replace(/\.?0+$/, '') || '0';
+    }
+    function fmtUsd(n) {
+      return '$' + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function coinsKey() { return 'pump_fun_coins_v1'; }
+    function holdKey() { return 'pump_holdings_' + userId; }
+
+    function loadCoins() {
+      try {
+        var raw = localStorage.getItem(coinsKey());
+        if (raw) {
+          coins = JSON.parse(raw);
+          if (Array.isArray(coins) && coins.length) return;
+        }
+      } catch (e) {}
+      coins = DEFAULT_COINS.map(function (c) {
+        return Object.assign({}, c, { change: 0, createdBy: null, t0: Date.now() });
+      });
+      saveCoins();
+    }
+
+    function saveCoins() {
+      try { localStorage.setItem(coinsKey(), JSON.stringify(coins)); } catch (e) {}
+    }
+
+    function loadHoldings() {
+      try { holdings = JSON.parse(localStorage.getItem(holdKey()) || '{}'); } catch (e) { holdings = {}; }
+    }
+    function saveHoldings() {
+      try { localStorage.setItem(holdKey(), JSON.stringify(holdings)); } catch (e) {}
+    }
+
+    async function loadControl() {
+      control = null;
+      try {
+        var { data } = await client.from('profiles').select('pump_control').eq('id', userId).maybeSingle();
+        if (data && data.pump_control) {
+          control = typeof data.pump_control === 'string' ? JSON.parse(data.pump_control) : data.pump_control;
+        }
+      } catch (e) {}
+      try {
+        if (!control) {
+          var raw = localStorage.getItem('pump_control_' + userId);
+          if (raw) control = JSON.parse(raw);
+        }
+      } catch (e) {}
+    }
+
+    function applyControlTick(coin) {
+      if (!control || !control.enabled) {
+        // mild random walk
+        var r = (Math.random() - 0.48) * 0.008;
+        coin.price = Math.max(coin.price * (1 + r), 0.00000001);
+        coin.change = ((coin.price - coin.base) / coin.base) * 100;
+        return;
+      }
+      var rules = (control.coins && control.coins[coin.id]) || control.default || null;
+      if (!rules || rules.enabled === false) {
+        var r2 = (Math.random() - 0.5) * 0.004;
+        coin.price = Math.max(coin.price * (1 + r2), 0.00000001);
+        coin.change = ((coin.price - coin.base) / coin.base) * 100;
+        return;
+      }
+      var dir = rules.direction || 'up'; // up | down | random
+      var targetPct = Number(rules.targetPct) || 5;
+      var speed = (Number(rules.speed) || 1) / 1000; // per tick influence
+      var sign = dir === 'down' ? -1 : (dir === 'random' ? (Math.random() > 0.5 ? 1 : -1) : 1);
+      var step = sign * (targetPct / 100) * speed * (0.5 + Math.random());
+      coin.price = Math.max(coin.price * (1 + step), 0.00000001);
+      // soft clamp around base * target
+      var maxP = coin.base * (1 + Math.abs(targetPct) / 100 * 3);
+      var minP = coin.base * Math.max(0.05, 1 - Math.abs(targetPct) / 100 * 3);
+      if (coin.price > maxP) coin.price = maxP;
+      if (coin.price < minP) coin.price = minP;
+      coin.change = ((coin.price - coin.base) / coin.base) * 100;
+    }
+
+    function tick() {
+      coins.forEach(applyControlTick);
+      saveCoins();
+      if (tab === 'market' || tab === 'holdings') render();
+      updateMemeVal();
+    }
+
+    function updateMemeVal() {
+      var total = 0;
+      Object.keys(holdings).forEach(function (id) {
+        var h = holdings[id];
+        var c = coins.find(function (x) { return x.id === id; });
+        if (c && h && h.units) total += h.units * c.price;
+      });
+      document.getElementById('meme-val').textContent = fmtUsd(total);
+    }
+
+    function setTab(t) {
+      tab = t;
+      document.querySelectorAll('.tab').forEach(function (el) {
+        el.classList.toggle('on', el.getAttribute('data-t') === t);
+      });
+      render();
+    }
+
+    function render() {
+      var el = document.getElementById('list');
+      if (tab === 'holdings') {
+        var ids = Object.keys(holdings).filter(function (id) { return holdings[id] && holdings[id].units > 0; });
+        if (!ids.length) {
+          el.innerHTML = '<div class="empty">No meme holdings yet. Buy from Market.</div>';
+          return;
+        }
+        el.innerHTML = ids.map(function (id) {
+          var c = coins.find(function (x) { return x.id === id; }) || { name: id, symbol: id, emoji: '🪙', price: 0, change: 0 };
+          var units = holdings[id].units;
+          var val = units * c.price;
+          var cls = (c.change || 0) >= 0 ? 'up' : 'down';
+          return '<div class="card"><div class="coin-row">' +
+            '<div class="coin-left"><div class="emoji">' + (c.emoji || '🪙') + '</div><div>' +
+            '<div class="cname">' + c.name + '</div><div class="csym">' + c.symbol + ' · ' + fmt(units, 4) + ' units</div></div></div>' +
+            '<div><div class="cprice">' + fmtUsd(val) + '</div>' +
+            '<div class="chg ' + cls + '">' + ((c.change || 0) >= 0 ? '+' : '') + (c.change || 0).toFixed(2) + '%</div></div></div>' +
+            '<div class="actions"><button class="btn sell" onclick="openTrade(\'' + id + '\',\'sell\')">Sell</button>' +
+            '<button class="btn buy" onclick="openTrade(\'' + id + '\',\'buy\')">Buy more</button></div></div>';
+        }).join('');
+        return;
+      }
+
+      var list = coins.slice().sort(function (a, b) { return Math.abs(b.change || 0) - Math.abs(a.change || 0); });
+      el.innerHTML = list.map(function (c) {
+        var cls = (c.change || 0) >= 0 ? 'up' : 'down';
+        var held = holdings[c.id] && holdings[c.id].units ? '<div class="hold">You hold ' + fmt(holdings[c.id].units, 4) + '</div>' : '';
+        return '<div class="card"><div class="coin-row">' +
+          '<div class="coin-left"><div class="emoji">' + (c.emoji || '🪙') + '</div><div>' +
+          '<div class="cname">' + c.name + '</div><div class="csym">' + c.symbol +
+          (c.createdBy ? ' · creator' : '') + '</div></div></div>' +
+          '<div><div class="cprice">$' + fmt(c.price) + '</div>' +
+          '<div class="chg ' + cls + '">' + ((c.change || 0) >= 0 ? '+' : '') + (c.change || 0).toFixed(2) + '%</div></div></div>' +
+          held +
+          '<div class="actions"><button class="btn buy" onclick="openTrade(\'' + c.id + '\',\'buy\')">Buy</button>' +
+          '<button class="btn sell" onclick="openTrade(\'' + c.id + '\',\'sell\')">Sell</button></div></div>';
+      }).join('');
+    }
+
+    function openTrade(id, mode) {
+      tradeCoinId = id;
+      tradeMode = mode;
+      var c = coins.find(function (x) { return x.id === id; });
+      if (!c) return;
+      document.getElementById('trade-title').textContent = (mode === 'buy' ? 'Buy ' : 'Sell ') + c.symbol;
+      document.getElementById('trade-hint').textContent = mode === 'buy'
+        ? 'Price $' + fmt(c.price) + ' · Balance ' + fmtUsd(balance)
+        : 'Price $' + fmt(c.price) + ' · You hold ' + fmt((holdings[id] && holdings[id].units) || 0, 4);
+      document.getElementById('trade-amt').value = '';
+      document.getElementById('trade-confirm').textContent = mode === 'buy' ? 'Buy' : 'Sell';
+      document.getElementById('trade-confirm').className = 'btn ' + (mode === 'buy' ? 'buy' : 'sell');
+      document.getElementById('trade-modal').classList.add('show');
+    }
+    function closeTrade() { document.getElementById('trade-modal').classList.remove('show'); }
+
+    async function refreshBalance() {
+      try {
+        var { data } = await client.from('profiles').select('balance').eq('id', userId).maybeSingle();
+        if (data) balance = Number(data.balance) || 0;
+      } catch (e) {}
+      document.getElementById('bal').textContent = fmtUsd(balance);
+    }
+
+    async function setBalance(newBal) {
+      balance = newBal;
+      document.getElementById('bal').textContent = fmtUsd(balance);
+      try {
+        await client.from('profiles').update({ balance: newBal }).eq('id', userId);
+      } catch (e) {}
+    }
+
+    async function confirmTrade() {
+      var amt = parseFloat(document.getElementById('trade-amt').value);
+      if (!amt || amt <= 0) { alert('Enter a valid amount'); return; }
+      var c = coins.find(function (x) { return x.id === tradeCoinId; });
+      if (!c) return;
+
+      if (tradeMode === 'buy') {
+        if (amt > balance) { alert('Not enough balance'); return; }
+        var units = amt / c.price;
+        if (!holdings[c.id]) holdings[c.id] = { units: 0, spent: 0 };
+        holdings[c.id].units += units;
+        holdings[c.id].spent = (holdings[c.id].spent || 0) + amt;
+        saveHoldings();
+        await setBalance(balance - amt);
+      } else {
+        var have = (holdings[c.id] && holdings[c.id].units) || 0;
+        var sellUnits = amt / c.price;
+        if (sellUnits > have + 1e-12) {
+          // allow selling by $ up to full holding
+          sellUnits = have;
+          amt = have * c.price;
+        }
+        if (have <= 0 || sellUnits <= 0) { alert('No holdings to sell'); return; }
+        holdings[c.id].units = Math.max(0, have - sellUnits);
+        saveHoldings();
+        await setBalance(balance + amt);
+      }
+      closeTrade();
+      render();
+      updateMemeVal();
+    }
+
+    function openCreate() { document.getElementById('create-modal').classList.add('show'); }
+    function closeCreate() { document.getElementById('create-modal').classList.remove('show'); }
+
+    async function createCoin() {
+      var name = (document.getElementById('c-name').value || '').trim();
+      var sym = (document.getElementById('c-sym').value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+      var emoji = (document.getElementById('c-emoji').value || '🪙').trim() || '🪙';
+      var price = parseFloat(document.getElementById('c-price').value) || 0.001;
+      if (!name || !sym) { alert('Name and symbol required'); return; }
+      if (coins.some(function (c) { return c.id === sym || c.symbol === sym; })) {
+        alert('Symbol already exists'); return;
+      }
+      if (balance < 5) { alert('Need $5 to launch a coin'); return; }
+      await setBalance(balance - 5);
+      coins.unshift({
+        id: sym,
+        name: name,
+        symbol: sym,
+        emoji: emoji,
+        price: price,
+        base: price,
+        change: 0,
+        createdBy: userId,
+        t0: Date.now()
+      });
+      saveCoins();
+      closeCreate();
+      setTab('market');
+      alert(sym + ' launched!');
+    }
+
+    async function init() {
+      var params = new URLSearchParams(location.search);
+      var qid = params.get('id');
+      if (qid) {
+        userId = qid;
+        document.getElementById('back-link').href = 'dashboard.html?id=' + encodeURIComponent(qid);
+      } else {
+        var session = await client.auth.getSession();
+        var user = session.data && session.data.session && session.data.session.user;
+        if (!user) {
+          var r = await client.auth.getUser();
+          user = r.data && r.data.user;
+        }
+        if (!user) { location.href = 'index.html'; return; }
+        userId = user.id;
+      }
+      loadCoins();
+      loadHoldings();
+      await loadControl();
+      await refreshBalance();
+      render();
+      updateMemeVal();
+      setInterval(tick, 2000);
+      setInterval(loadControl, 12000);
+    }
+    init();
+  </script>
+</body>
+</html>
