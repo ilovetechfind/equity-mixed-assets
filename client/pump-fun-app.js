@@ -53,6 +53,9 @@ function freeUnits(coinId){
 var have=(holdings[coinId]&&holdings[coinId].units)||0;
 return Math.max(0,have-lockedUnits(coinId));
 }
+function totalUnits(coinId){
+return (holdings[coinId]&&holdings[coinId].units)||0;
+}
 function renderBalances(){
 var pb=document.getElementById('pump-bal');if(pb)pb.textContent=fmtUsd(pumpBalance);
 var mb=document.getElementById('main-bal');if(mb)mb.textContent=fmtUsd(mainBalance);
@@ -211,9 +214,7 @@ document.getElementById('d-price').textContent='$'+fmt(c.price);
 var cls=(c.change||0)>=0?'up':'down';
 var chgEl=document.getElementById('d-chg');chgEl.className='chg '+cls;chgEl.textContent=((c.change||0)>=0?'+':'')+(c.change||0).toFixed(2)+'%';
 var units=(holdings[c.id]&&holdings[c.id].units)||0;
-var free=freeUnits(c.id);
-var locked=lockedUnits(c.id);
-document.getElementById('d-hold-hint').textContent='Pump bal '+fmtUsd(pumpBalance)+' · Hold '+fmt(units,4)+' (free '+fmt(free,4)+', in positions '+fmt(locked,4)+') · ~'+fmtUsd(units*c.price);
+document.getElementById('d-hold-hint').textContent='Pump bal '+fmtUsd(pumpBalance)+' · You hold '+fmt(units,4)+' · ~'+fmtUsd(units*c.price);
 }
 function formatLeft(ms){
 if(ms<=0)return '0s';
@@ -223,7 +224,7 @@ if(h)parts.push(h+'h');if(m||h)parts.push(m+'m');parts.push(sec+'s');return part
 function renderDetailPositions(){
 var el=document.getElementById('d-positions');
 var list=positions.filter(function(p){return p.coinId===activeCoinId;});
-if(!list.length){el.innerHTML='<div class="empty" style="padding:16px">No open positions on this coin. Positions only close with Close now or auto-close.</div>';return;}
+if(!list.length){el.innerHTML='<div class="empty" style="padding:16px">No open positions on this coin.</div>';return;}
 var coin=coins.find(function(c){return c.id===activeCoinId;}),now=Date.now();
 el.innerHTML=list.map(function(p){
 var cur=(coin?coin.price:p.entry)*p.units,pnl=cur-p.amount,pnlCls=pnl>=0?'up':'down';
@@ -265,20 +266,36 @@ await setPumpBalance(pumpBalance-amt);hideCloseModal();updateDetailHeader();rend
 }
 async function detailSell(){
 var c=coins.find(function(x){return x.id===activeCoinId;});if(!c)return;
+var have=totalUnits(c.id);
+if(have<=0){alert('No holdings to sell');return;}
 var amt=parseFloat(document.getElementById('d-amt').value);
-if(!amt||amt<=0){alert('Enter how much ($) you want to sell');return;}
-var free=freeUnits(c.id);
-if(free<=0){
-alert('All of this coin is locked in open positions.\n\nSell only works on free coins.\nTo exit a trade, use Close now on that position, or wait for auto-close.');
-return;
+var sellUnits,value;
+if(!amt||amt<=0){
+// no amount = sell all
+sellUnits=have;value=have*c.price;
+}else{
+sellUnits=Math.min(have,amt/c.price);value=sellUnits*c.price;
 }
-var maxValue=free*c.price;
-var value=Math.min(amt,maxValue);
-var sellUnits=value/c.price;
 if(sellUnits<=0){alert('Nothing to sell');return;}
-var have=(holdings[c.id]&&holdings[c.id].units)||0;
-holdings[c.id].units=Math.max(0,have-sellUnits);
-saveHoldings();
+// reduce holdings
+holdings[c.id].units=Math.max(0,have-sellUnits);saveHoldings();
+// reduce open positions from oldest; remove only when units hit 0
+var left=sellUnits;
+for(var i=0;i<positions.length&&left>0;i++){
+var p=positions[i];
+if(p.coinId!==c.id)continue;
+if(p.units<=left){
+left-=p.units;
+p.units=0;
+}else{
+var ratio=left/p.units;
+p.units-=left;
+p.amount=p.units*p.entry;
+left=0;
+}
+}
+positions=positions.filter(function(p){return p.units>1e-12;});
+savePositions();
 await setPumpBalance(pumpBalance+value);
 updateDetailHeader();
 renderDetailPositions();
