@@ -1,4 +1,5 @@
-var userId=null,balance=0,tab='market',coins=[],holdings={},positions=[],control=null,activeCoinId=null,historyMap={},pendingBuyAmt=0;
+var userId=null,mainBalance=0,pumpBalance=0,tab='market',coins=[],holdings={},positions=[],control=null,activeCoinId=null,historyMap={},pendingBuyAmt=0,fundMode='deposit';
+var CREATE_COST=50;
 var DEFAULT_COINS=[
 {id:'PEPE',name:'Pepe',symbol:'PEPE',emoji:'🐸',price:0.000012,base:0.000012},
 {id:'DOGE',name:'Dogecoin',symbol:'DOGE',emoji:'🐶',price:0.16,base:0.16},
@@ -17,6 +18,7 @@ function coinsKey(){return 'pump_fun_coins_v1';}
 function holdKey(){return 'pump_holdings_'+userId;}
 function posKey(){return 'pump_positions_'+userId;}
 function histKey(){return 'pump_history_v1';}
+function pumpBalKey(){return 'pump_balance_'+userId;}
 function loadCoinsLocal(){
 try{var raw=localStorage.getItem(coinsKey());if(raw){coins=JSON.parse(raw);if(Array.isArray(coins)&&coins.length)return;}}catch(e){}
 coins=DEFAULT_COINS.map(function(c){return Object.assign({},c,{change:0,createdBy:null,t0:Date.now(),phaseStart:Date.now()});});
@@ -50,6 +52,60 @@ return positions.filter(function(p){return p.coinId===coinId;}).reduce(function(
 function freeUnits(coinId){
 var have=(holdings[coinId]&&holdings[coinId].units)||0;
 return Math.max(0,have-lockedUnits(coinId));
+}
+function renderBalances(){
+var pb=document.getElementById('pump-bal');if(pb)pb.textContent=fmtUsd(pumpBalance);
+var mb=document.getElementById('main-bal');if(mb)mb.textContent=fmtUsd(mainBalance);
+}
+async function refreshBalances(){
+try{
+var res=await client.from('profiles').select('balance,pump_balance').eq('id',userId).maybeSingle();
+if(res.data){
+mainBalance=Number(res.data.balance)||0;
+if(res.data.pump_balance!=null)pumpBalance=Number(res.data.pump_balance)||0;
+else{
+try{var local=localStorage.getItem(pumpBalKey());if(local!=null)pumpBalance=Number(local)||0;}catch(e){}
+}
+}
+}catch(e){
+try{var local2=localStorage.getItem(pumpBalKey());if(local2!=null)pumpBalance=Number(local2)||0;}catch(e2){}
+}
+renderBalances();
+}
+async function setMainBalance(v){
+mainBalance=Math.max(0,Number(v)||0);
+renderBalances();
+try{await client.from('profiles').update({balance:mainBalance}).eq('id',userId);}catch(e){}
+}
+async function setPumpBalance(v){
+pumpBalance=Math.max(0,Number(v)||0);
+renderBalances();
+try{localStorage.setItem(pumpBalKey(),String(pumpBalance));}catch(e){}
+try{await client.from('profiles').update({pump_balance:pumpBalance}).eq('id',userId);}catch(e){}
+}
+function openFund(mode){
+fundMode=mode;
+document.getElementById('fund-title').textContent=mode==='deposit'?'Deposit from Main':'Withdraw to Main';
+document.getElementById('fund-hint').textContent=mode==='deposit'
+  ?('Move money from Main ('+fmtUsd(mainBalance)+') into Pump balance for trading & creating coins.')
+  :('Move money from Pump ('+fmtUsd(pumpBalance)+') back to Main balance.');
+document.getElementById('fund-amt').value='';
+document.getElementById('fund-modal').classList.add('show');
+}
+function hideFund(){document.getElementById('fund-modal').classList.remove('show');}
+async function confirmFund(){
+var amt=parseFloat(document.getElementById('fund-amt').value);
+if(!amt||amt<=0){alert('Enter a valid amount');return;}
+if(fundMode==='deposit'){
+if(amt>mainBalance){alert('Not enough main balance');return;}
+await setMainBalance(mainBalance-amt);
+await setPumpBalance(pumpBalance+amt);
+}else{
+if(amt>pumpBalance){alert('Not enough pump balance');return;}
+await setPumpBalance(pumpBalance-amt);
+await setMainBalance(mainBalance+amt);
+}
+hideFund();
 }
 async function loadControl(){
 control=null;
@@ -107,7 +163,7 @@ var idx=positions.findIndex(function(p){return p.id===posId;});if(idx<0)return;
 var pos=positions[idx],coin=coins.find(function(c){return c.id===pos.coinId;});if(!coin)return;
 var value=pos.units*coin.price;
 if(holdings[pos.coinId])holdings[pos.coinId].units=Math.max(0,(holdings[pos.coinId].units||0)-pos.units);
-saveHoldings();positions.splice(idx,1);savePositions();setBalance(balance+value);
+saveHoldings();positions.splice(idx,1);savePositions();setPumpBalance(pumpBalance+value);
 if(activeCoinId===pos.coinId){updateDetailHeader();renderDetailPositions();}
 updateMemeVal();if(tab==='holdings')renderList();
 }
@@ -119,7 +175,7 @@ updateMemeVal();
 }
 function updateMemeVal(){
 var total=0;Object.keys(holdings).forEach(function(id){var h=holdings[id],c=coins.find(function(x){return x.id===id;});if(c&&h&&h.units)total+=h.units*c.price;});
-document.getElementById('meme-val').textContent=fmtUsd(total);
+var el=document.getElementById('meme-val');if(el)el.textContent=fmtUsd(total);
 }
 function setTab(t){tab=t;document.querySelectorAll('.tab').forEach(function(el){el.classList.toggle('on',el.getAttribute('data-t')===t);});renderList();}
 function bindCardClicks(el){el.querySelectorAll('[data-cid]').forEach(function(node){node.onclick=function(){openDetail(node.getAttribute('data-cid'));};});}
@@ -157,7 +213,7 @@ var chgEl=document.getElementById('d-chg');chgEl.className='chg '+cls;chgEl.text
 var units=(holdings[c.id]&&holdings[c.id].units)||0;
 var free=freeUnits(c.id);
 var locked=lockedUnits(c.id);
-document.getElementById('d-hold-hint').textContent='Balance '+fmtUsd(balance)+' · Hold '+fmt(units,4)+' (free '+fmt(free,4)+', in positions '+fmt(locked,4)+') · ~'+fmtUsd(units*c.price);
+document.getElementById('d-hold-hint').textContent='Pump bal '+fmtUsd(pumpBalance)+' · Hold '+fmt(units,4)+' (free '+fmt(free,4)+', in positions '+fmt(locked,4)+') · ~'+fmtUsd(units*c.price);
 }
 function formatLeft(ms){
 if(ms<=0)return '0s';
@@ -176,14 +232,12 @@ return '<div class="pos-card"><div class="row"><span>Original</span><b>'+fmtUsd(
 }).join('');
 el.querySelectorAll('[data-pid]').forEach(function(btn){btn.onclick=function(e){e.stopPropagation();closePosition(btn.getAttribute('data-pid'));};});
 }
-async function refreshBalance(){try{var res=await client.from('profiles').select('balance').eq('id',userId).maybeSingle();if(res.data)balance=Number(res.data.balance)||0;}catch(e){}document.getElementById('bal').textContent=fmtUsd(balance);}
-async function setBalance(newBal){balance=newBal;document.getElementById('bal').textContent=fmtUsd(balance);try{await client.from('profiles').update({balance:newBal}).eq('id',userId);}catch(e){}}
 function startBuy(){
 var amt=parseFloat(document.getElementById('d-amt').value);
 if(!amt||amt<=0){alert('Enter amount');return;}
-if(amt>balance){alert('Not enough balance');return;}
+if(amt>pumpBalance){alert('Not enough pump balance. Deposit from main first.');return;}
 pendingBuyAmt=amt;
-document.getElementById('close-hint').textContent='Buying $'+amt.toFixed(2)+' of '+activeCoinId;
+document.getElementById('close-hint').textContent='Buying $'+amt.toFixed(2)+' of '+activeCoinId+' from Pump balance';
 document.getElementById('auto-fields').style.display='none';
 document.getElementById('close-cancel-row').style.display='flex';
 document.getElementById('t-h').value='0';document.getElementById('t-m').value='0';document.getElementById('t-s').value='30';
@@ -201,13 +255,13 @@ confirmBuy(total);
 }
 async function confirmBuy(autoSec){
 var c=coins.find(function(x){return x.id===activeCoinId;});if(!c||!pendingBuyAmt)return;
-var amt=pendingBuyAmt;if(amt>balance){alert('Not enough balance');hideCloseModal();return;}
+var amt=pendingBuyAmt;if(amt>pumpBalance){alert('Not enough pump balance');hideCloseModal();return;}
 var units=amt/c.price;
 if(!holdings[c.id])holdings[c.id]={units:0,spent:0};
 holdings[c.id].units+=units;holdings[c.id].spent=(holdings[c.id].spent||0)+amt;saveHoldings();
 positions.push({id:'p_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),coinId:c.id,units:units,entry:c.price,amount:amt,openedAt:Date.now(),autoCloseAt:autoSec&&autoSec>0?Date.now()+autoSec*1000:null});
 savePositions();c.phaseStart=Date.now();c.base=c.price;saveCoins();
-await setBalance(balance-amt);hideCloseModal();updateDetailHeader();renderDetailPositions();updateMemeVal();
+await setPumpBalance(pumpBalance-amt);hideCloseModal();updateDetailHeader();renderDetailPositions();updateMemeVal();
 }
 async function detailSell(){
 var c=coins.find(function(x){return x.id===activeCoinId;});if(!c)return;
@@ -225,8 +279,7 @@ if(sellUnits<=0){alert('Nothing to sell');return;}
 var have=(holdings[c.id]&&holdings[c.id].units)||0;
 holdings[c.id].units=Math.max(0,have-sellUnits);
 saveHoldings();
-// Do NOT touch positions — they only close via Close now or auto-close
-await setBalance(balance+value);
+await setPumpBalance(pumpBalance+value);
 updateDetailHeader();
 renderDetailPositions();
 updateMemeVal();
@@ -240,8 +293,8 @@ var emoji=(document.getElementById('c-emoji').value||'🪙').trim()||'🪙';
 var price=parseFloat(document.getElementById('c-price').value)||0.001;
 if(!name||!sym){alert('Name and symbol required');return;}
 if(coins.some(function(c){return c.id===sym||c.symbol===sym;})){alert('Symbol already exists');return;}
-if(balance<5){alert('Need $5 to launch');return;}
-await setBalance(balance-5);
+if(pumpBalance<CREATE_COST){alert('Need $'+CREATE_COST+' pump balance to launch. Deposit from main first.');return;}
+await setPumpBalance(pumpBalance-CREATE_COST);
 var coin={id:sym,name:name,symbol:sym,emoji:emoji,price:price,base:price,change:0,createdBy:userId,t0:Date.now(),phaseStart:Date.now()};
 coins.unshift(coin);saveCoins();await publishCoin(coin);closeCreate();setTab('market');openDetail(sym);
 }
@@ -255,7 +308,7 @@ if(!user){var r=await client.auth.getUser();user=r.data&&r.data.user;}
 if(!user){location.href='index.html';return;}
 userId=user.id;
 }
-loadCoinsLocal();await mergeRemoteCoins();loadHoldings();loadPositions();loadHistory();await loadControl();await refreshBalance();
+loadCoinsLocal();await mergeRemoteCoins();loadHoldings();loadPositions();loadHistory();await loadControl();await refreshBalances();
 renderList();updateMemeVal();
 setInterval(tick,1500);setInterval(loadControl,10000);setInterval(mergeRemoteCoins,20000);
 }
