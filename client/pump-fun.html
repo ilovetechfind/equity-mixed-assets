@@ -11,8 +11,13 @@
 .wrap{max-width:480px;margin:0 auto}.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .back{background:var(--card);border:1px solid var(--border);color:#fff;padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:600;font-size:.85rem;cursor:pointer}
 h1{margin:0;font-size:1.2rem;font-weight:800;background:linear-gradient(90deg,#f472b6,#a78bfa,#38bdf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.bal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
-.bal span{color:var(--muted);font-size:.75rem;font-weight:700}.bal b{font-size:1.15rem}
+.bal{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.bal-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.bal span{color:var(--muted);font-size:.7rem;font-weight:700;letter-spacing:.3px}.bal b{font-size:1.1rem;display:block;margin-top:2px}
+.bal-actions{display:flex;gap:8px;margin-top:10px}
+.bal-actions button{flex:1;border:none;border-radius:10px;padding:10px;font-weight:700;font-size:.8rem;cursor:pointer}
+.dep{background:rgba(16,185,129,.18);color:#6ee7b7;border:1px solid rgba(16,185,129,.35)!important}
+.wd{background:rgba(244,114,182,.15);color:#fbcfe8;border:1px solid rgba(244,114,182,.35)!important}
 .tabs{display:flex;gap:8px;margin-bottom:12px}.tab{flex:1;background:var(--card);border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:12px;font-weight:700;font-size:.8rem;cursor:pointer}
 .tab.on{background:rgba(244,114,182,.15);border-color:var(--pink);color:#fbcfe8}
 .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:10px;cursor:pointer}
@@ -43,11 +48,26 @@ canvas{width:100%;height:100%;display:block}.detail-head{display:flex;align-item
 <div class="wrap">
 <div id="market-view">
 <div class="top"><a class="back" href="dashboard.html" id="back-link" style="text-decoration:none;display:inline-block">← Back</a><h1>Pump.fun</h1><span class="badge-live">LIVE</span></div>
-<div class="bal"><div><span>MAIN BALANCE</span><br><b id="bal">$0.00</b></div><div style="text-align:right"><span>MEME VALUE</span><br><b id="meme-val">$0.00</b></div></div>
-<button class="create-btn" onclick="openCreate()">+ Create Meme Coin</button>
+
+<div class="bal">
+  <div class="bal-row">
+    <div><span>PUMP BALANCE</span><b id="pump-bal">$0.00</b></div>
+    <div style="text-align:right"><span>MEME VALUE</span><b id="meme-val">$0.00</b></div>
+  </div>
+  <div class="bal-row" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+    <div><span>MAIN BALANCE</span><b id="main-bal" style="font-size:.95rem">$0.00</b></div>
+  </div>
+  <div class="bal-actions">
+    <button type="button" class="dep" onclick="openFund('deposit')">Deposit from Main</button>
+    <button type="button" class="wd" onclick="openFund('withdraw')">Withdraw to Main</button>
+  </div>
+</div>
+
+<button class="create-btn" onclick="openCreate()">+ Create Meme Coin ($50)</button>
 <div class="tabs"><button class="tab on" data-t="market" onclick="setTab('market')">Market</button><button class="tab" data-t="holdings" onclick="setTab('holdings')">My Coins</button></div>
 <div id="list"></div>
 </div>
+
 <div id="detail">
 <div class="top"><button type="button" class="back" onclick="closeDetail()">← Market</button><h1 id="d-title">Coin</h1></div>
 <div class="card" style="cursor:default">
@@ -61,6 +81,18 @@ canvas{width:100%;height:100%;display:block}.detail-head{display:flex;align-item
 <div class="section-title">Open positions (this coin)</div><div id="d-positions"></div>
 </div>
 </div>
+
+<div class="modal" id="fund-modal"><div class="modal-box">
+<h3 id="fund-title">Deposit</h3>
+<p class="hint" id="fund-hint">Move funds between main and pump balance.</p>
+<label>Amount ($)</label>
+<input type="number" id="fund-amt" min="1" step="0.01" placeholder="50.00">
+<div class="actions">
+  <button class="btn ghost" onclick="hideFund()">Cancel</button>
+  <button class="btn buy" id="fund-confirm" onclick="confirmFund()">Confirm</button>
+</div>
+</div></div>
+
 <div class="modal" id="close-modal"><div class="modal-box">
 <h3>How do you want to close?</h3>
 <p class="hint" id="close-hint">Choose manual close or set an auto-close timer.</p>
@@ -76,16 +108,19 @@ canvas{width:100%;height:100%;display:block}.detail-head{display:flex;align-item
 </div>
 <div class="actions" id="close-cancel-row" style="margin-top:8px"><button class="btn ghost" onclick="hideCloseModal()">Cancel</button></div>
 </div></div>
+
 <div class="modal" id="create-modal"><div class="modal-box">
 <h3>Create Meme Coin</h3>
-<p class="hint">Launch cost $5. Admin can control this coin automatically.</p>
+<p class="hint">Launch cost <b style="color:#fbcfe8">$50</b> from your Pump balance. Admin can control this coin automatically.</p>
 <label>Name</label><input type="text" id="c-name" placeholder="e.g. Moon Cat">
 <label>Symbol</label><input type="text" id="c-sym" maxlength="8" placeholder="e.g. MCAT">
 <label>Emoji</label><input type="text" id="c-emoji" maxlength="4" placeholder="🐱">
 <label>Starting price ($)</label><input type="number" id="c-price" min="0.0001" step="any" value="0.001">
-<div class="actions"><button class="btn ghost" onclick="closeCreate()">Cancel</button><button class="btn buy" onclick="createCoin()">Launch ($5)</button></div>
+<div class="actions"><button class="btn ghost" onclick="closeCreate()">Cancel</button><button class="btn buy" onclick="createCoin()">Launch ($50)</button></div>
 </div></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script src="pump-fun-app.js"></script>
-</body></html>
+</body>
+</html>
