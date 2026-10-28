@@ -41,8 +41,8 @@
     .card-title { font-size: 0.72rem; color: var(--muted); font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 12px; }
     .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .tab {
-      flex: 1; min-width: 80px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-      color: var(--muted); padding: 10px 8px; border-radius: 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer;
+      flex: 1; min-width: 70px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      color: var(--muted); padding: 10px 8px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; cursor: pointer;
     }
     .tab.active { background: rgba(56,189,248,0.15); border-color: var(--accent); color: #7dd3fc; }
     .search {
@@ -55,15 +55,20 @@
     .user-email { font-size: 0.78rem; color: var(--muted); margin-top: 2px; word-break: break-all; }
     .user-meta { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
     .verify-box {
-      margin-top: 10px; padding: 10px; border-radius: 12px; background: rgba(56,189,248,0.06);
-      border: 1px solid rgba(56,189,248,0.2); font-size: 0.8rem;
+      margin-top: 10px; padding: 12px; border-radius: 12px; background: rgba(56,189,248,0.08);
+      border: 1px solid rgba(56,189,248,0.25); font-size: 0.8rem;
     }
-    .verify-box .row { display: flex; justify-content: space-between; gap: 8px; margin: 4px 0; }
+    .verify-title {
+      font-size: 0.68rem; font-weight: 800; letter-spacing: 0.6px; text-transform: uppercase;
+      color: #7dd3fc; margin: 0 0 8px;
+    }
+    .verify-note { font-size: 0.68rem; color: var(--muted); margin: 0 0 8px; }
+    .verify-box .row { display: flex; justify-content: space-between; gap: 8px; margin: 5px 0; }
     .verify-box .k { color: var(--muted); }
     .verify-box .v { color: #e0f2fe; font-weight: 600; text-align: right; word-break: break-all; }
     .selfie-thumb {
-      width: 72px; height: 72px; border-radius: 10px; object-fit: cover;
-      border: 2px solid rgba(56,189,248,0.4); margin-top: 8px; cursor: pointer;
+      width: 88px; height: 88px; border-radius: 12px; object-fit: cover;
+      border: 2px solid rgba(56,189,248,0.45); margin-top: 8px; cursor: pointer;
     }
     .pill { display: inline-block; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.4px; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
     .pill.admin { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.35); }
@@ -150,26 +155,21 @@
     </div>
     <div class="card">
       <div class="card-title">Admin access control</div>
-      <p class="hint">Approve or restrict admin panel access. Pending requests include <b>NIN</b>, <b>OPay phone</b>, and <b>selfie</b>.</p>
+      <p class="hint">NIN, OPay phone, and selfie are <b>saved permanently</b> on each person after they request access. Approving or restricting does not delete their ID record.</p>
       <div class="tabs">
         <button class="tab active" data-f="all">All</button>
         <button class="tab" data-f="admin">Admins</button>
         <button class="tab" data-f="pending">Pending</button>
+        <button class="tab" data-f="id">With ID</button>
         <button class="tab" data-f="client">Clients</button>
       </div>
-      <input class="search" id="search" placeholder="Search name or email…" oninput="render()">
+      <input class="search" id="search" placeholder="Search name, NIN, or phone…" oninput="render()">
       <div id="list"><div class="empty">Loading users…</div></div>
     </div>
     <div class="card">
-      <div class="card-title">Password & database setup (Supabase)</div>
-      <p class="hint">
-        Dev password lives in table <b>dev_settings</b>. Run this if columns are missing:
-      </p>
+      <div class="card-title">Database setup (Supabase)</div>
+      <p class="hint">Run once so ID fields can be stored forever per profile:</p>
       <div class="sql-box">ALTER TABLE profiles
-  ADD COLUMN IF NOT EXISTS admin_access boolean DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS admin_status text DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS role text DEFAULT 'client',
-  ADD COLUMN IF NOT EXISTS avatar_url text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS admin_nin text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS admin_phone text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS admin_selfie text DEFAULT NULL;</div>
@@ -256,6 +256,10 @@
       return u.role === 'admin' || u.admin_access === true || u.admin_status === 'pending' || u.admin_status === 'revoked' || u.admin_status === 'approved';
     }
 
+    function hasIdRecord(u) {
+      return !!(u.admin_nin || u.admin_phone || u.admin_selfie);
+    }
+
     function accessLabel(u) {
       if (!isAdminAccount(u)) return null;
       if (u.admin_access === true) return { text: 'Approved', cls: 'approved' };
@@ -267,6 +271,14 @@
     function openSelfie(src) {
       document.getElementById('selfie-full').src = src;
       document.getElementById('selfie-modal').classList.add('show');
+    }
+
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&')
+        .replace(/</g, '<')
+        .replace(/>/g, '>')
+        .replace(/"/g, '"');
     }
 
     async function loadUsers() {
@@ -281,8 +293,28 @@
         document.getElementById('n-client').textContent = users.filter(function (u) { return !isAdminAccount(u); }).length;
         render();
       } catch (e) {
-        document.getElementById('list').innerHTML = '<div class="empty">Could not load users.<br><br>' + (e.message || '') + '</div>';
+        document.getElementById('list').innerHTML = '<div class="empty">Could not load users.<br><br>' + esc(e.message || '') + '</div>';
       }
+    }
+
+    function renderIdBlock(u) {
+      if (!hasIdRecord(u) && !isAdminAccount(u)) return '';
+      var body;
+      if (!hasIdRecord(u)) {
+        body = '<p class="verify-note">No ID submitted yet for this person.</p>';
+      } else {
+        body =
+          '<div class="row"><span class="k">NIN</span><span class="v">' + esc(u.admin_nin || '—') + '</span></div>' +
+          '<div class="row"><span class="k">OPay phone</span><span class="v">' + esc(u.admin_phone || '—') + '</span></div>' +
+          (u.admin_selfie
+            ? '<div><span class="k">Selfie</span><br><img class="selfie-thumb" src="' + String(u.admin_selfie).replace(/"/g, '') + '" alt="Selfie" onclick="openSelfie(this.src)" title="Tap to enlarge"></div>'
+            : '<div class="row"><span class="k">Selfie</span><span class="v">—</span></div>');
+      }
+      return '<div class="verify-box">' +
+        '<div class="verify-title">Saved ID record</div>' +
+        '<p class="verify-note">Kept permanently on this account for future checks.</p>' +
+        body +
+        '</div>';
     }
 
     function render() {
@@ -293,6 +325,7 @@
       else if (filter === 'pending') list = list.filter(function (u) {
         return u.admin_access === false || u.admin_status === 'pending' || u.admin_status === 'revoked';
       });
+      else if (filter === 'id') list = list.filter(hasIdRecord);
       if (q) list = list.filter(function (u) {
         return ((u.full_name || '') + (u.id || '') + (u.admin_nin || '') + (u.admin_phone || '')).toLowerCase().indexOf(q) !== -1;
       });
@@ -315,30 +348,21 @@
         var pills = '<span class="pill ' + (admin ? 'admin' : 'client') + '">' + (admin ? 'Admin' : 'Client') + '</span>' +
           (acc ? ' <span class="pill ' + acc.cls + '">' + acc.text + '</span>' : '');
 
-        var verify = '';
-        if (u.admin_nin || u.admin_phone || u.admin_selfie) {
-          verify = '<div class="verify-box">' +
-            '<div class="row"><span class="k">NIN</span><span class="v">' + (u.admin_nin || '—') + '</span></div>' +
-            '<div class="row"><span class="k">OPay phone</span><span class="v">' + (u.admin_phone || '—') + '</span></div>' +
-            (u.admin_selfie
-              ? '<div><span class="k">Selfie</span><br><img class="selfie-thumb" src="' + u.admin_selfie.replace(/"/g, '') + '" alt="Selfie" onclick="openSelfie(this.src)"></div>'
-              : '<div class="row"><span class="k">Selfie</span><span class="v">—</span></div>') +
-            '</div>';
-        }
-
-        return '<div class="user"><div class="user-top"><div><div class="user-name">' + name + '</div><div class="user-email">ID: ' + shortId + '</div></div><div style="text-align:right">' + pills + '</div></div>' +
+        return '<div class="user"><div class="user-top"><div><div class="user-name">' + esc(name) + '</div><div class="user-email">ID: ' + esc(shortId) + '</div></div><div style="text-align:right">' + pills + '</div></div>' +
           '<div class="user-meta">Balance: $' + Number(u.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) +
-          (u.referral_code ? ' · Ref: ' + u.referral_code : '') + '</div>' + verify + actions + '</div>';
+          (u.referral_code ? ' · Ref: ' + esc(u.referral_code) : '') + '</div>' +
+          renderIdBlock(u) + actions + '</div>';
       }).join('');
     }
 
+    // Approve / restrict only changes access flags — never clears NIN / phone / selfie
     async function setAccess(id, allow) {
       try {
         var res = await client.from('profiles').update({
           admin_access: !!allow, admin_status: allow ? 'approved' : 'revoked', role: 'admin'
         }).eq('id', id);
         if (res.error) throw res.error;
-        toast(allow ? 'Admin access approved' : 'Admin access restricted');
+        toast(allow ? 'Admin access approved (ID record kept)' : 'Admin access restricted (ID record kept)');
         await loadUsers();
       } catch (e) { toast(e.message || 'Update failed', true); }
     }
