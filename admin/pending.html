@@ -31,6 +31,23 @@
     .ghost { background: rgba(255,255,255,0.06); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.12); }
     .msg { min-height: 20px; font-size: 0.85rem; font-weight: 600; margin-top: 8px; }
     .email { color: #c7d2fe; font-weight: 600; font-size: 0.85rem; margin-bottom: 12px; }
+    .form-block { text-align: left; margin-bottom: 14px; }
+    label { display: block; font-size: 0.72rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.4px; }
+    input[type="text"], input[type="tel"] {
+      width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12);
+      color: #fff; padding: 12px; border-radius: 10px; font-size: 0.9rem; outline: none; margin-bottom: 12px;
+    }
+    input:focus { border-color: #818cf8; }
+    .selfie-wrap {
+      border: 1px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 14px; text-align: center;
+      margin-bottom: 12px; background: rgba(0,0,0,0.2);
+    }
+    .selfie-wrap img {
+      max-width: 140px; max-height: 140px; border-radius: 12px; display: block; margin: 0 auto 10px;
+      border: 2px solid rgba(129,140,248,0.4);
+    }
+    .selfie-wrap input[type="file"] { font-size: 0.8rem; color: #94a3b8; width: 100%; }
+    .hint-sm { font-size: 0.75rem; color: #64748b; margin: -6px 0 12px; }
   </style>
 </head>
 <body>
@@ -39,8 +56,25 @@
     <h1>Admin Access Required</h1>
     <div class="email" id="email-line"></div>
     <p id="desc">
-      Your admin account is waiting for approval. A developer must grant you access before you can use the admin panel.
+      Fill in your details below to request admin access. A developer will review and approve.
     </p>
+
+    <div class="form-block" id="request-form">
+      <label for="nin">NIN (National Identification Number)</label>
+      <input type="text" id="nin" maxlength="20" placeholder="e.g. 12345678901" autocomplete="off">
+
+      <label for="phone">Phone number (OPay)</label>
+      <input type="tel" id="phone" maxlength="15" placeholder="e.g. 08012345678" autocomplete="tel">
+      <p class="hint-sm">Use the same number registered on your OPay account.</p>
+
+      <label>Selfie</label>
+      <div class="selfie-wrap">
+        <img id="selfie-preview" alt="Selfie preview" style="display:none">
+        <input type="file" id="selfie" accept="image/*" capture="user" onchange="onSelfieChange(event)">
+        <p class="hint-sm" style="margin:8px 0 0">Take a clear selfie of your face.</p>
+      </div>
+    </div>
+
     <button class="btn primary" id="request-btn" onclick="requestAccess()">Request Admin Access</button>
     <button class="btn ghost" onclick="logout()">Log Out</button>
     <div class="msg" id="msg"></div>
@@ -52,6 +86,26 @@
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let userId = null;
+    let selfieDataUrl = null;
+
+    function onSelfieChange(e) {
+      var file = e.target.files && e.target.files[0];
+      if (!file) { selfieDataUrl = null; document.getElementById('selfie-preview').style.display = 'none'; return; }
+      if (file.size > 2.5 * 1024 * 1024) {
+        alert('Selfie must be under 2.5 MB. Try a smaller photo.');
+        e.target.value = '';
+        selfieDataUrl = null;
+        return;
+      }
+      var reader = new FileReader();
+      reader.onload = function () {
+        selfieDataUrl = reader.result;
+        var img = document.getElementById('selfie-preview');
+        img.src = selfieDataUrl;
+        img.style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
 
     async function init() {
       const { data: { session } } = await client.auth.getSession();
@@ -65,7 +119,7 @@
       document.getElementById('email-line').textContent = user.email || user.id;
 
       const { data: profile } = await client.from('profiles')
-        .select('admin_access, admin_status')
+        .select('admin_access, admin_status, admin_nin, admin_phone')
         .eq('id', userId).maybeSingle();
 
       if (profile && profile.admin_access === true) {
@@ -73,29 +127,59 @@
         return;
       }
 
+      if (profile && profile.admin_nin) document.getElementById('nin').value = profile.admin_nin;
+      if (profile && profile.admin_phone) document.getElementById('phone').value = profile.admin_phone;
+
       if (profile && profile.admin_status === 'revoked') {
         document.getElementById('status-badge').textContent = 'ACCESS RESTRICTED';
         document.getElementById('status-badge').className = 'status revoked';
         document.getElementById('desc').textContent =
-          'Your admin access was restricted by a developer. You can request access again below.';
+          'Your admin access was restricted. Update your details and request access again.';
+      } else if (profile && profile.admin_status === 'pending') {
+        document.getElementById('status-badge').textContent = 'ACCESS PENDING';
+        document.getElementById('desc').textContent =
+          'Your request is waiting for developer approval. You can update details and resubmit.';
       }
     }
 
     async function requestAccess() {
       const msg = document.getElementById('msg');
       const btn = document.getElementById('request-btn');
+      const nin = (document.getElementById('nin').value || '').trim();
+      const phone = (document.getElementById('phone').value || '').trim();
+
+      if (!nin || nin.length < 8) {
+        msg.style.color = '#f87171';
+        msg.textContent = 'Enter a valid NIN.';
+        return;
+      }
+      if (!phone || phone.replace(/\D/g, '').length < 10) {
+        msg.style.color = '#f87171';
+        msg.textContent = 'Enter a valid OPay phone number.';
+        return;
+      }
+      if (!selfieDataUrl) {
+        msg.style.color = '#f87171';
+        msg.textContent = 'Please upload a selfie.';
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = 'Sending…';
       try {
-        const { error } = await client.from('profiles').upsert({
+        const payload = {
           id: userId,
           role: 'admin',
           admin_access: false,
-          admin_status: 'pending'
-        });
+          admin_status: 'pending',
+          admin_nin: nin,
+          admin_phone: phone,
+          admin_selfie: selfieDataUrl
+        };
+        const { error } = await client.from('profiles').upsert(payload);
         if (error) throw error;
         msg.style.color = '#34d399';
-        msg.textContent = 'Request sent. Wait for a developer to approve.';
+        msg.textContent = 'Request sent with your details. Wait for a developer to approve.';
         document.getElementById('status-badge').textContent = 'ACCESS PENDING';
         document.getElementById('status-badge').className = 'status pending';
       } catch (e) {
@@ -112,7 +196,6 @@
     }
 
     init();
-    // Auto-check if approved
     setInterval(async () => {
       if (!userId) return;
       try {
