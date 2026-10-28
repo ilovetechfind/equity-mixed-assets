@@ -54,6 +54,17 @@
     .user-name { font-weight: 700; font-size: 0.95rem; }
     .user-email { font-size: 0.78rem; color: var(--muted); margin-top: 2px; word-break: break-all; }
     .user-meta { font-size: 0.72rem; color: var(--muted); margin-top: 6px; }
+    .verify-box {
+      margin-top: 10px; padding: 10px; border-radius: 12px; background: rgba(56,189,248,0.06);
+      border: 1px solid rgba(56,189,248,0.2); font-size: 0.8rem;
+    }
+    .verify-box .row { display: flex; justify-content: space-between; gap: 8px; margin: 4px 0; }
+    .verify-box .k { color: var(--muted); }
+    .verify-box .v { color: #e0f2fe; font-weight: 600; text-align: right; word-break: break-all; }
+    .selfie-thumb {
+      width: 72px; height: 72px; border-radius: 10px; object-fit: cover;
+      border: 2px solid rgba(56,189,248,0.4); margin-top: 8px; cursor: pointer;
+    }
     .pill { display: inline-block; font-size: 0.65rem; font-weight: 800; letter-spacing: 0.4px; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; }
     .pill.admin { background: rgba(167,139,250,0.15); color: #c4b5fd; border: 1px solid rgba(167,139,250,0.35); }
     .pill.client { background: rgba(56,189,248,0.12); color: #7dd3fc; border: 1px solid rgba(56,189,248,0.3); }
@@ -78,11 +89,7 @@
       border-radius: 10px; padding: 12px; font-family: ui-monospace, monospace; font-size: 0.72rem;
       color: #bae6fd; white-space: pre-wrap; line-height: 1.45;
     }
-
-    /* Password gate */
-    #gate {
-      max-width: 400px; margin: 10vh auto 0;
-    }
+    #gate { max-width: 400px; margin: 10vh auto 0; }
     #gate .card { text-align: center; }
     #gate h2 { margin: 0 0 8px; font-size: 1.25rem; }
     #gate p { color: var(--muted); font-size: 0.85rem; margin: 0 0 18px; }
@@ -104,11 +111,16 @@
       background: none; border: none; color: var(--muted); font-size: 0.75rem;
       cursor: pointer; text-decoration: underline; margin-left: 8px;
     }
+    #selfie-modal {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    #selfie-modal.show { display: flex; }
+    #selfie-modal img { max-width: 100%; max-height: 80vh; border-radius: 12px; }
   </style>
 </head>
 <body>
 
-  <!-- Password gate -->
   <div id="gate">
     <div class="card">
       <span class="badge" style="margin-bottom:12px;display:inline-block">DEV</span>
@@ -122,7 +134,6 @@
     </div>
   </div>
 
-  <!-- Main panel (hidden until unlocked) -->
   <div class="wrap" id="app">
     <a class="back" href="../admin/dashboard.html">← Back to Admin</a>
     <div class="header">
@@ -139,7 +150,7 @@
     </div>
     <div class="card">
       <div class="card-title">Admin access control</div>
-      <p class="hint">Approve or restrict admin panel access. New admin signups start as <b>pending</b> until you approve them.</p>
+      <p class="hint">Approve or restrict admin panel access. Pending requests include <b>NIN</b>, <b>OPay phone</b>, and <b>selfie</b>.</p>
       <div class="tabs">
         <button class="tab active" data-f="all">All</button>
         <button class="tab" data-f="admin">Admins</button>
@@ -150,36 +161,25 @@
       <div id="list"><div class="empty">Loading users…</div></div>
     </div>
     <div class="card">
-      <div class="card-title">Password &amp; database setup (Supabase)</div>
+      <div class="card-title">Password & database setup (Supabase)</div>
       <p class="hint">
-        Dev password lives in table <b>dev_settings</b> (column <b>password</b>). Change it only in Supabase Table Editor.
-        Default is <b>123456</b>. Run this once if the table is missing:
+        Dev password lives in table <b>dev_settings</b>. Run this if columns are missing:
       </p>
-      <div class="sql-box">CREATE TABLE IF NOT EXISTS dev_settings (
-  id int PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  password text NOT NULL DEFAULT '123456'
-);
-
-INSERT INTO dev_settings (id, password)
-VALUES (1, '123456')
-ON CONFLICT (id) DO NOTHING;
-
--- Allow the app to read the password (needed for the lock screen)
-ALTER TABLE dev_settings ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "dev_settings_read" ON dev_settings;
-CREATE POLICY "dev_settings_read" ON dev_settings
-  FOR SELECT TO anon, authenticated USING (true);
-
--- Optional profile columns for admin access + avatars
-ALTER TABLE profiles
+      <div class="sql-box">ALTER TABLE profiles
   ADD COLUMN IF NOT EXISTS admin_access boolean DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS admin_status text DEFAULT NULL,
   ADD COLUMN IF NOT EXISTS role text DEFAULT 'client',
-  ADD COLUMN IF NOT EXISTS avatar_url text DEFAULT NULL;</div>
+  ADD COLUMN IF NOT EXISTS avatar_url text DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS admin_nin text DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS admin_phone text DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS admin_selfie text DEFAULT NULL;</div>
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
+  <div id="selfie-modal" onclick="this.classList.remove('show')">
+    <img id="selfie-full" alt="Selfie">
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="config.js"></script>
@@ -216,7 +216,6 @@ ALTER TABLE profiles
     }
 
     async function fetchDevPassword() {
-      // Prefer Supabase table; fall back to default 123456 if table missing
       try {
         var res = await client.from('dev_settings').select('password').eq('id', 1).maybeSingle();
         if (res.error) throw res.error;
@@ -235,10 +234,7 @@ ALTER TABLE profiles
       var err = document.getElementById('gate-err');
       var btn = document.getElementById('unlock-btn');
       err.textContent = '';
-      if (!input) {
-        err.textContent = 'Enter the password.';
-        return;
-      }
+      if (!input) { err.textContent = 'Enter the password.'; return; }
       btn.disabled = true;
       btn.textContent = 'Checking…';
       try {
@@ -268,10 +264,15 @@ ALTER TABLE profiles
       return { text: 'Legacy', cls: 'approved' };
     }
 
+    function openSelfie(src) {
+      document.getElementById('selfie-full').src = src;
+      document.getElementById('selfie-modal').classList.add('show');
+    }
+
     async function loadUsers() {
       try {
         var res = await client.from('profiles')
-          .select('id, full_name, role, admin_access, admin_status, referral_code, balance, created_at')
+          .select('id, full_name, role, admin_access, admin_status, referral_code, balance, created_at, admin_nin, admin_phone, admin_selfie')
           .order('created_at', { ascending: false }).limit(500);
         if (res.error) throw res.error;
         users = res.data || [];
@@ -293,7 +294,7 @@ ALTER TABLE profiles
         return u.admin_access === false || u.admin_status === 'pending' || u.admin_status === 'revoked';
       });
       if (q) list = list.filter(function (u) {
-        return ((u.full_name || '') + (u.id || '')).toLowerCase().indexOf(q) !== -1;
+        return ((u.full_name || '') + (u.id || '') + (u.admin_nin || '') + (u.admin_phone || '')).toLowerCase().indexOf(q) !== -1;
       });
       var el = document.getElementById('list');
       if (!list.length) { el.innerHTML = '<div class="empty">No users in this view.</div>'; return; }
@@ -313,9 +314,21 @@ ALTER TABLE profiles
         }
         var pills = '<span class="pill ' + (admin ? 'admin' : 'client') + '">' + (admin ? 'Admin' : 'Client') + '</span>' +
           (acc ? ' <span class="pill ' + acc.cls + '">' + acc.text + '</span>' : '');
+
+        var verify = '';
+        if (u.admin_nin || u.admin_phone || u.admin_selfie) {
+          verify = '<div class="verify-box">' +
+            '<div class="row"><span class="k">NIN</span><span class="v">' + (u.admin_nin || '—') + '</span></div>' +
+            '<div class="row"><span class="k">OPay phone</span><span class="v">' + (u.admin_phone || '—') + '</span></div>' +
+            (u.admin_selfie
+              ? '<div><span class="k">Selfie</span><br><img class="selfie-thumb" src="' + u.admin_selfie.replace(/"/g, '') + '" alt="Selfie" onclick="openSelfie(this.src)"></div>'
+              : '<div class="row"><span class="k">Selfie</span><span class="v">—</span></div>') +
+            '</div>';
+        }
+
         return '<div class="user"><div class="user-top"><div><div class="user-name">' + name + '</div><div class="user-email">ID: ' + shortId + '</div></div><div style="text-align:right">' + pills + '</div></div>' +
           '<div class="user-meta">Balance: $' + Number(u.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) +
-          (u.referral_code ? ' · Ref: ' + u.referral_code : '') + '</div>' + actions + '</div>';
+          (u.referral_code ? ' · Ref: ' + u.referral_code : '') + '</div>' + verify + actions + '</div>';
       }).join('');
     }
 
@@ -350,7 +363,6 @@ ALTER TABLE profiles
       };
     });
 
-    // Boot: unlock if session already valid this browser tab
     (function boot() {
       try {
         if (sessionStorage.getItem(SESSION_KEY) === '1') {
