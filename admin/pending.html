@@ -23,6 +23,12 @@
     }
     .pending { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.35); }
     .revoked { background: rgba(239,68,68,0.15); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
+    .expired { background: rgba(249,115,22,0.18); color: #fdba74; border: 1px solid rgba(249,115,22,0.4); }
+    .notice-box {
+      text-align: left; background: rgba(249,115,22,0.12); border: 1px solid rgba(249,115,22,0.35);
+      border-radius: 14px; padding: 14px; margin: 0 0 16px; font-size: 0.88rem; line-height: 1.5; color: #fed7aa;
+    }
+    .notice-box .amt { font-size: 1.25rem; font-weight: 800; color: #fdba74; margin: 8px 0 4px; }
     .btn {
       width: 100%; border: none; border-radius: 12px; padding: 14px; font-weight: 700;
       cursor: pointer; font-size: 0.95rem; margin-bottom: 10px;
@@ -46,9 +52,7 @@
       max-width: 160px; max-height: 160px; border-radius: 12px; display: block; margin: 0 auto 12px;
       border: 2px solid rgba(129,140,248,0.5);
     }
-    #selfie {
-      position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; z-index: -1;
-    }
+    #selfie { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; z-index: -1; }
     .selfie-btn {
       display: block; width: 100%; box-sizing: border-box;
       border: none; border-radius: 12px; padding: 16px;
@@ -63,8 +67,14 @@
 <body>
   <div class="card">
     <div class="status pending" id="status-badge">ACCESS PENDING</div>
-    <h1>Admin Access Required</h1>
+    <h1 id="page-title">Admin Access Required</h1>
     <div class="email" id="email-line"></div>
+
+    <div class="notice-box" id="sub-notice" style="display:none">
+      <div id="sub-text"></div>
+      <div class="amt" id="sub-amt"></div>
+    </div>
+
     <p id="desc">
       Fill in your details below to request admin access. A developer will review and approve.
     </p>
@@ -80,7 +90,7 @@
       <label>Selfie</label>
       <div class="selfie-wrap">
         <img id="selfie-preview" alt="Selfie preview" style="display:none">
-        <input type="file" id="selfie" accept="image/*" >
+        <input type="file" id="selfie" accept="image/*">
         <button type="button" class="selfie-btn" id="selfie-btn">📷 Take or upload selfie</button>
         <p class="hint-sm">Tap the button — camera or gallery will open.</p>
       </div>
@@ -121,9 +131,7 @@
         img.style.display = 'block';
         document.getElementById('selfie-btn').textContent = '✓ Change selfie';
       };
-      reader.onerror = function () {
-        alert('Could not read that photo. Try again.');
-      };
+      reader.onerror = function () { alert('Could not read that photo. Try again.'); };
       reader.readAsDataURL(file);
     }
 
@@ -152,7 +160,7 @@
       document.getElementById('email-line').textContent = user.email || user.id;
 
       const { data: profile } = await client.from('profiles')
-        .select('admin_access, admin_status, admin_nin, admin_phone, admin_selfie')
+        .select('admin_access, admin_status, admin_nin, admin_phone, admin_selfie, admin_notice_text, admin_notice_amount')
         .eq('id', userId).maybeSingle();
 
       if (profile && profile.admin_access === true) {
@@ -170,7 +178,22 @@
         document.getElementById('selfie-btn').textContent = '✓ Change selfie';
       }
 
-      if (profile && profile.admin_status === 'revoked') {
+      if (profile && profile.admin_status === 'expired') {
+        document.getElementById('status-badge').textContent = 'SUBSCRIPTION ENDED';
+        document.getElementById('status-badge').className = 'status expired';
+        document.getElementById('page-title').textContent = 'Recharge Required';
+        var notice = document.getElementById('sub-notice');
+        notice.style.display = 'block';
+        var txt = profile.admin_notice_text || 'Your subscription has finished. Kindly recharge to continue using your admin account.';
+        document.getElementById('sub-text').textContent = txt;
+        if (profile.admin_notice_amount != null && Number(profile.admin_notice_amount) > 0) {
+          document.getElementById('sub-amt').textContent = 'Amount: $' + Number(profile.admin_notice_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        } else {
+          document.getElementById('sub-amt').textContent = '';
+        }
+        document.getElementById('desc').textContent =
+          'Your admin account is restricted until a developer approves after recharge. You may still update ID details below.';
+      } else if (profile && profile.admin_status === 'revoked') {
         document.getElementById('status-badge').textContent = 'ACCESS RESTRICTED';
         document.getElementById('status-badge').className = 'status revoked';
         document.getElementById('desc').textContent =
@@ -219,9 +242,10 @@
         const { error } = await client.from('profiles').upsert(payload);
         if (error) throw error;
         msg.style.color = '#34d399';
-        msg.textContent = 'Request sent with your details. Wait for a developer to approve.';
+        msg.textContent = 'Request sent. Wait for a developer to approve.';
         document.getElementById('status-badge').textContent = 'ACCESS PENDING';
         document.getElementById('status-badge').className = 'status pending';
+        document.getElementById('page-title').textContent = 'Admin Access Required';
       } catch (e) {
         msg.style.color = '#f87171';
         msg.textContent = e.message || 'Could not send request.';
