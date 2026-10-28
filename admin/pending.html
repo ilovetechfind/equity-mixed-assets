@@ -39,15 +39,25 @@
     }
     input:focus { border-color: #818cf8; }
     .selfie-wrap {
-      border: 1px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 14px; text-align: center;
-      margin-bottom: 12px; background: rgba(0,0,0,0.2);
+      border: 1px dashed rgba(129,140,248,0.45); border-radius: 14px; padding: 16px; text-align: center;
+      margin-bottom: 12px; background: rgba(0,0,0,0.25);
     }
     .selfie-wrap img {
-      max-width: 140px; max-height: 140px; border-radius: 12px; display: block; margin: 0 auto 10px;
-      border: 2px solid rgba(129,140,248,0.4);
+      max-width: 160px; max-height: 160px; border-radius: 12px; display: block; margin: 0 auto 12px;
+      border: 2px solid rgba(129,140,248,0.5);
     }
-    .selfie-wrap input[type="file"] { font-size: 0.8rem; color: #94a3b8; width: 100%; }
-    .hint-sm { font-size: 0.75rem; color: #64748b; margin: -6px 0 12px; }
+    #selfie {
+      position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; z-index: -1;
+    }
+    .selfie-btn {
+      display: block; width: 100%; box-sizing: border-box;
+      border: none; border-radius: 12px; padding: 16px;
+      background: linear-gradient(135deg, #818cf8, #6366f1); color: #fff;
+      font-weight: 800; font-size: 0.95rem; cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .selfie-btn:active { opacity: 0.85; }
+    .hint-sm { font-size: 0.75rem; color: #64748b; margin: 8px 0 0; }
   </style>
 </head>
 <body>
@@ -65,13 +75,14 @@
 
       <label for="phone">Phone number (OPay)</label>
       <input type="tel" id="phone" maxlength="15" placeholder="e.g. 08012345678" autocomplete="tel">
-      <p class="hint-sm">Use the same number registered on your OPay account.</p>
+      <p class="hint-sm" style="margin:-6px 0 12px">Use the same number registered on your OPay account.</p>
 
       <label>Selfie</label>
       <div class="selfie-wrap">
         <img id="selfie-preview" alt="Selfie preview" style="display:none">
-        <input type="file" id="selfie" accept="image/*" capture="user" onchange="onSelfieChange(event)">
-        <p class="hint-sm" style="margin:8px 0 0">Take a clear selfie of your face.</p>
+        <input type="file" id="selfie" accept="image/*" >
+        <button type="button" class="selfie-btn" id="selfie-btn">📷 Take or upload selfie</button>
+        <p class="hint-sm">Tap the button — camera or gallery will open.</p>
       </div>
     </div>
 
@@ -90,9 +101,14 @@
 
     function onSelfieChange(e) {
       var file = e.target.files && e.target.files[0];
-      if (!file) { selfieDataUrl = null; document.getElementById('selfie-preview').style.display = 'none'; return; }
-      if (file.size > 2.5 * 1024 * 1024) {
-        alert('Selfie must be under 2.5 MB. Try a smaller photo.');
+      if (!file) {
+        selfieDataUrl = null;
+        document.getElementById('selfie-preview').style.display = 'none';
+        document.getElementById('selfie-btn').textContent = '📷 Take or upload selfie';
+        return;
+      }
+      if (file.size > 3 * 1024 * 1024) {
+        alert('Selfie must be under 3 MB. Try a smaller photo.');
         e.target.value = '';
         selfieDataUrl = null;
         return;
@@ -103,11 +119,28 @@
         var img = document.getElementById('selfie-preview');
         img.src = selfieDataUrl;
         img.style.display = 'block';
+        document.getElementById('selfie-btn').textContent = '✓ Change selfie';
+      };
+      reader.onerror = function () {
+        alert('Could not read that photo. Try again.');
       };
       reader.readAsDataURL(file);
     }
 
+    function pickSelfie() {
+      var input = document.getElementById('selfie');
+      input.value = '';
+      input.click();
+    }
+
     async function init() {
+      document.getElementById('selfie').addEventListener('change', onSelfieChange);
+      document.getElementById('selfie-btn').addEventListener('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        pickSelfie();
+      });
+
       const { data: { session } } = await client.auth.getSession();
       let user = session && session.user;
       if (!user) {
@@ -119,7 +152,7 @@
       document.getElementById('email-line').textContent = user.email || user.id;
 
       const { data: profile } = await client.from('profiles')
-        .select('admin_access, admin_status, admin_nin, admin_phone')
+        .select('admin_access, admin_status, admin_nin, admin_phone, admin_selfie')
         .eq('id', userId).maybeSingle();
 
       if (profile && profile.admin_access === true) {
@@ -129,6 +162,13 @@
 
       if (profile && profile.admin_nin) document.getElementById('nin').value = profile.admin_nin;
       if (profile && profile.admin_phone) document.getElementById('phone').value = profile.admin_phone;
+      if (profile && profile.admin_selfie) {
+        selfieDataUrl = profile.admin_selfie;
+        var img = document.getElementById('selfie-preview');
+        img.src = selfieDataUrl;
+        img.style.display = 'block';
+        document.getElementById('selfie-btn').textContent = '✓ Change selfie';
+      }
 
       if (profile && profile.admin_status === 'revoked') {
         document.getElementById('status-badge').textContent = 'ACCESS RESTRICTED';
