@@ -208,6 +208,20 @@
         currentAdminUser = session.user;
       }
 
+      // Access gate: pending / revoked / expired cannot use admin panel
+      try {
+        const { data: gate } = await client.from('profiles')
+          .select('admin_access, admin_status')
+          .eq('id', currentAdminUser.id).maybeSingle();
+        if (!gate || gate.admin_access !== true) {
+          window.location.replace('pending.html');
+          return;
+        }
+      } catch (e) {
+        window.location.replace('pending.html');
+        return;
+      }
+
       loadAdminProfile();
       loadAdminCode();
     }
