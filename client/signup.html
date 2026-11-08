@@ -15,23 +15,23 @@
 
     .card-container { display: flex; justify-content: center; align-items: center; flex: 1; width: 100%; padding: 20px; box-sizing: border-box; }
     .card { background-color: #1e293b; padding: 32px; border-radius: 12px; width: 100%; max-width: 420px; border: 1px solid #334155; box-sizing: border-box; }
-    .badge { background: #10b981; color: white; font-size: 11px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; display: inline-block; margin-bottom: 12px; }
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+    .badge { background: #10b981; color: white; font-size: 11px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; letter-spacing: 1px; display: inline-block; }
+    .lang-select {
+      max-width: 140px; padding: 6px 28px 6px 10px; border-radius: 6px;
+      border: 1px solid #334155; background: #0f172a url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M3 4.5L6 8l3-3.5'/%3E%3C/svg%3E") no-repeat right 8px center;
+      color: #cbd5e1; font-size: 12px; outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+    }
+    .lang-select:focus { border-color: #10b981; }
+    .lang-select option { background: #0f172a; color: #fff; }
     .title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
     .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
     .input-group { margin-bottom: 16px; position: relative; }
     .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-    .input-group input, .input-group select {
+    .input-group input {
       width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155;
       background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none;
     }
-    .lang-bar {
-      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
-      padding: 12px; border-radius: 8px; background: rgba(16,185,129,0.08);
-      border: 1px solid rgba(16,185,129,0.25);
-    }
-    .lang-bar label { margin: 0; white-space: nowrap; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-    .lang-bar select { flex: 1; margin: 0; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 14px; }
-    .lang-bar select option { background: #0f172a; color: #fff; }
     .toggle-pass { position: absolute; right: 12px; top: 35px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; }
     .btn { width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
     .btn:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -53,12 +53,9 @@
 
   <div class="card-container">
     <div class="card">
-      <span class="badge">Equity Mixed Assets</span>
-
-      <!-- Language BEFORE create account form -->
-      <div class="lang-bar">
-        <label data-i18n="language">Language</label>
-        <select id="lang-select" aria-label="Language"></select>
+      <div class="card-top">
+        <span class="badge">Equity Mixed Assets</span>
+        <select id="lang-select" class="lang-select" aria-label="Language" title="Language"></select>
       </div>
 
       <div class="title" data-i18n="create_account">Create Account</div>
