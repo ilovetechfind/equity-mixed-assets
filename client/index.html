@@ -20,7 +20,19 @@
     .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
     .input-group { margin-bottom: 16px; position: relative; }
     .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
-    .input-group input { width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155; background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none; }
+    .input-group input, .input-group select {
+      width: 100%; padding: 12px; border-radius: 6px; border: 1px solid #334155;
+      background-color: #0f172a; color: white; box-sizing: border-box; font-size: 14px; outline: none;
+    }
+    .input-group select { appearance: none; cursor: pointer; }
+    .input-group select option { background: #0f172a; color: #fff; }
+    .lang-bar {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+      padding: 12px; border-radius: 8px; background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.25);
+    }
+    .lang-bar label { margin: 0; white-space: nowrap; font-size: 12px; color: #94a3b8; text-transform: uppercase; font-weight: 600; }
+    .lang-bar select { flex: 1; margin: 0; padding: 10px; border-radius: 6px; border: 1px solid #334155; background: #0f172a; color: white; font-size: 14px; }
     .toggle-pass { position: absolute; right: 12px; top: 35px; background: none; border: none; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; }
     .btn { width: 100%; padding: 12px; background-color: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 8px; font-size: 15px; }
     .btn:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -43,33 +55,50 @@
   <div class="card-container">
     <div class="card">
       <span class="badge">Equity Mixed Assets</span>
-      <div class="title">Client Portal Login</div>
-      <div class="subtitle">Access your investment dashboard</div>
+
+      <!-- Language before login / create account -->
+      <div class="lang-bar">
+        <label data-i18n="language">Language</label>
+        <select id="lang-select" aria-label="Language"></select>
+      </div>
+
+      <div class="title" data-i18n="login_title">Client Portal Login</div>
+      <div class="subtitle" data-i18n="login_subtitle">Access your investment dashboard</div>
 
       <div class="input-group">
-        <label>Email Address</label>
+        <label data-i18n="email">Email Address</label>
         <input type="email" id="email" placeholder="client@example.com">
       </div>
       <div class="input-group">
-        <label>Password</label>
+        <label data-i18n="password">Password</label>
         <input type="password" id="password" placeholder="••••••••">
         <button type="button" class="toggle-pass" onclick="togglePassword('password', this)">Show</button>
       </div>
       
-      <button class="btn" id="login-btn" onclick="handleLogin()">Log In</button>
+      <button class="btn" id="login-btn" onclick="handleLogin()" data-i18n="log_in">Log In</button>
       <div id="alert-box" class="alert-msg"></div>
 
       <div class="links">
-        Don't have an account? <a href="signup.html">Sign up</a>
+        <span data-i18n="no_account">Don't have an account?</span> <a href="signup.html" data-i18n="sign_up">Sign up</a>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="i18n.js"></script>
   <script>
     const SUPABASE_URL = "https://rrdddtmqojyheshznrwl.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJyZGRkdG1xb2p5aGVzaHpucndsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyODUxNjEsImV4cCI6MjEwMTg2MTE2MX0.0Gp4-6D-TKBMgvHYZhKncfyfcWRTGd2oeSzpJGUg8vQ";
     const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    (function initLang() {
+      if (!window.EMA_I18N) return;
+      window.EMA_I18N.fillSelect(document.getElementById('lang-select'));
+      window.EMA_I18N.applyPage();
+      document.getElementById('lang-select').addEventListener('change', function () {
+        window.EMA_I18N.setLang(this.value);
+      });
+    })();
 
     function togglePassword(inputId, btnElement) {
       const input = document.getElementById(inputId);
@@ -107,7 +136,7 @@
         alertBox.style.display = 'block';
         alertBox.innerText = error.message;
         btn.disabled = false;
-        btn.innerText = 'Log In';
+        btn.innerText = window.EMA_I18N ? window.EMA_I18N.t('log_in') : 'Log In';
       } else {
         window.location.href = 'dashboard.html';
       }
