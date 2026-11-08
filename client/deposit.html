@@ -49,15 +49,15 @@
     </header>
 
     <div class="nav-bar">
-      <a href="dashboard.html" class="back-btn">← Back</a>
-      <h2 class="view-title">Select Payment Method</h2>
+      <a href="dashboard.html" class="back-btn" data-i18n="back">← Back</a>
+      <h2 class="view-title" data-i18n="select_payment">Select Payment Method</h2>
     </div>
 
     <div class="method-card" onclick="window.location.href='deposit-bitcoin.html'">
       <div class="method-left">
         <div class="method-icon">₿</div>
         <div class="method-info">
-          <h3>Pay through Bitcoin</h3>
+          <h3 data-i18n="bitcoin">Pay through Bitcoin</h3>
           <p>Instant crypto network deposit</p>
         </div>
       </div>
@@ -68,7 +68,7 @@
       <div class="method-left">
         <div class="method-icon">🎁</div>
         <div class="method-info">
-          <h3>Upload Gift Card</h3>
+          <h3 data-i18n="giftcard">Upload Gift Card</h3>
           <p>Submit card details & receipt</p>
         </div>
       </div>
@@ -79,7 +79,7 @@
       <div class="method-left">
         <div class="method-icon">🏦</div>
         <div class="method-info">
-          <h3>Bank Transfer</h3>
+          <h3 data-i18n="bank">Bank Transfer</h3>
           <p>Direct wire or local bank deposit</p>
         </div>
       </div>
@@ -90,7 +90,7 @@
       <div class="method-left">
         <div class="method-icon">⚙️</div>
         <div class="method-info">
-          <h3>Request Custom Payment</h3>
+          <h3 data-i18n="custom_payment">Request Custom Payment</h3>
           <p>Alternate payment arrangements</p>
         </div>
       </div>
@@ -99,11 +99,12 @@
   </div>
 
   <nav class="bottom-nav">
-    <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span>Home</a>
-    <a href="investment-plan.html" class="nav-item"><span class="nav-icon">📈</span>Plans</a>
-    <a href="deposit.html" class="nav-item active"><span class="nav-icon">💳</span>Deposit</a>
-    <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span>Settings</a>
+    <a href="dashboard.html" class="nav-item"><span class="nav-icon">🏠</span><span data-i18n="home">Home</span></a>
+    <a href="investment-plan.html" class="nav-item"><span class="nav-icon">📈</span><span data-i18n="plans">Plans</span></a>
+    <a href="deposit.html" class="nav-item active"><span class="nav-icon">💳</span><span data-i18n="deposit">Deposit</span></a>
+    <a href="settings.html" class="nav-item"><span class="nav-icon">⚙️</span><span data-i18n="settings">Settings</span></a>
   </nav>
+
+  <script src="i18n.js"></script>
 </body>
-  
 </html>
