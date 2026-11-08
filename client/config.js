@@ -40,12 +40,22 @@ window.goTo = function goTo(page) {
   window.location.href = page;
 };
 
+/* Auto-load i18n on every page that includes config.js */
+(function loadI18n() {
+  if (window.EMA_I18N) return;
+  try {
+    var s = document.createElement('script');
+    s.src = 'i18n.js';
+    s.async = false;
+    s.onload = function () {
+      try { if (window.EMA_I18N) window.EMA_I18N.applyPage(); } catch (e) {}
+    };
+    (document.head || document.documentElement).appendChild(s);
+  } catch (e) {}
+})();
+
 /**
  * Global incoming-transfer popup on ANY page that includes config.js.
- * 1) profiles.last_incoming (sender name)
- * 2) balance increase vs last known (works even without extra columns)
- * 3) notifications.transfer_received
- * + Realtime profile UPDATE subscription
  */
 (function setupTransferToasts() {
   var started = false;
